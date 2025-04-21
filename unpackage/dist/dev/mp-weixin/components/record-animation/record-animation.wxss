@@ -1,0 +1,117 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.prompt.data-v-c35cfa7d {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+.prompt .prompt-image.data-v-c35cfa7d {
+  position: absolute;
+  top: 650rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 430rpx;
+  height: 154rpx;
+  border-radius: 28rpx;
+}
+.cancle.data-v-c35cfa7d {
+  position: absolute;
+  top: 810rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+}
+.dots-container.data-v-c35cfa7d {
+  position: absolute;
+  top: 715rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 310rpx;
+  height: 15rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dot.data-v-c35cfa7d {
+  height: 14rpx;
+  width: 8rpx;
+  margin-right: 5rpx;
+  border-radius: 5rpx;
+  background-color: #000000;
+  animation: pulse-c35cfa7d 1.5s infinite ease-in-out;
+}
+.dot.data-v-c35cfa7d:nth-child(4) {
+  height: 22rpx;
+}
+.dot.data-v-c35cfa7d:nth-child(8) {
+  height: 22rpx;
+}
+.dot.data-v-c35cfa7d:nth-child(12) {
+  height: 22rpx;
+}
+.dot.data-v-c35cfa7d:nth-child(16) {
+  height: 22rpx;
+}
+.dot.data-v-c35cfa7d:last-child {
+  margin-right: 0;
+  background: rgba(32, 40, 48, 0.22);
+}
+.dot.data-v-c35cfa7d:nth-child(1) {
+  background: rgba(32, 40, 48, 0.22);
+  animation-delay: -0.3s;
+}
+.dot.data-v-c35cfa7d:nth-child(2) {
+  animation-delay: -0.1s;
+}
+.dot.data-v-c35cfa7d:nth-child(3) {
+  animation-delay: 0.1s;
+}
+@keyframes pulse-c35cfa7d {
+0% {
+    transform: scale(0.9);
+    background-color: #000000;
+}
+50% {
+    transform: scale(1.2);
+}
+100% {
+    transform: scale(0.8);
+}
+}
+@keyframes puls-c35cfa7d {
+0% {
+    transform: translateY(0px);
+}
+50% {
+    transform: translateY(-2rpx);
+}
+100% {
+    transform: translateY(0px);
+}
+}

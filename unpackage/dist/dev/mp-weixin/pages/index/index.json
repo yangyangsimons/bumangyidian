@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "barrage": "../../components/barrage/barrage",
+    "chat": "../../components/chat/chat",
+    "record-animation": "../../components/record-animation/record-animation"
+  }
+}

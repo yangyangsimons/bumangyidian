@@ -1,0 +1,1 @@
+{"version":3,"file":"config.js","sources":["utils/config.js"],"sourcesContent":["const domain2 = '192.168.1.104:8080'\nconst domain1 = '8.134.201.234:8080'\nconst domain = 'mang.5gradio.com.cn:443'\nexport const baseUrl = `https://${domain}`\nexport const wsUrl = `wss://${domain}`\n"],"names":[],"mappings":";AAEA,MAAM,SAAS;AACH,MAAC,UAAU,WAAW,MAAM;AAC5B,MAAC,QAAQ,SAAS,MAAM;;;"}

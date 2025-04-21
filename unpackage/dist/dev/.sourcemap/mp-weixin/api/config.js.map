@@ -1,0 +1,1 @@
+{"version":3,"file":"config.js","sources":["api/config.js"],"sourcesContent":["export const baseUrl = 'http://8.134.201.234:8080'\n"],"names":[],"mappings":";AAAY,MAAC,UAAU;;"}

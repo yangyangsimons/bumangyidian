@@ -1,0 +1,1 @@
+{"version":3,"names":["wx","createComponent","_sfc_main"],"sources":["test-popup.vue?type=component"],"sourcesContent":["import Component from '/Users/lynnyang/work/project/xjlab/HBuilderProjects/bumangyidian/components/test-popup/test-popup.vue'\nwx.createComponent(Component)"],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AACAA,EAAA,CAAGC,eAAA,CAAgBC,SAAS","ignoreList":[]}
