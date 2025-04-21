@@ -4,21 +4,21 @@ const stores_messageProcessor = require("./messageProcessor.js");
 const useBarrageStore = common_vendor.defineStore("barrage", {
   state: () => ({
     messages: [],
-    //用户跟踪当前流式消息的ID
+    // 用户跟踪当前流式消息的ID
     currentStreamingMessageId: null
   }),
   actions: {
     addMessage(payload) {
-      const messageId = Date.now();
+      const messageId = payload.id || Date.now();
       if (payload.isStreaming) {
         this.currentStreamingMessageId = messageId;
       }
       this.messages.push({
         ...payload,
-        id: Date.now(),
+        id: messageId,
         timestamp: (/* @__PURE__ */ new Date()).toISOString()
       });
-      common_vendor.index.__f__("log", "at stores/barrage.js:24", "所有消息", this.messages);
+      common_vendor.index.__f__("log", "at stores/barrage.js:25", "所有消息", this.messages);
       return messageId;
     },
     appendToStreamingMessage(text) {
@@ -67,6 +67,17 @@ const useBarrageStore = common_vendor.defineStore("barrage", {
       this.currentStreamingMessageId = null;
       const messageProcessorStore = stores_messageProcessor.useMessageProcessorStore();
       messageProcessorStore.resetProcessor();
+    },
+    // 更新特定消息内容
+    updateMessageContent(messageId, content) {
+      const msgIndex = this.messages.findIndex((msg) => msg.id === messageId);
+      if (msgIndex !== -1) {
+        this.messages[msgIndex].content = content;
+      }
+    },
+    // 查找特定类型的消息
+    findMessageByType(type) {
+      return this.messages.find((msg) => msg.type === type);
     }
   }
 });

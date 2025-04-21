@@ -4,10 +4,13 @@ import { ref, computed } from 'vue'
 import { baseUrl } from '../utils/config'
 import { useSubjectStore } from './subject' // 导入主题store
 import { useIsRadioStore } from './isRadio'
+import { useMessageProcessorStore } from './messageProcessor' // 导入messageProcessor
+
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   // 获取主题store
   const subjectStore = useSubjectStore()
   const isRadioStore = useIsRadioStore()
+
   // 背景音乐相关状态
   const bgAudioManager = ref(null)
   const bgSectionId = ref(null)
@@ -20,7 +23,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
 
   // 计算属性：获取当前音乐标题（基于主题）
   const musicTitle = computed(() => {
-    return `${subjectStore.subject} `
+    return `${subjectStore.subject}`
   })
 
   // TTS相关状态
@@ -65,6 +68,16 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
           // 上报播放完成
           reportBgMusicFinish()
           bgIsPlaying.value = false
+
+          // 停止歌词同步
+          try {
+            const messageProcessorStore = useMessageProcessorStore()
+            if (messageProcessorStore && messageProcessorStore.stopLyricSync) {
+              messageProcessorStore.stopLyricSync()
+            }
+          } catch (err) {
+            console.error('停止歌词同步失败', err)
+          }
         }
       })
 
@@ -77,12 +90,32 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       bgAudioManager.value.onError((err) => {
         console.error('背景音乐播放错误', err)
         bgIsPlaying.value = false
+
+        // 发生错误时停止歌词同步
+        try {
+          const messageProcessorStore = useMessageProcessorStore()
+          if (messageProcessorStore && messageProcessorStore.stopLyricSync) {
+            messageProcessorStore.stopLyricSync()
+          }
+        } catch (err) {
+          console.error('停止歌词同步失败', err)
+        }
       })
 
       // 停止事件
       bgAudioManager.value.onStop(() => {
         console.log('背景音乐已停止')
         bgIsPlaying.value = false
+
+        // 背景音乐停止时停止歌词同步
+        try {
+          const messageProcessorStore = useMessageProcessorStore()
+          if (messageProcessorStore && messageProcessorStore.stopLyricSync) {
+            messageProcessorStore.stopLyricSync()
+          }
+        } catch (err) {
+          console.error('停止歌词同步失败', err)
+        }
       })
 
       // 播放事件
@@ -620,6 +653,16 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     // 保留音量和循环设置，不重置bgVolume.value和bgLoop.value
 
     console.log('背景音乐状态已重置')
+
+    // 停止歌词同步
+    try {
+      const messageProcessorStore = useMessageProcessorStore()
+      if (messageProcessorStore && messageProcessorStore.stopLyricSync) {
+        messageProcessorStore.stopLyricSync()
+      }
+    } catch (err) {
+      console.error('停止歌词同步失败', err)
+    }
   }
 
   return {
@@ -630,6 +673,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     resumeBgMusic,
     toggleBgMusic,
     bgIsPlaying,
+    bgPlayTime, // 确保导出这个用于歌词同步
     setBgVolume,
     bgVolume,
     setBgLoop,
@@ -665,3 +709,4 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     },
   }
 })
+//
