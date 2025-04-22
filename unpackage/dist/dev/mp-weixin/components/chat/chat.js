@@ -24,17 +24,23 @@ const _sfc_main = {
   __name: "chat",
   emits: ["submit"],
   setup(__props, { emit: __emit }) {
+    const radioText = common_vendor.ref("电台播出中");
     const audioPlayerStore = stores_audioPlayer.useAudioPlayerStore();
     const sbStore = stores_subject.useSubjectStore();
     const wsStore = stores_websocket.useWebSocketStore();
     const sendStore = stores_send.useSendStore();
     const isRadioStore = stores_isRadio.useIsRadioStore();
     const radioPlay = common_vendor.ref(true);
+    const colorSystem = common_vendor.ref("background: rgba(0, 0, 0, 0.2);");
+    const inputColor = common_vendor.ref("color:rgba(255, 255, 255, 1)");
     const sendAble = common_vendor.computed(() => {
       return sendStore.send;
     });
     const isRadio = common_vendor.computed(() => {
       return isRadioStore.isRadio;
+    });
+    const voiceIconSrc = common_vendor.computed(() => {
+      return isRadio.value ? "../../static/voice-icon-disable.png" : "../../static/voice-icon.png";
     });
     const modelStore = stores_model.useModelStore();
     const message = common_vendor.ref("");
@@ -87,29 +93,31 @@ const _sfc_main = {
       keyboardHeight.value = 32;
     };
     const changeInputTypeToText = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:194", "切换到文字模式");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:214", "切换到文字模式");
       showText.value = false;
     };
     const changeInputTypeToVoice = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:198", "切换到语音模式");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:218", "切换到语音模式");
       showText.value = true;
     };
     const startRecord = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:204", "开始录音");
+      audioPlayerStore.setTtsVolume(0);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:225", "开始录音");
       recordingStore.startRecording();
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:206", recordingStore.isRecording);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:227", recordingStore.isRecording);
       shouldCancel.value = false;
       manager.start({
         lang: "zh_CN"
       });
     };
     const endRecord = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:215", "结束录音");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:236", "结束录音");
+      audioPlayerStore.setTtsVolume(1);
       recordingStore.stopRecording();
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:217", recordingStore.isRecording);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:239", recordingStore.isRecording);
       manager.stop();
       if (shouldCancel.value) {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:221", "取消发送录音");
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:243", "取消发送录音");
         shouldCancel.value = false;
         common_vendor.index.showToast({
           title: "已取消发送",
@@ -119,12 +127,12 @@ const _sfc_main = {
         return;
       }
       manager.onStop = (res) => {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:232", "识别结束：", res.result);
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:254", "识别结束：", res.result);
         message.value = res.result;
         handleUploadMessage(message.value);
       };
       manager.onError = (res) => {
-        common_vendor.index.__f__("error", "at components/chat/chat.vue:243", "识别错误：", res);
+        common_vendor.index.__f__("error", "at components/chat/chat.vue:265", "识别错误：", res);
       };
     };
     const onKeyInput = (event) => {
@@ -142,7 +150,7 @@ const _sfc_main = {
       }, 50);
     };
     const handleStopGenerate = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:274", "停止生成消息");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:296", "停止生成消息");
       wsStore.sendMessage({
         input_type: 4,
         text: "stop",
@@ -152,16 +160,16 @@ const _sfc_main = {
     const handleUploadMessage = async (userMessage) => {
       if (!userMessage || !userMessage.trim())
         return;
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:286", "上传的消息:", userMessage);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:308", "上传的消息:", userMessage);
       const barrageMessages = barrageStore.messages;
       if (barrageMessages.length >= 1 && barrageMessages[barrageMessages.length - 1].type === "subject") {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:293", "上一个对话是主题选择");
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:315", "上一个对话是主题选择");
         uploadMessage.system_model = stores_model.useModelStore().model;
         uploadMessage.input_type = 2;
         uploadMessage.text = userMessage;
         setTimeout(async () => {
           const currentSubject = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
-          common_vendor.index.__f__("log", "at components/chat/chat.vue:300", "获取当前主题", currentSubject.data.topic);
+          common_vendor.index.__f__("log", "at components/chat/chat.vue:322", "获取当前主题", currentSubject.data.topic);
           sbStore.setSubject(currentSubject.data.topic);
         }, 2e3);
       } else {
@@ -178,77 +186,103 @@ const _sfc_main = {
     };
     const stopRadio = () => {
       radioPlay.value = false;
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:319", "停止电台");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:341", "停止电台");
       audioPlayerStore.pauseBgMusic();
       audioPlayerStore.pauseTtsAudio();
     };
     const resumeRadio = () => {
       radioPlay.value = true;
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:326", "恢复电台");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:348", "恢复电台");
       try {
         audioPlayerStore.resumeTtsAudio();
         audioPlayerStore.resumeBgMusic();
         audioPlayerStore.setBgLoop(false);
       } catch (e) {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:335", "恢复电台失败", e);
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:357", "恢复电台失败", e);
         audioPlayerStore.resumeTtsAudio();
       }
     };
     common_vendor.onShow(() => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:343", "聊天组件显示");
+      if (isRadioStore.isRadio) {
+        voiceIconSrc.value = "../../static/voice-icon-disable.png";
+      }
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:368", "聊天组件显示");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:369", "聊天组件显示isRadio", isRadioStore.isRadio);
     });
     common_vendor.onLoad(() => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:348", "聊天组件加载完成");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:374", "聊天组件加载完成");
     });
     common_vendor.onUnload(() => {
       common_vendor.index.offKeyboardHeightChange();
     });
+    const radioInputtap = () => {
+      radioText.value = "长按退出电台,可以聊天哦";
+      setTimeout(() => {
+        radioText.value = "电台播出中";
+      }, 2e3);
+    };
+    const backToQA = () => {
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:389", "返回问答");
+      audioPlayerStore.stopAllAudio();
+      modelStore.setModel("QA模式");
+      isRadioStore.setIsRadio(false);
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: showText.value && !isRadio.value
       }, showText.value && !isRadio.value ? {
-        b: common_assets._imports_0$3,
+        b: common_assets._imports_0$2,
         c: common_vendor.o(changeInputTypeToText),
         d: common_vendor.o(startRecord),
         e: common_vendor.o(endRecord),
         f: common_vendor.o(onTouchMove),
-        g: common_vendor.o(onTouchStart)
+        g: common_vendor.o(onTouchStart),
+        h: common_vendor.s(colorSystem.value)
       } : {}, {
-        h: !showText.value && !isRadio.value
+        i: !showText.value && !isRadio.value
       }, !showText.value && !isRadio.value ? common_vendor.e({
-        i: common_assets._imports_1$3,
-        j: common_vendor.o(changeInputTypeToVoice),
-        k: common_vendor.o(onKeyInput),
-        l: inputValue.value,
-        m: common_vendor.o(handleSubmit),
-        n: common_vendor.o(onInputFocus),
-        o: common_vendor.o(onInputBlur),
-        p: sendAble.value
+        j: common_assets._imports_1$4,
+        k: common_vendor.o(changeInputTypeToVoice),
+        l: inputColor.value,
+        m: common_vendor.o(onKeyInput),
+        n: inputValue.value,
+        o: common_vendor.o(handleSubmit),
+        p: common_vendor.o(onInputFocus),
+        q: common_vendor.o(onInputBlur),
+        r: sendAble.value
       }, sendAble.value ? {
-        q: common_assets._imports_2$3,
-        r: common_vendor.o(handleSubmit)
+        s: common_assets._imports_2$2,
+        t: common_vendor.o(handleSubmit)
       } : {}, {
-        s: !sendAble.value
+        v: !sendAble.value
       }, !sendAble.value ? {
-        t: common_assets._imports_3$2,
-        v: common_vendor.o(handleStopGenerate)
-      } : {}) : {}, {
-        w: isRadio.value
-      }, isRadio.value ? common_vendor.e({
-        x: common_assets._imports_4$1,
-        y: radioPlay.value
-      }, radioPlay.value ? {
-        z: common_assets._imports_5,
-        A: common_vendor.o(stopRadio)
+        w: common_assets._imports_3$2,
+        x: common_vendor.o(handleStopGenerate)
       } : {}, {
-        B: !radioPlay.value
+        y: common_vendor.s(colorSystem.value)
+      }) : {}, {
+        z: isRadio.value
+      }, isRadio.value ? common_vendor.e({
+        A: common_assets._imports_4$1,
+        B: radioText.value,
+        C: inputColor.value,
+        D: common_vendor.o(radioInputtap),
+        E: common_vendor.o(backToQA),
+        F: radioPlay.value
+      }, radioPlay.value ? {
+        G: common_assets._imports_5,
+        H: common_vendor.o(stopRadio)
+      } : {}, {
+        I: !radioPlay.value
       }, !radioPlay.value ? {
-        C: common_assets._imports_6,
-        D: common_vendor.o(resumeRadio)
-      } : {}) : {}, {
-        E: common_assets._imports_7,
-        F: common_vendor.o(toggleUserPopup),
-        G: common_vendor.sr(userPopupRef, "5a9fb32a-0", {
+        J: common_assets._imports_6,
+        K: common_vendor.o(resumeRadio)
+      } : {}, {
+        L: common_vendor.s(colorSystem.value)
+      }) : {}, {
+        M: voiceIconSrc.value,
+        N: common_vendor.o(toggleUserPopup),
+        O: common_vendor.sr(userPopupRef, "5a9fb32a-0", {
           "k": "userPopupRef"
         })
       });

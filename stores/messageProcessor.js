@@ -83,7 +83,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
       // 处理歌词
       if (data.lrc) {
         console.log('当前是广播模式,歌词:', data.lrc)
-        handleLyrics(data.lrc)
+        handleLyrics(data.lrc, play_time || 0)
       }
     }
 
@@ -96,7 +96,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
   }
 
   // 处理歌词数据
-  const handleLyrics = (lyricsData) => {
+  const handleLyrics = (lyricsData, play_time) => {
     // 停止之前可能存在的歌词同步
     stopLyricSync()
 
@@ -104,26 +104,13 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     currentLyrics.value = lyricsData
     currentLyricIndex.value = -1
 
-    // 初始化歌词显示
-    initLyricDisplay(lyricsData)
-
     // 启动歌词同步
-    startLyricSync(lyricsData)
-  }
-
-  // 初始化歌词显示（创建歌词消息）
-  const initLyricDisplay = (lyricsData) => {
-    // 创建一个专门用于显示歌词的消息
-    lyricMessageId.value = barrageStore.addMessage({
-      type: 'lyric',
-      content: '🎵 歌词加载中...',
-      id: 'lyric-message', // 使用固定ID方便后续更新
-      isLyric: true, // 标记这是歌词消息
-    })
+    startLyricSync(lyricsData, play_time)
   }
 
   // 启动歌词同步
-  const startLyricSync = (lyricsData) => {
+  // 启动歌词同步
+  const startLyricSync = (lyricsData, play_time) => {
     // 先停止之前可能存在的同步
     stopLyricSync()
 
@@ -139,9 +126,9 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     lyricSyncInterval.value = setInterval(() => {
       if (audioPlayerStore.bgIsPlaying) {
         const currentTime = audioPlayerStore.bgPlayTime
-        updateLyricByTime(currentTime, parsedLyrics)
+        updateLyricByTime(currentTime, parsedLyrics, play_time)
       }
-    }, 100) // 每100毫秒检查一次
+    }, 1000) // 每100毫秒检查一次
   }
 
   // 停止歌词同步
@@ -153,7 +140,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
   }
 
   // 根据当前时间更新歌词显示
-  const updateLyricByTime = (currentTime, lyrics) => {
+  const updateLyricByTime = (currentTime, lyrics, play_time) => {
     // 找出当前应该显示的歌词
     let newIndex = -1
 
@@ -169,32 +156,27 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     // 如果找到有效的歌词且与当前显示的不同，更新显示
     if (newIndex !== -1 && newIndex !== currentLyricIndex.value) {
       currentLyricIndex.value = newIndex
-      updateLyricDisplay(lyrics[newIndex].text)
+      console.log('当前歌词索引:', newIndex)
+      if (play_time != 0 && currentTime == 0) {
+        console.log(currentTime, '当前时间:', currentTime)
+      } else {
+        // 修改这里：不是更新现有歌词，而是添加新的歌词消息
+        addLyricMessage(lyrics[newIndex].text)
+      }
     }
   }
 
   // 更新歌词显示
-  const updateLyricDisplay = (text) => {
-    if (!lyricMessageId.value) return
+  // 添加新的歌词消息 (新增函数)
+  const addLyricMessage = (text) => {
+    // 创建新的歌词消息，而不是更新现有消息
+    barrageStore.addMessage({
+      type: 'lyric',
+      content: text,
+      isLyric: true,
+    })
 
-    // 查找歌词消息并更新内容
-    const messageIndex = barrageStore.messages.findIndex(
-      (msg) => msg.id === lyricMessageId.value || msg.id === 'lyric-message'
-    )
-
-    if (messageIndex !== -1) {
-      // 更新已有的歌词消息
-      barrageStore.messages[messageIndex].content = text
-      console.log('歌词已更新:', text)
-    } else {
-      // 如果没有找到歌词消息（可能被删除了），重新创建一个
-      lyricMessageId.value = barrageStore.addMessage({
-        type: 'lyric',
-        content: text,
-        id: 'lyric-message',
-        isLyric: true,
-      })
-    }
+    console.log('添加新歌词:', text)
   }
 
   // 将时间字符串转换为秒数
@@ -304,12 +286,6 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
       icon: 'none',
       duration: 2000,
     })
-
-    // 同时在对话界面显示
-    // barrageStore.addMessage({
-    //   type: 'error',
-    //   content: text || '系统错误',
-    // })
   }
 
   // 通用显示文本消息

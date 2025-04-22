@@ -50,6 +50,7 @@
                 font-weight: 700;
                 color: rgba(16, 18, 19, 1);
                 .change {
+                    margin-left: 10rpx;
                     width: 30rpx;
                     height: 30rpx;
                 }
@@ -68,9 +69,9 @@
                 }
                 .sex {
                     .sex-icon {
+                        margin-top: 10rpx;
                         width: 32rpx;
                         height: 32rpx;
-                        margin-top: 12rpx;
                     }
                 }
                 .mbti {
@@ -205,6 +206,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        wx-button {
+            border: none;
+        }
+        wx-button:after {
+            border: none;
+        }
         button {
             width: 335rpx;
             height: 90rpx;

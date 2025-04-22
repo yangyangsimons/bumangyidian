@@ -73,6 +73,11 @@
   height: 40rpx;
 }
 .login-container .header .describe.data-v-e4e4508d {
+  margin: 0 auto;
+  width: 300rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 24rpx;
   font-weight: 300;
@@ -90,6 +95,12 @@
   bottom: 100rpx;
   font-size: 28rpx;
   font-weight: 700;
+}
+.login-container .main wx-button.data-v-e4e4508d {
+  border: none;
+}
+.login-container .main wx-button.data-v-e4e4508d:after {
+  display: none;
 }
 .login-container .main .wechat.data-v-e4e4508d {
   width: 686rpx;

@@ -4,9 +4,11 @@ const utils_config = require("../utils/config.js");
 const stores_subject = require("./subject.js");
 const stores_isRadio = require("./isRadio.js");
 const stores_messageProcessor = require("./messageProcessor.js");
+const stores_model = require("./model.js");
 const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
   const subjectStore = stores_subject.useSubjectStore();
   const isRadioStore = stores_isRadio.useIsRadioStore();
+  const modelStore = stores_model.useModelStore();
   const bgAudioManager = common_vendor.ref(null);
   const bgSectionId = common_vendor.ref(null);
   const bgAudioId = common_vendor.ref(null);
@@ -33,9 +35,9 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     if (!bgAudioManager.value) {
       bgAudioManager.value = common_vendor.index.getBackgroundAudioManager();
       bgAudioManager.value.onEnded(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:53", "背景音乐播放结束");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:54", "背景音乐播放结束");
         if (bgLoop.value && currentBgUrl.value) {
-          common_vendor.index.__f__("log", "at stores/audioPlayer.js:57", "背景音乐循环播放");
+          common_vendor.index.__f__("log", "at stores/audioPlayer.js:58", "背景音乐循环播放");
           setTimeout(() => {
             playBgMusic(
               currentBgUrl.value,
@@ -53,7 +55,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
               messageProcessorStore.stopLyricSync();
             }
           } catch (err) {
-            common_vendor.index.__f__("error", "at stores/audioPlayer.js:79", "停止歌词同步失败", err);
+            common_vendor.index.__f__("error", "at stores/audioPlayer.js:80", "停止歌词同步失败", err);
           }
         }
       });
@@ -61,7 +63,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
         bgPlayTime.value = bgAudioManager.value.currentTime;
       });
       bgAudioManager.value.onError((err) => {
-        common_vendor.index.__f__("error", "at stores/audioPlayer.js:91", "背景音乐播放错误", err);
+        common_vendor.index.__f__("error", "at stores/audioPlayer.js:92", "背景音乐播放错误", err);
         bgIsPlaying.value = false;
         try {
           const messageProcessorStore = stores_messageProcessor.useMessageProcessorStore();
@@ -69,11 +71,23 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
             messageProcessorStore.stopLyricSync();
           }
         } catch (err2) {
-          common_vendor.index.__f__("error", "at stores/audioPlayer.js:101", "停止歌词同步失败", err2);
+          common_vendor.index.__f__("error", "at stores/audioPlayer.js:102", "停止歌词同步失败", err2);
         }
       });
       bgAudioManager.value.onStop(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:107", "背景音乐已停止");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:108", "背景音乐已停止");
+        reportCurrentProgress();
+        if (isRadioStore.isRadio) {
+          common_vendor.index.__f__("log", "at stores/audioPlayer.js:111", "isRadio模式下的背景音乐停止", isRadioStore.isRadio);
+          isRadioStore.setIsRadio(false);
+          modelStore.setModel("QA模式");
+          common_vendor.index.__f__(
+            "log",
+            "at stores/audioPlayer.js:114",
+            "背景音乐停止的时候isRadio模式已重置",
+            isRadioStore.isRadio
+          );
+        }
         bgIsPlaying.value = false;
         try {
           const messageProcessorStore = stores_messageProcessor.useMessageProcessorStore();
@@ -81,15 +95,16 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
             messageProcessorStore.stopLyricSync();
           }
         } catch (err) {
-          common_vendor.index.__f__("error", "at stores/audioPlayer.js:117", "停止歌词同步失败", err);
+          common_vendor.index.__f__("error", "at stores/audioPlayer.js:128", "停止歌词同步失败", err);
         }
       });
       bgAudioManager.value.onPlay(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:123", "背景音乐开始播放");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:134", "背景音乐开始播放");
         bgIsPlaying.value = true;
       });
       bgAudioManager.value.onPause(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:129", "背景音乐已暂停");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:140", "背景音乐已暂停");
+        reportCurrentProgress();
         bgIsPlaying.value = false;
       });
     }
@@ -98,8 +113,9 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     if (bgAudioManager.value) {
       bgAudioManager.value.title = musicTitle.value;
       bgAudioManager.value.epname = "小程序背景音乐";
-      bgAudioManager.value.coverImgUrl = "../../static/logo.png";
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:145", "更新背景音乐属性:", {
+      bgAudioManager.value.coverImgUrl = "https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg";
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:159", "背景音乐属性已更新:", bgAudioManager.value);
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:160", "更新背景音乐属性:", {
         title: musicTitle.value
       });
     }
@@ -109,7 +125,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       ttsAudioContext.value = common_vendor.index.createInnerAudioContext();
       ttsAudioContext.value.volume = ttsVolume.value;
       ttsAudioContext.value.onEnded(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:161", "TTS音频播放结束", "队列长度:", ttsQueue.value.length);
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:176", "TTS音频播放结束", "队列长度:", ttsQueue.value.length);
         if (ttsSectionId.value && ttsAudioId.value) {
           reportTtsFinish();
         }
@@ -118,31 +134,31 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
         playNextInQueue();
       });
       ttsAudioContext.value.onError((err) => {
-        common_vendor.index.__f__("error", "at stores/audioPlayer.js:177", "TTS音频播放错误", err);
+        common_vendor.index.__f__("error", "at stores/audioPlayer.js:192", "TTS音频播放错误", err);
         ttsIsPlaying.value = false;
         ttsPaused.value = false;
         playNextInQueue();
       });
       ttsAudioContext.value.onCanplay(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:186", "TTS音频已准备好播放");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:201", "TTS音频已准备好播放");
         if (ttsAudioContext.value.duration > 0) {
           ttsPlayTime.value = ttsAudioContext.value.duration;
-          common_vendor.index.__f__("log", "at stores/audioPlayer.js:190", "TTS音频长度:", ttsPlayTime.value);
+          common_vendor.index.__f__("log", "at stores/audioPlayer.js:205", "TTS音频长度:", ttsPlayTime.value);
         }
       });
       ttsAudioContext.value.onPlay(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:195", "TTS音频开始播放");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:210", "TTS音频开始播放");
         ttsIsPlaying.value = true;
         ttsPaused.value = false;
       });
       ttsAudioContext.value.onTimeUpdate(() => {
         if (ttsAudioContext.value.duration > 0 && ttsPlayTime.value === 0) {
           ttsPlayTime.value = ttsAudioContext.value.duration;
-          common_vendor.index.__f__("log", "at stores/audioPlayer.js:204", "更新TTS音频长度:", ttsPlayTime.value);
+          common_vendor.index.__f__("log", "at stores/audioPlayer.js:219", "更新TTS音频长度:", ttsPlayTime.value);
         }
       });
       ttsAudioContext.value.onPause(() => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:210", "TTS音频已暂停");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:225", "TTS音频已暂停");
         ttsIsPlaying.value = false;
         ttsPaused.value = true;
       });
@@ -153,7 +169,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     ttsVolume.value = volume;
     if (ttsAudioContext.value) {
       ttsAudioContext.value.volume = volume;
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:226", "TTS音量已设置为:", volume);
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:241", "TTS音量已设置为:", volume);
     }
     return volume;
   };
@@ -162,13 +178,13 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     bgVolume.value = volume;
     if (bgAudioManager.value) {
       bgAudioManager.value.volume = volume;
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:241", "背景音乐音量已设置为:", volume);
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:256", "背景音乐音量已设置为:", volume);
     }
     return volume;
   };
   const setBgLoop = (loop) => {
     bgLoop.value = !!loop;
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:250", "背景音乐循环播放状态设置为:", bgLoop.value);
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:265", "背景音乐循环播放状态设置为:", bgLoop.value);
     return bgLoop.value;
   };
   const playBgMusic = (url, playTime = 0, sectionId = null, audioId = null) => {
@@ -184,7 +200,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       bgAudioManager.value.startTime = playTime;
     }
     bgIsPlaying.value = true;
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:281", "开始播放背景音乐", {
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:296", "开始播放背景音乐", {
       url,
       playTime,
       sectionId,
@@ -198,7 +214,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     if (bgAudioManager.value && bgIsPlaying.value) {
       bgAudioManager.value.pause();
       bgIsPlaying.value = false;
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:297", "背景音乐已暂停");
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:312", "背景音乐已暂停");
     }
   };
   const resumeBgMusic = () => {
@@ -207,9 +223,9 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       try {
         bgAudioManager.value.play();
         bgIsPlaying.value = true;
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:311", "背景音乐恢复播放");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:326", "背景音乐恢复播放");
       } catch (err) {
-        common_vendor.index.__f__("error", "at stores/audioPlayer.js:313", "背景音乐恢复播放失败", err);
+        common_vendor.index.__f__("error", "at stores/audioPlayer.js:328", "背景音乐恢复播放失败", err);
         playBgMusic(
           currentBgUrl.value,
           bgPlayTime.value,
@@ -227,7 +243,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     }
   };
   const enqueueTtsAudio = (url, sectionId = null, audioId = null) => {
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:335", "将TTS音频添加到队列", {
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:350", "将TTS音频添加到队列", {
       url,
       sectionId,
       audioId,
@@ -245,12 +261,12 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
   const playNextInQueue = () => {
     if (ttsQueue.value.length === 0) {
       isProcessingQueue.value = false;
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:360", "TTS队列为空，等待新音频");
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:375", "TTS队列为空，等待新音频");
       return;
     }
     isProcessingQueue.value = true;
     const nextAudio = ttsQueue.value.shift();
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:369", "播放队列中的下一个TTS音频", {
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:384", "播放队列中的下一个TTS音频", {
       remainingInQueue: ttsQueue.value.length,
       nextAudio
     });
@@ -268,7 +284,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       ttsAudioContext.value.play();
       ttsIsPlaying.value = true;
       ttsPaused.value = false;
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:401", "正在播放TTS音频", {
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:416", "正在播放TTS音频", {
         url: url.substring(0, 50) + "...",
         // 只显示URL的一部分，避免日志太长
         sectionId,
@@ -276,7 +292,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
         volume: ttsVolume.value
       });
     } catch (err) {
-      common_vendor.index.__f__("error", "at stores/audioPlayer.js:408", "播放TTS音频失败", err);
+      common_vendor.index.__f__("error", "at stores/audioPlayer.js:423", "播放TTS音频失败", err);
       setTimeout(playNextInQueue, 500);
     }
   };
@@ -304,12 +320,12 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       ttsAudioContext.value.pause();
       ttsIsPlaying.value = false;
       ttsPaused.value = true;
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:446", "TTS音频已暂停");
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:461", "TTS音频已暂停");
     }
   };
   const resumeTtsAudio = () => {
     if (!ttsAudioContext.value) {
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:453", "TTS音频上下文未初始化，无法恢复播放");
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:468", "TTS音频上下文未初始化，无法恢复播放");
       return;
     }
     if (ttsPaused.value && currentTtsUrl.value) {
@@ -317,9 +333,9 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
         ttsAudioContext.value.play();
         ttsIsPlaying.value = true;
         ttsPaused.value = false;
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:464", "恢复TTS音频播放");
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:479", "恢复TTS音频播放");
       } catch (err) {
-        common_vendor.index.__f__("error", "at stores/audioPlayer.js:466", "恢复TTS音频播放失败", err);
+        common_vendor.index.__f__("error", "at stores/audioPlayer.js:481", "恢复TTS音频播放失败", err);
         ttsAudioContext.value.src = currentTtsUrl.value;
         ttsAudioContext.value.volume = ttsVolume.value;
         ttsAudioContext.value.play();
@@ -329,7 +345,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     } else if (!ttsIsPlaying.value && ttsQueue.value.length > 0) {
       playNextInQueue();
     } else {
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:479", "没有可恢复播放的TTS音频");
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:494", "没有可恢复播放的TTS音频");
     }
   };
   const stopBgMusic = () => {
@@ -360,7 +376,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       play_time: Number(bgPlayTime.value.toFixed(1)),
       is_finish: true
     };
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:522", "上报背景音乐播放完成", reportData);
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:537", "上报背景音乐播放完成", reportData);
     isRadioStore.setIsRadio(false);
     sendProgressReport(reportData);
   };
@@ -374,7 +390,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       play_time: Number(ttsPlayTime.value.toFixed(1))
       // 添加play_time字段
     };
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:541", "上报TTS音频播放完成", reportData);
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:556", "上报TTS音频播放完成", reportData);
     sendProgressReport(reportData);
   };
   const reportCurrentProgress = () => {
@@ -385,7 +401,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
         play_time: Number(bgPlayTime.value.toFixed(1)),
         is_finish: false
       };
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:558", "上报背景音乐当前进度", reportData);
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:573", "audioPlayer上报背景音乐当前进度", reportData);
       sendProgressReport(reportData);
     }
     if (ttsIsPlaying.value && ttsSectionId.value && ttsAudioId.value) {
@@ -396,7 +412,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
         play_time: Number(ttsPlayTime.value.toFixed(1))
         // 添加play_time字段
       };
-      common_vendor.index.__f__("log", "at stores/audioPlayer.js:571", "上报TTS当前进度", reportData);
+      common_vendor.index.__f__("log", "at stores/audioPlayer.js:586", "上报TTS当前进度", reportData);
       sendProgressReport(reportData);
     }
   };
@@ -411,10 +427,10 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
       },
       data,
       success: (res) => {
-        common_vendor.index.__f__("log", "at stores/audioPlayer.js:589", "上报进度成功", res.data);
+        common_vendor.index.__f__("log", "at stores/audioPlayer.js:604", "上报进度成功", res.data);
       },
       fail: (err) => {
-        common_vendor.index.__f__("error", "at stores/audioPlayer.js:592", "上报进度失败", err);
+        common_vendor.index.__f__("error", "at stores/audioPlayer.js:607", "上报进度失败", err);
       }
     });
   };
@@ -429,7 +445,7 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     };
   };
   const resetTtsAudio = () => {
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:613", "重置TTS音频状态");
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:628", "重置TTS音频状态");
     if (ttsIsPlaying.value && ttsAudioContext.value) {
       ttsAudioContext.value.stop();
     }
@@ -441,10 +457,10 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     currentTtsUrl.value = "";
     ttsQueue.value = [];
     isProcessingQueue.value = false;
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:634", "TTS音频状态已重置");
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:649", "TTS音频状态已重置");
   };
   const resetBgMusic = () => {
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:639", "重置背景音乐状态");
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:654", "重置背景音乐状态");
     if (bgIsPlaying.value && bgAudioManager.value) {
       bgAudioManager.value.stop();
     }
@@ -453,14 +469,14 @@ const useAudioPlayerStore = common_vendor.defineStore("audioPlayer", () => {
     bgIsPlaying.value = false;
     bgPlayTime.value = 0;
     currentBgUrl.value = "";
-    common_vendor.index.__f__("log", "at stores/audioPlayer.js:655", "背景音乐状态已重置");
+    common_vendor.index.__f__("log", "at stores/audioPlayer.js:670", "背景音乐状态已重置");
     try {
       const messageProcessorStore = stores_messageProcessor.useMessageProcessorStore();
       if (messageProcessorStore && messageProcessorStore.stopLyricSync) {
         messageProcessorStore.stopLyricSync();
       }
     } catch (err) {
-      common_vendor.index.__f__("error", "at stores/audioPlayer.js:664", "停止歌词同步失败", err);
+      common_vendor.index.__f__("error", "at stores/audioPlayer.js:679", "停止歌词同步失败", err);
     }
   };
   return {

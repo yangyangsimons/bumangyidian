@@ -119,7 +119,7 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
                 reject(err);
               });
               socketTask.onClose(() => {
-                common_vendor.index.__f__("log", "at stores/websocket.js:157", "WebSocket连接已关闭");
+                common_vendor.index.__f__("log", "at stores/websocket.js:157", "WebSocket连接已关闭......");
                 isConnected.value = false;
                 isConnecting.value = false;
                 socketTask = null;
@@ -170,7 +170,6 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
     return _doSendMessage(message);
   };
   const close = async () => {
-    common_vendor.index.__f__("log", "at stores/websocket.js:214", "关闭WebSocket连接");
     return ensureSocketClosed();
   };
   return { messages, connect, sendMessage, close, isConnected, isConnecting };

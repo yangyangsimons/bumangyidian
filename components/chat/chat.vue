@@ -1,6 +1,10 @@
 <template>
   <view class="chat-container">
-    <view class="input-container-voice" v-if="showText && !isRadio">
+    <view
+      class="input-container-voice"
+      v-if="showText && !isRadio"
+      :style="colorSystem"
+    >
       <image
         class="input-icon"
         src="../../static/keyboard.png"
@@ -17,7 +21,11 @@
         按住说话
       </button>
     </view>
-    <view class="input-container-text" v-if="!showText && !isRadio">
+    <view
+      class="input-container-text"
+      v-if="!showText && !isRadio"
+      :style="colorSystem"
+    >
       <image
         class="input-voice-icon"
         src="../../static/voice.png"
@@ -27,7 +35,8 @@
       <input
         type="text"
         placeholder="聊点什么吧？"
-        placeholder-style="color:rgba(255, 255, 255, 0.4);"
+        p
+        :placeholder-style="inputColor"
         class="input-field-text"
         @input="onKeyInput"
         :value="inputValue"
@@ -39,7 +48,7 @@
       />
       <view class="send" @tap.stop="handleSubmit" v-if="sendAble">
         <image
-          class="send-icon"
+          class="send-icon send-fly"
           src="../../static/send-icon.png"
           mode="scaleToFill"
         />
@@ -52,7 +61,7 @@
         />
       </view>
     </view>
-    <view class="input-container-text" v-if="isRadio">
+    <view class="input-container-text" v-if="isRadio" :style="colorSystem">
       <image
         class="input-voice-icon"
         src="../../static/radio.png"
@@ -60,11 +69,13 @@
       />
       <input
         type="text"
-        placeholder="电台播出中"
-        placeholder-style="color:rgba(255, 255, 255, 0.4);"
+        :placeholder="radioText"
+        :placeholder-style="inputColor"
         class="input-field-text"
         adjust-position="true"
         disabled
+        @tap="radioInputtap"
+        @longpress="backToQA"
       />
       <view class="send" @tap.stop="stopRadio" v-if="radioPlay">
         <image
@@ -83,7 +94,7 @@
     </view>
     <image
       class="voice-icon"
-      src="../../static/voice-icon.png"
+      :src="voiceIconSrc"
       mode="scaleToFill"
       @click="toggleUserPopup"
     />
@@ -105,18 +116,27 @@
   import { useAudioPlayerStore } from '../../stores/audioPlayer'
   import request from '@/utils/request'
 
+  const radioText = ref('电台播出中')
   const audioPlayerStore = useAudioPlayerStore()
   const sbStore = useSubjectStore()
   const wsStore = useWebSocketStore()
   const sendStore = useSendStore()
   const isRadioStore = useIsRadioStore()
   const radioPlay = ref(true)
+  const colorSystem = ref('background: rgba(0, 0, 0, 0.2);')
+  const inputColor = ref('color:rgba(255, 255, 255, 1)')
   // 设置能否发送消息
   const sendAble = computed(() => {
     return sendStore.send
   })
   const isRadio = computed(() => {
     return isRadioStore.isRadio
+  })
+
+  const voiceIconSrc = computed(() => {
+    return isRadio.value
+      ? '../../static/voice-icon-disable.png'
+      : '../../static/voice-icon.png'
   })
   // const isRadio = ref(true)
   // 初始化聊天模式
@@ -201,6 +221,7 @@
 
   // 录音开始
   const startRecord = () => {
+    audioPlayerStore.setTtsVolume(0)
     console.log('开始录音')
     recordingStore.startRecording()
     console.log(recordingStore.isRecording)
@@ -213,6 +234,7 @@
   // 当用户松开手指时，结束录音并开始识别
   const endRecord = () => {
     console.log('结束录音')
+    audioPlayerStore.setTtsVolume(1)
     recordingStore.stopRecording()
     console.log(recordingStore.isRecording)
     manager.stop()
@@ -340,7 +362,11 @@
 
   onShow(() => {
     // 页面显示时可以进行一些操作
+    if (isRadioStore.isRadio) {
+      voiceIconSrc.value = '../../static/voice-icon-disable.png'
+    }
     console.log('聊天组件显示')
+    console.log('聊天组件显示isRadio', isRadioStore.isRadio)
   })
 
   onLoad(() => {
@@ -352,6 +378,19 @@
     // 移除键盘高度监听
     uni.offKeyboardHeightChange()
   })
+
+  const radioInputtap = () => {
+    radioText.value = '长按退出电台,可以聊天哦'
+    setTimeout(() => {
+      radioText.value = '电台播出中'
+    }, 2000)
+  }
+  const backToQA = () => {
+    console.log('返回问答')
+    audioPlayerStore.stopAllAudio()
+    modelStore.setModel('QA模式')
+    isRadioStore.setIsRadio(false)
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -433,12 +472,16 @@
         height: 70rpx; // 增大点击区域
         position: absolute;
         top: 50%;
-        right: 5rpx;
+        right: 10rpx;
         transform: translateY(-50%);
         display: flex;
         justify-content: center;
         align-items: center;
         .send-icon {
+          width: 50rpx;
+          height: 50rpx;
+        }
+        .send-icon.send-fly {
           width: 36rpx;
           height: 36rpx;
         }

@@ -101,13 +101,17 @@
   height: 70rpx;
   position: absolute;
   top: 50%;
-  right: 5rpx;
+  right: 10rpx;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .chat-container .input-container-text .send .send-icon.data-v-5a9fb32a {
+  width: 50rpx;
+  height: 50rpx;
+}
+.chat-container .input-container-text .send .send-icon.send-fly.data-v-5a9fb32a {
   width: 36rpx;
   height: 36rpx;
 }

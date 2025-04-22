@@ -5,11 +5,12 @@ import { baseUrl } from '../utils/config'
 import { useSubjectStore } from './subject' // 导入主题store
 import { useIsRadioStore } from './isRadio'
 import { useMessageProcessorStore } from './messageProcessor' // 导入messageProcessor
-
+import { useModelStore } from './model' // 导入模型store
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   // 获取主题store
   const subjectStore = useSubjectStore()
   const isRadioStore = useIsRadioStore()
+  const modelStore = useModelStore()
 
   // 背景音乐相关状态
   const bgAudioManager = ref(null)
@@ -105,6 +106,16 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       // 停止事件
       bgAudioManager.value.onStop(() => {
         console.log('背景音乐已停止')
+        reportCurrentProgress()
+        if (isRadioStore.isRadio) {
+          console.log('isRadio模式下的背景音乐停止', isRadioStore.isRadio)
+          isRadioStore.setIsRadio(false)
+          modelStore.setModel('QA模式')
+          console.log(
+            '背景音乐停止的时候isRadio模式已重置',
+            isRadioStore.isRadio
+          )
+        }
         bgIsPlaying.value = false
 
         // 背景音乐停止时停止歌词同步
@@ -127,6 +138,8 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       // 暂停事件
       bgAudioManager.value.onPause(() => {
         console.log('背景音乐已暂停')
+        //上报进度
+        reportCurrentProgress()
         bgIsPlaying.value = false
       })
     }
@@ -140,8 +153,10 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       bgAudioManager.value.epname = '小程序背景音乐'
 
       // 如果需要可以设置封面
-      bgAudioManager.value.coverImgUrl = '../../static/logo.png'
+      bgAudioManager.value.coverImgUrl =
+        'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg'
 
+      console.log('背景音乐属性已更新:', bgAudioManager.value)
       console.log('更新背景音乐属性:', {
         title: musicTitle.value,
       })
@@ -555,7 +570,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
         is_finish: false,
       }
 
-      console.log('上报背景音乐当前进度', reportData)
+      console.log('audioPlayer上报背景音乐当前进度', reportData)
       sendProgressReport(reportData)
     }
 

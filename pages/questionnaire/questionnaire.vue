@@ -23,7 +23,10 @@
       <button class="next" @click="handleNext">
         <text class="next-text">开启</text>
       </button>
-      <text class="skip" @click="skip">不知道，跳过 ></text>
+      <view class="skip" @click="skip"
+        ><text>不知道，跳过</text>
+        <image class="skip-icon" src="../../static/skip.png" mode="scaleToFill"
+      /></view>
     </view>
   </view>
 </template>

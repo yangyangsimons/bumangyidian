@@ -12,7 +12,7 @@
         <image class="logo" src="../../static/logo.png" />
       </view>
       <image src="../../static/logo-title.png" class="title">不芒一点</image>
-      <text class="describe">你的专属电台</text>
+      <view class="describe">你的专属电台</view>
     </view>
     <view class="main">
       <button v-if="!agreeProtocol" class="wx-login" @click="clickBtn">
@@ -216,6 +216,11 @@
         height: 40rpx;
       }
       .describe {
+        margin: 0 auto;
+        width: 300rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         font-size: 24rpx;
         font-weight: 300;
@@ -234,7 +239,12 @@
       bottom: 100rpx;
       font-size: 28rpx;
       font-weight: 700;
-
+      wx-button {
+        border: none;
+      }
+      wx-button:after {
+        display: none;
+      }
       .wechat {
         width: 686rpx;
         height: 90rpx;

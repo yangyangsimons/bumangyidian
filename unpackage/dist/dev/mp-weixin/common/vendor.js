@@ -7054,9 +7054,9 @@ function initOnError() {
   };
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,172.21.108.80";
+  const hosts = "127.0.0.1,192.168.1.110";
   const port = "8090";
-  const id = "mp-weixin_o2Usa7";
+  const id = "mp-weixin_BpwDJG";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8767,6 +8767,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
+const onHide = /* @__PURE__ */ createHook(ON_HIDE);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onUnload = /* @__PURE__ */ createHook(ON_UNLOAD);
 exports.Pinia = Pinia;
@@ -8782,6 +8783,7 @@ exports.index = index;
 exports.n = n;
 exports.nextTick$1 = nextTick$1;
 exports.o = o;
+exports.onHide = onHide;
 exports.onLoad = onLoad;
 exports.onShow = onShow;
 exports.onUnload = onUnload;

@@ -1,9 +1,6 @@
 <template>
   <view class="cover">
-    <image
-      class="global-title"
-      src="../../static/global-title-dark.png"
-    ></image>
+    <image class="global-title" src="../../static/global-title.png"></image>
     <!-- 当金种子杯模式有效时显示切换按钮 -->
     <button
       v-if="isGoldModeAvailable"
@@ -12,7 +9,7 @@
     >
       <view class="botton-title">
         <image
-          src="../../static/changeModel.png"
+          :src="changeModelSrc"
           mode="scaleToFill"
           class="change-model-pic"
         />
@@ -44,7 +41,11 @@
       <text class="shining-text">{{ shinePointConfig.text }} </text>
     </view>
     <record-animation />
-    <view class="subject-container" v-if="currentModel === '常规模式'">
+    <view
+      class="subject-container"
+      v-if="currentModel === '常规模式'"
+      :style="{ color: systemColor }"
+    >
       <view class="title">今日话题</view>
       <scroll-view
         class="subject-scroll-view"
@@ -80,9 +81,13 @@
   //导入主题管理
   import { useSubjectStore } from '../../stores/subject'
   import { useIsRadioStore } from '../../stores/isRadio'
+
+  //主题管理
+  const systemColor = ref('rgba(26, 28, 30, 1);')
   //导入电台模式状态
   const isRadioStore = useIsRadioStore()
   const isRadio = computed(() => isRadioStore.isRadio)
+  const changeModelSrc = ref('../../static/changeModel.png')
   //自动滑动实现动画
   // 新增变量
   const scrollLeft = ref(0)
@@ -225,21 +230,22 @@
       // 上报当前音频播放状态,停止所有音频并清空所有音频队列
       // 关闭连接
       await wsStore.close()
-      console.log('WebSocket连接已关闭')
+      console.log('模式切换WebSocket连接已关闭')
 
       // 等待一段时间，确保连接完全关闭
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       try {
         // 重新连接
         await wsStore.connect()
-        console.log('socket重新连接成功')
+        console.log('切换模式的socket重新连接成功')
 
         // 等待连接稳定
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
         // 发送模式切换消息
         if (currentModel.value === '金种子杯模式') {
+          changeModelSrc.value = '../../static/changeModel-2.png'
           await wsStore.sendMessage({
             system_model: currentModel.value,
             input_type: 3,
@@ -247,6 +253,7 @@
           })
           console.log('模式切换消息发送成功')
         } else {
+          changeModelSrc.value = '../../static/changeModel.png'
           modelStore.setModel('常规模式')
           await wsStore.sendMessage({
             system_model: currentModel.value,
@@ -327,7 +334,7 @@
     }
   }
 
-  onLoad(async () => {
+  onShow(async () => {
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
@@ -339,18 +346,33 @@
       // 获取系统配置
       await fetchSystemConfig()
 
-      // 尝试连接WebSocket
-      if (!wsStore.isConnected) {
-        await wsStore.connect()
-        console.log('socket连接成功')
+      // 设置当前模式
+      if (isRadio.value) {
+        // 如果是电台模式，直接返回
+        console.log('电台模式下执行的onShow逻辑', isRadio.value)
+        console.log('背景音乐是否正在播放', audioPlayerStore.bgIsPlaying)
+        // audioPlayerStore.stopAllAudio()
+        // 尝试连接WebSocket
+        if (!wsStore.isConnected) {
+          await wsStore.connect()
+          console.log('socket连接成功')
 
-        // 发送连接成功的消息 - 仅在页面首次加载时
-        await wsStore.sendMessage({
-          system_model: currentModel.value,
-          input_type: 3,
-          text: '',
-        })
-        console.log('发送input_type=3的初始消息成功')
+          // 发送连接成功的消息 - 仅在页面首次加载时
+        }
+      } else {
+        // 尝试连接WebSocket
+        if (!wsStore.isConnected) {
+          await wsStore.connect()
+          console.log('socket连接成功')
+
+          // 发送连接成功的消息 - 仅在页面首次加载时
+          await wsStore.sendMessage({
+            system_model: currentModel.value,
+            input_type: 3,
+            text: '',
+          })
+          console.log('发送input_type=3的初始消息成功')
+        }
       }
     } catch (error) {
       console.error('页面显示时发生错误:', error)
@@ -361,7 +383,7 @@
     }
   })
 
-  onUnload(() => {
+  onHide(async () => {
     // 页面隐藏时关闭WebSocket连接
     console.log('onHide主页面隐藏')
 
@@ -370,15 +392,21 @@
     console.log('音频播放状态已上报')
 
     // 停止并清空所有音频队列
-    audioPlayerStore.stopAllAudio()
-    console.log('停止并清空所有音频队列')
-    // 清空消息列表
-    barrageStore.clearMessages()
-    console.log('清空消息列表')
+    if (isRadio.value) {
+      // 如果是电台模式，就不停止背景音乐
+      console.log('电台模式下不停止背景音乐onHide', isRadio.value)
+      audioPlayerStore.stopTtsAudio()
+    } else {
+      audioPlayerStore.stopAllAudio()
+      barrageStore.clearMessages()
+      console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
+      // 清空消息列表
+      console.log('清空消息列表')
+    }
 
     // 关闭WebSocket连接
-    wsStore.close()
-    console.log('socket连接关闭')
+    await wsStore.close()
+    console.log('Hidesocket连接关闭')
   })
 
   // 添加onUnload钩子，在页面卸载时上报音频状态并清空队列

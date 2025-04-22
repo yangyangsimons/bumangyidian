@@ -286,17 +286,17 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$5,
+        a: common_assets._imports_0$4,
         b: avator.value,
         c: common_vendor.o(changeAvator),
         d: common_vendor.t(userName.value),
-        e: common_assets._imports_1$4,
+        e: common_assets._imports_1$5,
         f: common_vendor.o(changeName),
         g: common_vendor.t(userAge.value),
         h: sexSrc.value,
         i: common_vendor.t(userMbti.value),
         j: common_vendor.t(userMbtiShort.value),
-        k: common_assets._imports_1$4,
+        k: common_assets._imports_1$5,
         l: common_vendor.o(changeMbti),
         m: common_vendor.f(tones.value, (item, index, i0) => {
           return {
@@ -308,7 +308,7 @@ const _sfc_main = {
             f: common_vendor.o(($event) => toneClick(item.id, index), index)
           };
         }),
-        n: common_assets._imports_2$4,
+        n: common_assets._imports_2$3,
         o: common_vendor.o(updateTone),
         p: common_vendor.sr(userPopupRef, "52d19f64-0", {
           "k": "userPopupRef"

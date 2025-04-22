@@ -124,7 +124,7 @@
   border-radius: 50%;
   width: 50rpx;
   height: 50rpx;
-  animation: shine-1cf27b2a 1s infinite alternate;
+  animation: shine 1s infinite alternate;
 }
 .cover .shine-point .shining-text.data-v-1cf27b2a {
   position: absolute;
@@ -142,14 +142,6 @@
   background: rgba(26, 28, 30, 0.54);
   white-space: normal;
   box-sizing: border-box;
-}
-@keyframes shine-1cf27b2a {
-from {
-    box-shadow: 0 0 5rpx rgba(242, 242, 240, 0.5);
-}
-to {
-    box-shadow: 0 0 10rpx rgba(63, 63, 62, 0.9);
-}
 }
 .popupshow.data-v-1cf27b2a {
   position: absolute;

@@ -154,7 +154,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
               })
 
               socketTask.onClose(() => {
-                console.log('WebSocket连接已关闭')
+                console.log('WebSocket连接已关闭......')
                 isConnected.value = false
                 isConnecting.value = false
                 socketTask = null
@@ -211,7 +211,6 @@ export const useWebSocketStore = defineStore('websocket', () => {
   }
 
   const close = async () => {
-    console.log('关闭WebSocket连接')
     return ensureSocketClosed()
   }
 
