@@ -16,9 +16,7 @@
         >
           <view class="content-box">
             <text class="content">
-              <text class="type">
-                {{ msg.type === 'user' ? '我：' : '主持人：' }} </text
-              >{{ msg.content }}
+              <text class="type"> </text>{{ msg.content }}
             </text>
           </view>
         </view>

@@ -22,7 +22,7 @@ const _sfc_main = {
           }).exec();
         }).exec();
       } catch (error) {
-        common_vendor.index.__f__("error", "at components/barrage/barrage.vue:70", "滚动计算出错:", error);
+        common_vendor.index.__f__("error", "at components/barrage/barrage.vue:68", "滚动计算出错:", error);
       }
     };
     const stopWatch = common_vendor.watch(
@@ -38,7 +38,7 @@ const _sfc_main = {
     });
     const messages = common_vendor.computed(() => {
       if (barrageStore.messages.length % 5 === 0) {
-        common_vendor.index.__f__("log", "at components/barrage/barrage.vue:92", "消息数量:", barrageStore.messages.length);
+        common_vendor.index.__f__("log", "at components/barrage/barrage.vue:90", "消息数量:", barrageStore.messages.length);
       }
       return barrageStore.messages;
     });
@@ -46,10 +46,9 @@ const _sfc_main = {
       return {
         a: common_vendor.f(messages.value, (msg, k0, i0) => {
           return {
-            a: common_vendor.t(msg.type === "user" ? "我：" : "主持人："),
-            b: common_vendor.t(msg.content),
-            c: msg.id,
-            d: msg.type === "user" ? 1 : ""
+            a: common_vendor.t(msg.content),
+            b: msg.id,
+            c: msg.type === "user" ? 1 : ""
           };
         }),
         b: scrollTop.value

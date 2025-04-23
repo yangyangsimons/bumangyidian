@@ -22,7 +22,7 @@ const _sfc_main = {
     const isRadioStore = stores_isRadio.useIsRadioStore();
     const isRadio = common_vendor.computed(() => isRadioStore.isRadio);
     const changeModelSrc = common_vendor.ref("../../static/changeModel.png");
-    const scrollLeft = common_vendor.ref(0);
+    common_vendor.ref(0);
     common_vendor.ref(null);
     common_vendor.ref(0);
     const bgSrc = common_vendor.ref("../../static/index-bg.png");
@@ -238,13 +238,18 @@ const _sfc_main = {
         l: `${shinePointConfig.y_ratio * 100}%`
       } : {}, {
         m: currentModel.value === "常规模式"
-      }, currentModel.value === "常规模式" ? {
+      }, currentModel.value === "常规模式" ? common_vendor.e({
         n: common_vendor.t(subejctText.value),
-        o: scrollLeft.value,
-        p: common_vendor.o((...args) => _ctx.onScroll && _ctx.onScroll(...args)),
-        q: systemColor.value
+        o: _ctx.needScroll
+      }, _ctx.needScroll ? {} : {}, {
+        p: _ctx.needScroll
+      }, _ctx.needScroll ? {
+        q: common_vendor.t(subejctText.value)
       } : {}, {
-        r: common_vendor.o(handleSubmit)
+        r: `translateX(${-_ctx.scrollPosition}px)`,
+        s: systemColor.value
+      }) : {}, {
+        t: common_vendor.o(handleSubmit)
       });
     };
   }

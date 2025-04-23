@@ -25,6 +25,7 @@
         font-weight: 500;
         font-size: 56rpx;
         max-width: 550rpx;
+
         .title {
             height: 80rpx;
             line-height: 80rpx;
@@ -32,8 +33,10 @@
             font-weight: 400;
             text-wrap: nowrap;
         }
+
         .subject-scroll-view {
             width: 100%;
+            overflow: hidden;
             white-space: nowrap;
 
             /* 隐藏滚动条 */
@@ -42,10 +45,19 @@
             }
         }
 
+        .marquee-content {
+            display: inline-flex;
+            white-space: nowrap;
+        }
+
         .subject {
             display: inline-block;
             white-space: nowrap;
-            padding-right: 40rpx; // 增加一些右侧空间
+            padding-right: 40rpx;
+        }
+
+        .space {
+            width: 60rpx; // 两个文本之间的间距
         }
     }
     .barrage-container {

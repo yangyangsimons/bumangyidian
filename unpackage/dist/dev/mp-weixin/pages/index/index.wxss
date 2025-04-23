@@ -61,16 +61,24 @@
 }
 .cover .subject-container .subject-scroll-view.data-v-1cf27b2a {
   width: 100%;
+  overflow: hidden;
   white-space: nowrap;
   /* 隐藏滚动条 */
 }
 .cover .subject-container .subject-scroll-view.data-v-1cf27b2a::-webkit-scrollbar {
   display: none;
 }
+.cover .subject-container .marquee-content.data-v-1cf27b2a {
+  display: inline-flex;
+  white-space: nowrap;
+}
 .cover .subject-container .subject.data-v-1cf27b2a {
   display: inline-block;
   white-space: nowrap;
   padding-right: 40rpx;
+}
+.cover .subject-container .space.data-v-1cf27b2a {
+  width: 60rpx;
 }
 .cover .barrage-container.data-v-1cf27b2a {
   width: 100%;

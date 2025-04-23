@@ -47,16 +47,16 @@
       :style="{ color: systemColor }"
     >
       <view class="title">今日话题</view>
-      <scroll-view
-        class="subject-scroll-view"
-        scroll-x
-        :scroll-left="scrollLeft"
-        :enhanced="true"
-        :show-scrollbar="false"
-        @scroll="onScroll"
-      >
-        <view class="subject">{{ subejctText }}</view>
-      </scroll-view>
+      <view class="subject-scroll-view">
+        <view
+          class="marquee-content"
+          :style="{ transform: `translateX(${-scrollPosition}px)` }"
+        >
+          <view class="subject">{{ subejctText }}</view>
+          <view class="space" v-if="needScroll"></view>
+          <view class="subject" v-if="needScroll">{{ subejctText }}</view>
+        </view>
+      </view>
     </view>
     <view class="barrage-container">
       <barrage />
@@ -408,23 +408,6 @@
     await wsStore.close()
     console.log('Hidesocket连接关闭')
   })
-
-  // 添加onUnload钩子，在页面卸载时上报音频状态并清空队列
-  // onUnload(() => {
-  //   console.log('onUnload主页面卸载')
-
-  //   // 上报当前音频播放状态
-  //   audioPlayerStore.reportCurrentProgress()
-  //   console.log('音频播放状态已上报')
-
-  //   // 停止并清空所有音频队列
-  //   audioPlayerStore.stopAllAudio()
-  //   console.log('停止并清空所有音频队列')
-
-  //   // 关闭WebSocket连接
-  //   wsStore.close()
-  //   console.log('socket连接关闭')
-  // })
 </script>
 
 <style lang="scss" scoped>
