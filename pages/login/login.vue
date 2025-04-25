@@ -17,7 +17,7 @@
     <view class="main">
       <button v-if="!agreeProtocol" class="wx-login" @click="clickBtn">
         <image class="wechat-icon" src="../../static/wechat.png" />
-        <text class="wechat-text">微信登录</text>
+        <text class="wechat-text">手机号快捷登录</text>
       </button>
       <button
         v-else
@@ -26,7 +26,11 @@
         @getphonenumber="handleWechatLogin"
       >
         <image class="wechat-icon" src="../../static/wechat.png" />
-        <text class="wechat-text">微信登录</text>
+        <text class="wechat-text">手机号快捷登录</text>
+      </button>
+      <button class="phone" @click="unLoginTry">
+        <image class="wechat-icon" src="../../static/phone.png" />
+        <text class="wechat-text">游客体验，暂不登录</text>
       </button>
     </view>
     <view class="footer">
@@ -89,6 +93,12 @@
   const handleWechatLogin = async (e) => {
     const phoneCode = e.detail.code
     console.log('获取到的手机号code', phoneCode)
+    if (phoneCode === undefined) {
+      return uni.showToast({
+        title: '获取手机号登录',
+        icon: 'none',
+      })
+    }
     if (!agreeProtocol.value) {
       return uni.showToast({
         title: '请先阅读并同意协议',
@@ -178,6 +188,35 @@
       uni.hideLoading()
     }
   }
+  const unLoginTry = async () => {
+    console.log('游客身份体验')
+    //游客身份体验
+    uni.setStorage({
+      key: 'tourist',
+      data: true,
+      success: (result) => {
+        console.log('游客身份存储成功:', result)
+      },
+    })
+    //新手引导页设置token
+    uni.setStorage({
+      key: 'isFirst',
+      data: true,
+      success: (result) => {
+        console.log('首次使用存储成功:', result)
+        uni.reLaunch({
+          url: '/pages/index/index',
+        })
+      },
+      fail: (error) => {
+        console.log('首次使用存储失败:', error)
+        uni.showToast({
+          title: '游客身份体验失败',
+          icon: 'none',
+        })
+      },
+    })
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -255,7 +294,7 @@
       width: 686rpx;
       height: 220rpx;
       position: absolute;
-      bottom: 100rpx;
+      bottom: 200rpx;
       font-size: 28rpx;
       font-weight: 700;
       wx-button {
@@ -311,11 +350,17 @@
         color: rgba(167, 238, 39, 1);
         font-size: 28rpx;
         font-weight: 700;
+        image {
+          width: 33rpx;
+          height: 33rpx;
+          margin-right: 8rpx;
+        }
       }
       image {
         width: 40rpx;
         height: 40rpx;
         margin-right: 8rpx;
+        margin-bottom: 2rpx;
       }
     }
     .footer {

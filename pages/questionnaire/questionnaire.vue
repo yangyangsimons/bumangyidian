@@ -128,6 +128,20 @@
             })
             console.log('提交问卷结果', res)
             if (res.code == 0) {
+              uni.showToast({
+                title: '注册成功',
+                icon: 'success',
+              })
+              uni.setStorage({
+                key: 'tourist',
+                data: false,
+                success: (result) => {
+                  console.log('游客存储成功:', result)
+                },
+                fail: (error) => {
+                  console.log('游客存储失败:', error)
+                },
+              })
               uni.reLaunch({ url: '/pages/index/index' })
             }
           } catch (e) {
@@ -188,6 +202,16 @@
           })
           console.log('提交问卷结果', res)
           if (res.code == 0) {
+            uni.setStorage({
+              key: 'tourist',
+              data: false,
+              success: (result) => {
+                console.log('游客存储成功:', result)
+              },
+              fail: (error) => {
+                console.log('游客存储失败:', error)
+              },
+            })
             uni.reLaunch({ url: '/pages/index/index' })
           }
         } catch (e) {

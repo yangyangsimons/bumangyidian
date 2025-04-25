@@ -1,9 +1,9 @@
 {
   "pages": [
+    "pages/index/index",
     "pages/login/login",
     "pages/hello/hello",
     "pages/questionnaire/questionnaire",
-    "pages/index/index",
     "pages/agreement/agreement"
   ],
   "window": {

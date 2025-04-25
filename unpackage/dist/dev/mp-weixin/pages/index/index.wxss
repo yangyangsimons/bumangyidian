@@ -96,7 +96,7 @@
   height: 80rpx;
   top: 244rpx;
   right: 0;
-  z-index: 10;
+  z-index: 1;
   color: white;
   border-radius: 12rpx 0px 0px 12rpx;
   background: rgba(0, 0, 0, 0.5);

@@ -94,7 +94,7 @@
   width: 686rpx;
   height: 220rpx;
   position: absolute;
-  bottom: 100rpx;
+  bottom: 200rpx;
   font-size: 28rpx;
   font-weight: 700;
 }
@@ -144,10 +144,16 @@
   font-size: 28rpx;
   font-weight: 700;
 }
+.login-container .main .phone image.data-v-e4e4508d {
+  width: 33rpx;
+  height: 33rpx;
+  margin-right: 8rpx;
+}
 .login-container .main image.data-v-e4e4508d {
   width: 40rpx;
   height: 40rpx;
   margin-right: 8rpx;
+  margin-bottom: 2rpx;
 }
 .login-container .footer.data-v-e4e4508d {
   display: flex;

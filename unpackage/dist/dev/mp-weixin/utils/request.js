@@ -6,6 +6,7 @@ const request = (url, method = "GET", data = {}, header = {}) => {
     "Content-Type": "application/json",
     Authorization: token ? `bearer ${token}` : "",
     // 常见的token携带方式
+    is_yk: token ? "0" : "1",
     ...header
     // 允许自定义header覆盖默认设置
   };

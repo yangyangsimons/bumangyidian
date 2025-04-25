@@ -292,7 +292,7 @@ const _sfc_main = {
         E: common_vendor.o(backToQA),
         F: radioPlay.value
       }, radioPlay.value ? {
-        G: common_assets._imports_4$1,
+        G: common_assets._imports_4$2,
         H: common_vendor.o(stopRadio)
       } : {}, {
         I: !radioPlay.value

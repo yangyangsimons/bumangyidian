@@ -1,5 +1,6 @@
 <template>
   <view class="cover">
+    <guide class="guide" />
     <image class="global-title" src="../../static/global-title.png"></image>
     <!-- 当金种子杯模式有效时显示切换按钮 -->
     <button
@@ -62,7 +63,6 @@
       <barrage />
     </view>
     <chat @submit="handleSubmit" />
-    <guide />
   </view>
 </template>
 

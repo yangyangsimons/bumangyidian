@@ -1,5 +1,5 @@
 <template>
-  <view class="intro-container" v-if="guideShow">
+  <view class="intro-container" v-if="guideShow" @click="isYkClick">
     <view class="change-model-container"> </view>
     <view class="change-model-container-right">
       <image src="../../static/guide/right-top-icon.png" mode="scaleToFill" />
@@ -32,7 +32,121 @@
 <script setup>
   import { ref } from 'vue'
   import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
+  import { useWebSocketStore } from '@/stores/websocket'
+  import { useAudioPlayerStore } from '@/stores/audioPlayer'
+  import { useBarrageStore } from '@/stores/barrage'
+  const barrageStore = useBarrageStore()
+  const audioPlayerStore = useAudioPlayerStore()
+  const wsStore = useWebSocketStore()
   const guideShow = ref(false)
+  const token = ref('')
+  const istourist = ref(true)
+  const isYkClick = async () => {
+    uni.getStorage({
+      key: 'token',
+      success: async (res) => {
+        console.log('获取token成功', res.data)
+        if (res.data) {
+          // 如果token存在，说明是注册用户
+          token.value = res.data
+          uni.setStorage({
+            key: 'isFirst',
+            data: false,
+          })
+          uni.setStorage({
+            key: 'tourist',
+            data: false,
+          })
+          console.log('注册用户')
+          guideShow.value = false
+        } else {
+          console.log('游客点击了页面')
+          // 如果是游客点击了页面，直接跳转到登录页面
+          const isFirst = await uni.getStorage({
+            key: 'isFirst',
+          })
+          const tourist = await uni.getStorage({
+            key: 'tourist',
+          })
+          istourist.value = tourist.data
+          console.log(
+            '游客点击了页面isFirst,tourist',
+            isFirst.data,
+            tourist.data
+          )
+          if (tourist.data) {
+            uni.showModal({
+              title: '',
+              content: '登录后体验完整功能',
+              success: async (res) => {
+                if (res.confirm) {
+                  await wsStore.close()
+                  audioPlayerStore.stopAllAudio()
+                  barrageStore.clearMessages()
+                  console.log('用户点击确定')
+                  // 1秒钟之后跳转登录
+                  setTimeout(() => {
+                    uni.reLaunch({
+                      url: '/pages/login/login',
+                    })
+                  }, 1000)
+                } else if (res.cancel) {
+                  console.log('用户点击取消')
+                }
+              },
+            })
+          }
+        }
+      },
+      fail: async (error) => {
+        console.log('获取token失败', error)
+        // 如果获取token失败，说明是游客用户
+        // 直接跳转到登录页面
+        // 如果token不存在，说明是游客用户
+        console.log('游客用户')
+        //是否是游客点击了页面
+        console.log('游客点击了页面')
+        // 如果是游客点击了页面，直接跳转到登录页面
+        const isFirst = await uni.getStorage({
+          key: 'isFirst',
+        })
+        const tourist = await uni.getStorage({
+          key: 'tourist',
+        })
+        console.log('游客点击了页面isFirst,tourist', isFirst.data, tourist.data)
+        if (tourist.data) {
+          uni.showModal({
+            title: '',
+            content: '登录后体验完整功能',
+            success: async (res) => {
+              if (res.confirm) {
+                console.log('用户点击确定')
+                await wsStore.close()
+                audioPlayerStore.stopAllAudio()
+                barrageStore.clearMessages()
+                console.log('用户点击确定')
+                // 1秒钟之后跳转登录
+                setTimeout(() => {
+                  uni.reLaunch({
+                    url: '/pages/login/login',
+                  })
+                }, 1000)
+                uni.reLaunch({
+                  url: '/pages/login/login',
+                })
+              } else if (res.cancel) {
+                console.log('用户点击取消')
+              }
+            },
+          })
+        }
+      },
+    })
+    if (token && token.data) {
+      console.log('token', token.data)
+    } else {
+    }
+  }
   onShow(async () => {
     // 页面显示时执行的逻辑
     console.log('新手引导页页面显示')
@@ -44,19 +158,31 @@
     }
   })
   const guideShowClick = () => {
-    // 点击新手引导页时执行的逻辑
-    console.log('点击了新手引导页')
-    guideShow.value = false
-    uni.setStorageSync('isFirst', false)
+    console.log('新手引导页点击', istourist.value)
+    if (istourist.value) {
+      guideShow.value = true
+      return
+    } else {
+      // 点击新手引导页时执行的逻辑
+      console.log('点击了新手引导页')
+      guideShow.value = false
+      uni.setStorageSync('isFirst', false)
+    }
   }
 </script>
 
 <style lang="scss" scoped>
   .intro-container {
-    position: relative;
+    position: fixed;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.45);
+    .guide-bg {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
     .change-model-container-right {
       position: absolute;
       top: 345rpx;
@@ -124,7 +250,8 @@
       width: 230rpx;
       height: 112rpx;
       border-radius: 270rpx 0px 0px 270rpx;
-      background: rgba(204, 204, 204, 1);
+      background: rgba(204, 204, 204, 0.5);
+      z-index: 999;
     }
     .chat-container {
       position: absolute;
@@ -133,8 +260,9 @@
       width: 602rpx;
       height: 104rpx;
       margin-left: 20rpx;
-      background: rgba(204, 204, 204, 1);
+      background: rgba(204, 204, 204, 0.5);
       border-radius: 250rpx;
+      z-index: 999;
     }
     .user-container {
       position: absolute;
@@ -144,8 +272,10 @@
       width: 100rpx;
       height: 104rpx;
       margin-right: 26rpx;
-      background: rgba(204, 204, 204, 1);
+      background: transparent;
       border-radius: 250rpx;
+      background: rgba(204, 204, 204, 0.5);
+      z-index: 999;
     }
     .chat-container-left {
       display: flex;

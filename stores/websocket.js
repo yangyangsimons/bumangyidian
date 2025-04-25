@@ -98,7 +98,10 @@ export const useWebSocketStore = defineStore('websocket', () => {
             try {
               socketTask = uni.connectSocket({
                 url: `${wsUrl}/content/ws`,
-                header: { Authorization: `bearer ${token}` },
+                header: {
+                  Authorization: `bearer ${token}`,
+                  is_yk: token ? '0' : '1',
+                },
                 success: () => {
                   console.log('WebSocket连接请求已发送')
                 },

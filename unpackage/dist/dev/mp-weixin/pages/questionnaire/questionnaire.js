@@ -89,10 +89,24 @@ const _sfc_main = {
               });
               common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:129", "提交问卷结果", res);
               if (res.code == 0) {
+                common_vendor.index.showToast({
+                  title: "注册成功",
+                  icon: "success"
+                });
+                common_vendor.index.setStorage({
+                  key: "tourist",
+                  data: false,
+                  success: (result) => {
+                    common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:139", "游客存储成功:", result);
+                  },
+                  fail: (error) => {
+                    common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:142", "游客存储失败:", error);
+                  }
+                });
                 common_vendor.index.reLaunch({ url: "/pages/index/index" });
               }
             } catch (e) {
-              common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:134", "提交问卷结果失败", e);
+              common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:148", "提交问卷结果失败", e);
               common_vendor.index.showToast({
                 title: "网络异常，请稍后再试",
                 icon: "none"
@@ -106,7 +120,7 @@ const _sfc_main = {
           }
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:149", "获取出生日期失败", error);
+          common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:163", "获取出生日期失败", error);
           return;
         }
       });
@@ -119,16 +133,16 @@ const _sfc_main = {
       common_vendor.index.getStorage({
         key: "sex",
         success: ({ data }) => {
-          common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:164", "获取到的性别:", data);
+          common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:178", "获取到的性别:", data);
           if (data == "male") {
             sex.value = "男";
           } else {
             sex.value = "女";
           }
-          common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:170", "获取到的出生日期:", birth.value);
+          common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:184", "获取到的出生日期:", birth.value);
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:173", "获取性别失败", error);
+          common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:187", "获取性别失败", error);
           return;
         }
       });
@@ -144,12 +158,22 @@ const _sfc_main = {
               avator: "http://avatar1",
               answers: []
             });
-            common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:189", "提交问卷结果", res);
+            common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:203", "提交问卷结果", res);
             if (res.code == 0) {
+              common_vendor.index.setStorage({
+                key: "tourist",
+                data: false,
+                success: (result) => {
+                  common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:209", "游客存储成功:", result);
+                },
+                fail: (error) => {
+                  common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:212", "游客存储失败:", error);
+                }
+              });
               common_vendor.index.reLaunch({ url: "/pages/index/index" });
             }
           } catch (e) {
-            common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:194", "提交问卷结果失败", e);
+            common_vendor.index.__f__("log", "at pages/questionnaire/questionnaire.vue:218", "提交问卷结果失败", e);
             common_vendor.index.showToast({
               title: "网络异常，请稍后再试",
               icon: "none"
@@ -157,14 +181,14 @@ const _sfc_main = {
           }
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:202", "获取出生日期失败", error);
+          common_vendor.index.__f__("error", "at pages/questionnaire/questionnaire.vue:226", "获取出生日期失败", error);
           return;
         }
       });
     };
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$1,
+        a: common_assets._imports_0,
         b: common_vendor.f(options.value, (value, key, i0) => {
           return {
             a: common_vendor.t(key),
@@ -175,7 +199,7 @@ const _sfc_main = {
           };
         }),
         c: common_vendor.o(handleNext),
-        d: common_assets._imports_1$2,
+        d: common_assets._imports_1$3,
         e: common_vendor.o(skip)
       };
     };

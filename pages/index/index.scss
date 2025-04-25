@@ -2,6 +2,14 @@
     position: fixed;
     width: 100%;
     height: 100%;
+    // .guide {
+    //     background-color: rgba(0, 0, 0, 0.75);
+    //     position: absolute;
+    //     top: 0;
+    //     left: 0;
+    //     width: 100%;
+    //     height: 100%;
+    // }
     .global-title {
         width: 243rpx;
         height: 64rpx;
@@ -81,7 +89,7 @@
         height: 80rpx;
         top: 244rpx;
         right: 0;
-        z-index: 10;
+        z-index: 1;
         color: white;
         border-radius: 12rpx 0px 0px 12rpx;
         background: rgba(0, 0, 0, 0.5);

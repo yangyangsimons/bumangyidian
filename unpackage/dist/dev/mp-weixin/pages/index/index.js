@@ -13,7 +13,7 @@ const stores_subjectShow = require("../../stores/subjectShow.js");
 const stores_placeholderStore = require("../../stores/placeholderStore.js");
 const stores_toggleModelStore = require("../../stores/toggleModelStore.js");
 if (!Math) {
-  (recordAnimation + barrage + chat + guide)();
+  (guide + recordAnimation + barrage + chat)();
 }
 const barrage = () => "../../components/barrage/barrage.js";
 const chat = () => "../../components/chat/chat.js";
@@ -282,7 +282,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$1,
+        a: common_assets._imports_0,
         b: isGoldModeAvailable.value
       }, isGoldModeAvailable.value ? {
         c: changeModelSrc.value,
@@ -293,7 +293,7 @@ const _sfc_main = {
         g: bgSrc.value,
         h: shinePointVisible.value
       }, shinePointVisible.value ? {
-        i: common_assets._imports_1$3,
+        i: common_assets._imports_1,
         j: common_vendor.t(shinePointConfig.text),
         k: `${shinePointConfig.x_ratio * 100}%`,
         l: `${shinePointConfig.y_ratio * 100}%`
