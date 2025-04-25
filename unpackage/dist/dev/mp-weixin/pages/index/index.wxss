@@ -42,6 +42,7 @@
   position: absolute;
   top: 0;
   left: 0;
+  z-index: -1;
 }
 .cover .subject-container.data-v-1cf27b2a {
   margin-left: 40rpx;
@@ -63,6 +64,8 @@
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
+  -webkit-mask: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+          mask: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
   /* 隐藏滚动条 */
 }
 .cover .subject-container .subject-scroll-view.data-v-1cf27b2a::-webkit-scrollbar {
@@ -89,13 +92,13 @@
 }
 .cover .changeModel.data-v-1cf27b2a {
   position: absolute;
-  width: 174rpx;
+  width: 195rpx;
   height: 80rpx;
   top: 244rpx;
   right: 0;
   z-index: 10;
   color: white;
-  border-radius: 12rpx 0px, 0px, 12rpx;
+  border-radius: 12rpx 0px 0px 12rpx;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;

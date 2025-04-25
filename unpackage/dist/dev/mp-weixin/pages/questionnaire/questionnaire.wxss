@@ -54,11 +54,23 @@
   height: 200rpx;
 }
 .questionnaire-container .header .title.data-v-57a88e77 {
+  position: relative;
   font-size: 56rpx;
   font-weight: 500;
   color: #101213;
 }
+.questionnaire-container .header .title .bar.data-v-57a88e77 {
+  position: absolute;
+  width: 136rpx;
+  height: 12rpx;
+  left: 112rpx;
+  background: linear-gradient(90deg, #d3f84f 0%, #a7ee27 100%);
+  border-radius: 6rpx;
+  margin-top: -25rpx;
+  z-index: -1;
+}
 .questionnaire-container .header .describe.data-v-57a88e77 {
+  margin-top: 5rpx;
   font-size: 28rpx;
   color: rgba(16, 18, 19, 0.35);
   font-weight: 400;

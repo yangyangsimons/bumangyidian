@@ -3,10 +3,36 @@
     // background: #f8f9fa;
     border-radius: 16rpx;
     // border: 1rpx solid yellow;
+
+    .scroll-container {
+        -webkit-mask: -webkit-gradient(linear, right 20%, right top, from(#000), to(transparent));
+        mask: gradient(linear, right 20%, right top, from(#000), to(transparent));
+        position: relative;
+        height: 100%;
+
+        // 顶部渐变蒙版
+        .top-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10%; // 控制蒙版高度，占容器的10%
+            z-index: 10; // 确保在内容上方
+            pointer-events: none; // 允许点击透过蒙版
+            // background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(0, 0, 0, 0) 42.17%); // 从黑色渐变到透明
+            border-top-left-radius: 16rpx;
+            border-top-right-radius: 16rpx;
+            z-index: 0;
+        }
+    }
+
     .scroll-view {
+        -webkit-mask: -webkit-gradient(linear, right 20%, right top, from(#000), to(transparent));
+        mask: gradient(linear, right 20%, right top, from(#000), to(transparent));
         height: 100%;
         padding: 35rpx;
         box-sizing: border-box;
+
         .messages-wrapper {
             gap: 24rpx;
             min-height: 100%;
@@ -14,9 +40,11 @@
             flex-direction: column;
             justify-content: flex-end;
             width: 690rpx;
+
             .message-bubble {
                 display: flex;
                 max-width: 600rpx;
+
                 .content-box {
                     display: flex;
                     align-items: center;
@@ -28,28 +56,36 @@
                     vertical-align: middle;
                     padding: 16rpx 24rpx;
                     padding-right: 20rpx;
+
                     .type {
                         color: rgba(255, 255, 255, 0.37);
                     }
+
                     .content {
                         color: rgba(255, 255, 255, 1);
                         text-wrap: break-word;
                         word-break: break-all;
+                        line-height: 45rpx;
+                        letter-spacing: 1rpx;
                     }
                 }
             }
+
             .message-bubble.user {
                 justify-content: flex-end;
                 margin-left: 100rpx;
                 margin-right: 10rpx;
                 max-width: 100%;
                 min-width: 150rpx;
+
                 .content-box {
                     padding-right: 20rpx;
                     background: linear-gradient(220.44deg, rgba(211, 248, 79, 1) 0%, rgba(167, 238, 39, 1) 100%);
+
                     .content {
                         color: rgba(26, 28, 30, 1);
                     }
+
                     .type {
                         color: rgba(26, 28, 30, 0.5);
                     }

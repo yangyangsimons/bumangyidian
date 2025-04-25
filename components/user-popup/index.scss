@@ -50,7 +50,7 @@
                 font-weight: 700;
                 color: rgba(16, 18, 19, 1);
                 .change {
-                    margin-left: 10rpx;
+                    margin-left: 15rpx;
                     width: 30rpx;
                     height: 30rpx;
                 }
@@ -60,28 +60,32 @@
                 height: 35rpx;
                 width: 100%;
                 display: flex;
-                justify-content: space-between;
+                justify-content: flex-start;
                 align-items: center;
                 text-wrap: nowrap;
                 .age {
-                    font-size: 28rpx;
+                    margin-left: 0;
+                    margin-right: 15rpx;
+                    font-size: 32rpx;
                     color: rgba(16, 18, 19, 0.5);
                 }
                 .sex {
+                    margin-right: 20rpx;
                     .sex-icon {
-                        margin-top: 10rpx;
+                        margin-top: 11rpx;
                         width: 32rpx;
                         height: 32rpx;
                     }
                 }
                 .mbti {
+                    margin-right: 20rpx;
                     width: 120rpx;
                     border-radius: 6rpx;
                     background: linear-gradient(233.19deg, rgba(211, 248, 79, 1) 0%, rgba(167, 238, 39, 1) 100%);
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    height: 100%;
+                    height: 32rpx;
                     .mbti-name {
                         font-size: 20rpx;
                         color: rgba(26, 28, 30, 1);
@@ -133,10 +137,16 @@
             justify-content: space-between;
             width: 100%;
             row-gap: 40rpx;
+            column-gap: 0rpx;
             // border: 2rpx solid rgba(16, 18, 19, 1);
             .tone-container {
-                width: 130rpx;
+                // border: 1px solid rgba(16, 18, 19, 0.1);
+                width: 125rpx;
                 height: 220rpx;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
                 .image-container {
                     border: 4rpx solid rgba(0, 0, 0, 0);
                     position: relative;
@@ -169,18 +179,19 @@
 
                 .describe {
                     margin-top: 10rpx;
-                    width: 100%;
                     height: 70rpx;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
                     .name {
+                        white-space: nowrap;
                         font-size: 28rpx;
                         font-weight: 400;
                         color: rgba(16, 18, 19, 1);
                     }
                     .style {
+                        white-space: nowrap;
                         font-size: 20rpx;
                         font-weight: 400;
                         color: rgba(16, 18, 19, 0.4);
@@ -213,7 +224,7 @@
             border: none;
         }
         button {
-            width: 335rpx;
+            width: 680rpx;
             height: 90rpx;
             border-radius: 40rpx;
             font-size: 28rpx;

@@ -10,7 +10,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.unref(recordingStore).isRecording
       }, common_vendor.unref(recordingStore).isRecording ? {
-        b: common_assets._imports_0$3
+        b: common_assets._imports_0$4
       } : {});
     };
   }

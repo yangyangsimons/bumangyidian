@@ -16,6 +16,7 @@
         position: absolute;
         top: 0;
         left: 0;
+        z-index: -1;
     }
     .subject-container {
         margin-left: 40rpx;
@@ -38,7 +39,13 @@
             width: 100%;
             overflow: hidden;
             white-space: nowrap;
-
+            mask: linear-gradient(
+                to right,
+                transparent 0%,
+                /* 左端透明 */ rgba(0, 0, 0, 1) 10%,
+                /* 渐变到不透明 */ rgba(0, 0, 0, 1) 90%,
+                /* 中间不透明区域 */ transparent 100% /* 右端透明 */
+            );
             /* 隐藏滚动条 */
             &::-webkit-scrollbar {
                 display: none;
@@ -70,16 +77,13 @@
 
     .changeModel {
         position: absolute;
-        width: 174rpx;
+        width: 195rpx;
         height: 80rpx;
         top: 244rpx;
         right: 0;
         z-index: 10;
         color: white;
-        border-radius:
-            12rpx 0px,
-            0px,
-            12rpx;
+        border-radius: 12rpx 0px 0px 12rpx;
         background: rgba(0, 0, 0, 0.5);
         display: flex;
         flex-direction: column;
@@ -137,13 +141,4 @@
             box-sizing: border-box; // 确保padding和border在宽度计算中
         }
     }
-
-    // @keyframes shine {
-    //     from {
-    //         box-shadow: 0 0 5rpx rgba(242, 242, 240, 0.5);
-    //     }
-    //     to {
-    //         box-shadow: 0 0 10rpx rgba(63, 63, 62, 0.9);
-    //     }
-    // }
 }

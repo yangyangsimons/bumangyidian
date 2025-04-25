@@ -6,9 +6,9 @@ export const useSendStore = defineStore('send', {
   }),
   actions: {
     setSend(okToSend) {
-      console.log('更新前:', this.send)
+      console.log('更新前sendable:', this.send)
       this.send = okToSend
-      console.log('更新后:', this.send)
+      console.log('更新后sendable:', this.send)
     },
   },
 })

@@ -1,0 +1,1 @@
+<view class="agreement-container"><web-view src="{{a}}"></web-view></view>

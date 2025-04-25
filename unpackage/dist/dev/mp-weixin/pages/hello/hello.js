@@ -13,7 +13,7 @@ const _sfc_main = {
     });
     const selectSex = (sex) => {
       selectedSex.value = sex;
-      common_vendor.index.__f__("log", "at pages/hello/hello.vue:74", "选择的性别:", selectedSex.value);
+      common_vendor.index.__f__("log", "at pages/hello/hello.vue:78", "选择的性别:", selectedSex.value);
     };
     const rawDate = common_vendor.ref("2020-10-10");
     const startDate = common_vendor.ref("1900-01-01");
@@ -33,27 +33,37 @@ const _sfc_main = {
     };
     const handleNext = () => {
       if (selectedSex.value) {
-        common_vendor.index.__f__("log", "at pages/hello/hello.vue:97", "选择的性别:", selectedSex.value);
-        common_vendor.index.__f__("log", "at pages/hello/hello.vue:98", "选择的日期:", rawDate.value);
+        common_vendor.index.__f__("log", "at pages/hello/hello.vue:101", "选择的性别:", selectedSex.value);
+        common_vendor.index.__f__("log", "at pages/hello/hello.vue:102", "选择的日期:", rawDate.value);
         common_vendor.index.setStorage({
           key: "sex",
           data: selectedSex.value,
           success: (result) => {
-            common_vendor.index.__f__("log", "at pages/hello/hello.vue:103", "性别存储成功:", result);
+            common_vendor.index.__f__("log", "at pages/hello/hello.vue:107", "性别存储成功:", result);
           },
           fail: (error) => {
-            common_vendor.index.__f__("log", "at pages/hello/hello.vue:106", "性别存储失败:", error);
+            common_vendor.index.__f__("log", "at pages/hello/hello.vue:110", "性别存储失败:", error);
           }
         });
         common_vendor.index.setStorage({
           key: "birth",
           data: rawDate.value,
           success: (result) => {
-            common_vendor.index.__f__("log", "at pages/hello/hello.vue:113", "出生日期存储成功:", result);
+            common_vendor.index.__f__("log", "at pages/hello/hello.vue:117", "出生日期存储成功:", result);
             common_vendor.index.reLaunch({ url: "/pages/questionnaire/questionnaire" });
           },
           fail: (error) => {
-            common_vendor.index.__f__("log", "at pages/hello/hello.vue:117", "出生日期存储失败:", error);
+            common_vendor.index.__f__("log", "at pages/hello/hello.vue:121", "出生日期存储失败:", error);
+          }
+        });
+        common_vendor.index.setStorage({
+          key: "isFirst",
+          data: true,
+          success: (result) => {
+            common_vendor.index.__f__("log", "at pages/hello/hello.vue:128", "首次使用存储成功:", result);
+          },
+          fail: (error) => {
+            common_vendor.index.__f__("log", "at pages/hello/hello.vue:131", "首次使用存储失败:", error);
           }
         });
       } else {
@@ -66,7 +76,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return {
         a: common_assets._imports_0$1,
-        b: common_assets._imports_1$2,
+        b: common_assets._imports_1$1,
         c: maleImageSrc.value,
         d: common_vendor.o(($event) => selectSex("male")),
         e: femaleImageSrc.value,

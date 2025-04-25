@@ -82,7 +82,10 @@
   import { useModelStore } from '../../stores/model'
   // 导入音频播放器状态管理
   import { useAudioPlayerStore } from '@/stores/audioPlayer'
+  import { useToggleModelStore } from '../../stores/toggleModelStore'
 
+  const modelStore = useModelStore()
+  const toggleModelStore = useToggleModelStore()
   const wsStore = useWebSocketStore()
   // 初始化音频播放器状态管理
   const audioPlayerStore = useAudioPlayerStore()
@@ -200,6 +203,7 @@
     const selectedTone = tones.value.find((item) => item.id === id)
     //更新音色试听的path
     if (selectedTone) {
+      console.log('选中的音色', selectedTone)
       currentTonePath.value = selectedTone.path
     } else {
       console.error('未找到对应的音色项')
@@ -273,6 +277,17 @@
       audioPlayer.value.stop()
       audioPlayer.value.destroy()
       audioPlayer.value = null
+      console.log('触发模式切换逻辑', selectedToneId.value)
+      console.log('触发模式切换逻辑', modelStore.model)
+      if (selectedToneId.value == 6 && modelStore.model !== '金种子杯模式') {
+        // 选中的是音色6，触发模式切换逻辑
+
+        toggleModelStore.triggerModelChange()
+      }
+      if (modelStore.model == '金种子杯模式' && selectedToneId.value !== 6) {
+        // 选中的是音色6，触发模式切换逻辑
+        toggleModelStore.triggerModelChange()
+      }
       uni.showToast({
         title: '音色更新成功',
         icon: 'success',
@@ -410,6 +425,11 @@
   // 暴露方法以便父组件调用
   const open = () => {
     userPopupRef.value.open('bottom')
+    if (modelStore.model === '金种子杯模式') {
+      const index = tones.value.findIndex((item) => item.id === 6)
+      console.log('打开了音色页面，金种子杯模式')
+      toneClick(6, index)
+    }
   }
 
   const close = () => {

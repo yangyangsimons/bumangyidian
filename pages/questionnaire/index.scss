@@ -29,11 +29,23 @@
         height: 200rpx;
 
         .title {
+            position: relative;
             font-size: 56rpx;
             font-weight: 500;
             color: rgba(16, 18, 19, 1);
+            .bar {
+                position: absolute;
+                width: 136rpx;
+                height: 12rpx;
+                left: 112rpx;
+                background: linear-gradient(90deg, rgba(211, 248, 79, 1) 0%, rgba(167, 238, 39, 1) 100%);
+                border-radius: 6rpx;
+                margin-top: -25rpx;
+                z-index: -1;
+            }
         }
         .describe {
+            margin-top: 5rpx;
             font-size: 28rpx;
             color: rgba(16, 18, 19, 0.35);
             font-weight: 400;

@@ -1,9 +1,10 @@
 {
   "pages": [
     "pages/login/login",
-    "pages/index/index",
     "pages/hello/hello",
-    "pages/questionnaire/questionnaire"
+    "pages/questionnaire/questionnaire",
+    "pages/index/index",
+    "pages/agreement/agreement"
   ],
   "window": {
     "navigationBarTextStyle": "black",

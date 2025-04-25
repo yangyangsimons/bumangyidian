@@ -12,7 +12,7 @@
         <image class="logo" src="../../static/logo.png" />
       </view>
       <image src="../../static/logo-title.png" class="title">不芒一点</image>
-      <view class="describe">你的专属电台</view>
+      <view class="describe"> <text>为你世界加一点</text> </view>
     </view>
     <view class="main">
       <button v-if="!agreeProtocol" class="wx-login" @click="clickBtn">
@@ -42,9 +42,13 @@
       </view>
       <text class="agreement">
         <text class="agreement-text">我已阅读同意不芒一点</text>
-        <text class="agreement-link">《用户协议》</text>
+        <text class="agreement-link" @click="openAgreement('user')"
+          >《用户协议》</text
+        >
         <text class="agreement-text">和</text>
-        <text class="agreement-link">《隐私政策》</text>
+        <text class="agreement-link" @click="openAgreement('privacy')"
+          >《隐私政策》</text
+        >
       </text>
     </view>
   </view>
@@ -62,6 +66,17 @@
 
   // 微信登录和手机号的处理
   const token = ref('')
+  // 处理协议/隐私政策点击
+  const openAgreement = (type) => {
+    // 根据类型确定跳转的URL
+    const url =
+      type === 'user'
+        ? '/pages/agreement/agreement?type=user'
+        : '/pages/agreement/agreement?type=privacy'
+
+    // 跳转到协议展示页面
+    uni.navigateTo({ url })
+  }
   const clickBtn = () => {
     console.log('点击了微信登录按钮')
     if (!agreeProtocol.value) {
@@ -186,6 +201,7 @@
       }
     }
     .header {
+      // border: 1px solid red;
       position: absolute;
       top: 456rpx;
       left: 50%;
@@ -194,7 +210,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      width: 274rpx;
+      width: 350rpx;
       height: 306rpx;
       .logo-container {
         width: 142rpx;
@@ -216,16 +232,19 @@
         height: 40rpx;
       }
       .describe {
+        // border: 1px solid red;
         margin: 0 auto;
-        width: 300rpx;
         display: flex;
         align-items: center;
         justify-content: center;
-        text-align: center;
+        text-align: right;
         font-size: 24rpx;
         font-weight: 300;
         color: rgba(0, 0, 0, 1);
         letter-spacing: 21rpx;
+        text {
+          margin-left: 21rpx;
+        }
       }
     }
     .main {

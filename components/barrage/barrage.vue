@@ -1,27 +1,30 @@
 <template>
   <view class="barrage-container">
-    <scroll-view
-      scroll-y
-      class="scroll-view"
-      :show-scrollbar="false"
-      :scroll-with-animation="true"
-      :scroll-top="scrollTop"
-    >
-      <view class="messages-wrapper">
-        <view
-          v-for="msg in messages"
-          :key="msg.id"
-          class="message-bubble"
-          :class="{ user: msg.type === 'user' }"
-        >
-          <view class="content-box">
-            <text class="content">
-              <text class="type"> </text>{{ msg.content }}
-            </text>
+    <view class="scroll-container">
+      <view class="top-mask"></view>
+      <scroll-view
+        scroll-y
+        class="scroll-view"
+        :show-scrollbar="false"
+        :scroll-with-animation="true"
+        :scroll-top="scrollTop"
+      >
+        <view class="messages-wrapper">
+          <view
+            v-for="msg in messages"
+            :key="msg.id"
+            class="message-bubble"
+            :class="{ user: msg.type === 'user' }"
+          >
+            <view class="content-box">
+              <text class="content">
+                <text class="type"> </text>{{ msg.content }}
+              </text>
+            </view>
           </view>
         </view>
-      </view>
-    </scroll-view>
+      </scroll-view>
+    </view>
   </view>
 </template>
 

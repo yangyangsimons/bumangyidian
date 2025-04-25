@@ -14,12 +14,12 @@
           class="change-model-pic"
         />
         <text class="model">{{
-          currentModel === '常规模式' ? '创业金种子' : '常规模式'
+          currentModel === '常规模式' ? '「不芒」学长' : '「树洞」模式'
         }}</text>
       </view>
 
       <text class="talk">{{
-        currentModel === '常规模式' ? '来湘创业全掌握' : '退出创业问答'
+        currentModel === '常规模式' ? '创新创业专家解读' : '陪你早安到晚安'
       }}</text>
     </button>
 
@@ -43,7 +43,7 @@
     <record-animation />
     <view
       class="subject-container"
-      v-if="currentModel === '常规模式'"
+      v-if="currentModel != '金种子杯模式' && subjectShow"
       :style="{ color: systemColor }"
     >
       <view class="title">今日话题</view>
@@ -62,16 +62,18 @@
       <barrage />
     </view>
     <chat @submit="handleSubmit" />
+    <guide />
   </view>
 </template>
 
 <script setup>
-  import { ref, reactive, computed, nextTick } from 'vue'
+  import { ref, reactive, computed, nextTick, watch } from 'vue'
   import { wsUrl, baseUrl } from '../../utils/config'
   import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
   import request from '@/utils/request'
   import barrage from '@/components/barrage/barrage.vue'
   import chat from '@/components/chat/chat.vue'
+  import guide from '@/components/guide/guide.vue'
   import { useWebSocketStore } from '@/stores/websocket'
   import { useBarrageStore } from '../../stores/barrage'
   import { useModelStore } from '../../stores/model'
@@ -81,46 +83,72 @@
   //导入主题管理
   import { useSubjectStore } from '../../stores/subject'
   import { useIsRadioStore } from '../../stores/isRadio'
+  import { subjectShowStore } from '../../stores/subjectShow'
+  import { usePlaceholderStore } from '../../stores/placeholderStore'
+  import { useToggleModelStore } from '../../stores/toggleModelStore'
+
+  const toggleModelStore = useToggleModelStore()
+
+  // 监听 store 中的状态变化
+  watch(
+    () => toggleModelStore.shouldToggleModel,
+    (newValue) => {
+      if (newValue) {
+        // 如果状态为 true，则执行 toggleModelchange 函数
+        toggleSystemModel()
+        // 执行完后重置状态
+        toggleModelStore.resetModelChangeFlag()
+      }
+    }
+  )
+  const placeholderStore = usePlaceholderStore()
 
   //主题管理
   const systemColor = ref('rgba(26, 28, 30, 1);')
+  const subjectshowStore = subjectShowStore()
+  const subjectShow = computed(() => {
+    return isRadioStore.isRadio || subjectshowStore.subjectShow ? true : false
+  })
   //导入电台模式状态
   const isRadioStore = useIsRadioStore()
   const isRadio = computed(() => isRadioStore.isRadio)
   const changeModelSrc = ref('../../static/changeModel.png')
-  //自动滑动实现动画
-  // 新增变量
-  const scrollLeft = ref(0)
-  const scrollTimer = ref(null)
-  const maxScrollLeft = ref(0)
-  const scrollSpeed = 1 // 数值越大滚动越快
 
-  // 切换非电台模式
-  const toggleRadioModel = () => {
-    isRadioStore.setIsRadio(!isRadio.value)
-    console.log('切换电台模式', isRadio.value)
-  }
-  // 新增方法
-  const startAutoScroll = () => {
-    stopAutoScroll()
+  // 响应式数据
+  const scrollPosition = ref(0)
+  const needScroll = ref(false)
+  let scrollTimer = null
+  let textWidth = 0
+  const scrollSpeed = 1 // 每次移动的像素
+  const scrollDelay = 15 // 滚动间隔（毫秒）
+  // 生命周期钩子
+  onShow(() => {
+    nextTick(() => {
+      initScroll()
+    })
+  })
 
+  onHide(() => {
+    stopScroll()
+  })
+
+  // 方法
+  const initScroll = () => {
     const query = uni.createSelectorQuery()
     query
-      .select('.subject-scroll-view')
-      .boundingClientRect((container) => {
+      .select('.subject')
+      .boundingClientRect((textRect) => {
         query
-          .select('.subject')
-          .boundingClientRect((content) => {
-            if (content && container && content.width > container.width) {
-              maxScrollLeft.value = content.width - container.width
-              const animate = () => {
-                scrollLeft.value += scrollSpeed
-                if (scrollLeft.value >= maxScrollLeft.value) {
-                  scrollLeft.value = 0
-                }
-                scrollTimer.value = requestAnimationFrame(animate)
+          .select('.subject-scroll-view')
+          .boundingClientRect((containerRect) => {
+            if (textRect && containerRect) {
+              textWidth = textRect.width
+
+              // 如果文本宽度大于容器宽度，需要滚动
+              if (textRect.width > containerRect.width) {
+                needScroll.value = true
+                startScroll()
               }
-              animate()
             }
           })
           .exec()
@@ -128,11 +156,30 @@
       .exec()
   }
 
-  const stopAutoScroll = () => {
-    if (scrollTimer.value) {
-      cancelAnimationFrame(scrollTimer.value)
-      scrollTimer.value = null
+  const startScroll = () => {
+    stopScroll()
+
+    scrollTimer = setInterval(() => {
+      scrollPosition.value += scrollSpeed
+
+      // 当滚动到第一个文本的末尾时，重置位置
+      if (scrollPosition.value >= textWidth + 60) {
+        scrollPosition.value = 0
+      }
+    }, scrollDelay)
+  }
+
+  const stopScroll = () => {
+    if (scrollTimer) {
+      clearInterval(scrollTimer)
+      scrollTimer = null
     }
+  }
+
+  // 切换非电台模式
+  const toggleRadioModel = () => {
+    isRadioStore.setIsRadio(!isRadio.value)
+    console.log('切换电台模式', isRadio.value)
   }
 
   // 在主题更新时（如获取新主题后）
@@ -222,10 +269,14 @@
       console.log('清空消息列表')
       // 更新状态管理
       if (currentModel.value === '金种子杯模式') {
+        //更新随机的placeholder
+
         modelStore.setModel('金种子杯模式')
+        placeholderStore.setRandomSpecialPlaceholder()
         isRadioStore.setIsRadio(false)
       } else {
         modelStore.setModel('常规模式')
+        placeholderStore.setRandomNormalPlaceholder()
       }
       // 上报当前音频播放状态,停止所有音频并清空所有音频队列
       // 关闭连接

@@ -4,6 +4,7 @@
   "usingComponents": {
     "barrage": "../../components/barrage/barrage",
     "chat": "../../components/chat/chat",
+    "guide": "../../components/guide/guide",
     "record-animation": "../../components/record-animation/record-animation"
   }
 }

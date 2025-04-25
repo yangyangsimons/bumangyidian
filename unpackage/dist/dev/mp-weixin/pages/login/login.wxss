@@ -52,7 +52,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 274rpx;
+  width: 350rpx;
   height: 306rpx;
 }
 .login-container .header .logo-container.data-v-e4e4508d {
@@ -74,15 +74,17 @@
 }
 .login-container .header .describe.data-v-e4e4508d {
   margin: 0 auto;
-  width: 300rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  text-align: right;
   font-size: 24rpx;
   font-weight: 300;
   color: black;
   letter-spacing: 21rpx;
+}
+.login-container .header .describe text.data-v-e4e4508d {
+  margin-left: 21rpx;
 }
 .login-container .main.data-v-e4e4508d {
   display: flex;
