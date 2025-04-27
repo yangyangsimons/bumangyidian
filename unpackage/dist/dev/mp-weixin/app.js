@@ -13,8 +13,30 @@ const _sfc_main = {
     common_vendor.index.__f__("log", "at App.vue:4", "App Launch");
     const token = common_vendor.index.getStorageSync("token");
     if (!token) {
-      common_vendor.index.reLaunch({
-        url: "/pages/login/login"
+      common_vendor.index.__f__("log", "at App.vue:8", "游客身份体验");
+      common_vendor.index.setStorage({
+        key: "tourist",
+        data: true,
+        success: (result) => {
+          common_vendor.index.__f__("log", "at App.vue:14", "游客身份存储成功:", result);
+        }
+      });
+      common_vendor.index.setStorage({
+        key: "isFirst",
+        data: true,
+        success: (result) => {
+          common_vendor.index.__f__("log", "at App.vue:22", "首次使用存储成功:", result);
+          common_vendor.index.reLaunch({
+            url: "/pages/index/index"
+          });
+        },
+        fail: (error) => {
+          common_vendor.index.__f__("log", "at App.vue:28", "首次使用存储失败:", error);
+          common_vendor.index.showToast({
+            title: "游客身份体验失败",
+            icon: "none"
+          });
+        }
       });
     } else {
       common_vendor.index.request({
@@ -25,14 +47,14 @@ const _sfc_main = {
         },
         method: "GET",
         success: (res) => {
-          common_vendor.index.__f__("log", "at App.vue:20", "获取用户信息", res);
+          common_vendor.index.__f__("log", "at App.vue:44", "获取用户信息", res);
           if (res.data.code === 0 && res.data.data.birth) {
-            common_vendor.index.__f__("log", "at App.vue:22", "用户已注册生日是：", res.data.data.birth);
+            common_vendor.index.__f__("log", "at App.vue:46", "用户已注册生日是：", res.data.data.birth);
             common_vendor.index.reLaunch({
               url: "/pages/index/index"
             });
           } else if (res.data.code === 0 && !res.data.data.birth) {
-            common_vendor.index.__f__("log", "at App.vue:27", "用户未注册");
+            common_vendor.index.__f__("log", "at App.vue:51", "用户未注册");
             common_vendor.index.reLaunch({
               url: "/pages/hello/hello"
             });
@@ -48,10 +70,10 @@ const _sfc_main = {
     }
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:45", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:69", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:48", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:72", "App Hide");
   }
 };
 function createApp() {

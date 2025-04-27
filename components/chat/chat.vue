@@ -208,6 +208,33 @@
 
   // 监听键盘高度变化
   const onInputFocus = (e) => {
+    console.log('输入框获取焦点', e)
+    // 判断是否已经登录过了，token是否存在
+    const token = uni.getStorageSync('token')
+    if (!token) {
+      uni.showModal({
+        title: '',
+        content: '登录后体验完整功能',
+        success: async (res) => {
+          if (res.confirm) {
+            console.log('用户点击确定')
+            await wsStore.close()
+            audioPlayerStore.stopAllAudio()
+            barrageStore.clearMessages()
+            console.log('用户点击确定')
+            // 1秒钟之后跳转登录
+            setTimeout(() => {
+              uni.reLaunch({
+                url: '/pages/login/login',
+              })
+            }, 1000)
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        },
+      })
+      return
+    }
     // 获取键盘高度
     uni.onKeyboardHeightChange((res) => {
       if (res.height > 0) {
@@ -291,10 +318,9 @@
   const handleSubmit = () => {
     if (!sendAble.value) {
       console.log('不能发送消息')
-      uni.showToast({
-        title: '请稍等，正在处理上一个消息',
-        icon: 'none',
-        duration: 1000,
+      uni.showLoading({
+        title: '加载中',
+        mask: true,
       })
       return
     }

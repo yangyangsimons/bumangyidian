@@ -86,6 +86,31 @@ const _sfc_main = {
       userPopupRef.value.open();
     };
     const onInputFocus = (e) => {
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:211", "输入框获取焦点", e);
+      const token = common_vendor.index.getStorageSync("token");
+      if (!token) {
+        common_vendor.index.showModal({
+          title: "",
+          content: "登录后体验完整功能",
+          success: async (res) => {
+            if (res.confirm) {
+              common_vendor.index.__f__("log", "at components/chat/chat.vue:220", "用户点击确定");
+              await wsStore.close();
+              audioPlayerStore.stopAllAudio();
+              barrageStore.clearMessages();
+              common_vendor.index.__f__("log", "at components/chat/chat.vue:224", "用户点击确定");
+              setTimeout(() => {
+                common_vendor.index.reLaunch({
+                  url: "/pages/login/login"
+                });
+              }, 1e3);
+            } else if (res.cancel) {
+              common_vendor.index.__f__("log", "at components/chat/chat.vue:232", "用户点击取消");
+            }
+          }
+        });
+        return;
+      }
       common_vendor.index.onKeyboardHeightChange((res) => {
         if (res.height > 0) {
           keyboardHeight.value = res.height + 32;
@@ -98,31 +123,31 @@ const _sfc_main = {
       keyboardHeight.value = 32;
     };
     const changeInputTypeToText = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:228", "切换到文字模式");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:255", "切换到文字模式");
       showText.value = false;
     };
     const changeInputTypeToVoice = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:232", "切换到语音模式");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:259", "切换到语音模式");
       showText.value = true;
     };
     const startRecord = () => {
       audioPlayerStore.setTtsVolume(0);
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:239", "开始录音");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:266", "开始录音");
       recordingStore.startRecording();
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:241", recordingStore.isRecording);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:268", recordingStore.isRecording);
       shouldCancel.value = false;
       manager.start({
         lang: "zh_CN"
       });
     };
     const endRecord = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:250", "结束录音");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:277", "结束录音");
       audioPlayerStore.setTtsVolume(1);
       recordingStore.stopRecording();
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:253", recordingStore.isRecording);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:280", recordingStore.isRecording);
       manager.stop();
       if (shouldCancel.value) {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:257", "取消发送录音");
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:284", "取消发送录音");
         shouldCancel.value = false;
         common_vendor.index.showToast({
           title: "已取消发送",
@@ -132,12 +157,12 @@ const _sfc_main = {
         return;
       }
       manager.onStop = (res) => {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:268", "识别结束：", res.result);
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:295", "识别结束：", res.result);
         message.value = res.result;
         handleUploadMessage(message.value);
       };
       manager.onError = (res) => {
-        common_vendor.index.__f__("error", "at components/chat/chat.vue:280", "识别错误：", res);
+        common_vendor.index.__f__("error", "at components/chat/chat.vue:307", "识别错误：", res);
       };
     };
     const onKeyInput = (event) => {
@@ -145,11 +170,10 @@ const _sfc_main = {
     };
     const handleSubmit = () => {
       if (!sendAble.value) {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:293", "不能发送消息");
-        common_vendor.index.showToast({
-          title: "请稍等，正在处理上一个消息",
-          icon: "none",
-          duration: 1e3
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:320", "不能发送消息");
+        common_vendor.index.showLoading({
+          title: "加载中",
+          mask: true
         });
         return;
       }
@@ -164,7 +188,7 @@ const _sfc_main = {
       }, 50);
     };
     const handleStopGenerate = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:320", "停止生成消息");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:346", "停止生成消息");
       wsStore.sendMessage({
         input_type: 4,
         text: "stop",
@@ -174,17 +198,17 @@ const _sfc_main = {
     const handleUploadMessage = async (userMessage) => {
       if (!userMessage || !userMessage.trim())
         return;
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:331", "上传消息了sendAble:", sendAble.value);
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:333", "上传的消息:", userMessage);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:357", "上传消息了sendAble:", sendAble.value);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:359", "上传的消息:", userMessage);
       const barrageMessages = barrageStore.messages;
       if (barrageMessages.length >= 1 && barrageMessages[barrageMessages.length - 1].type === "subject") {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:340", "上一个对话是主题选择");
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:366", "上一个对话是主题选择");
         uploadMessage.system_model = stores_model.useModelStore().model;
         uploadMessage.input_type = 2;
         uploadMessage.text = userMessage;
         setTimeout(async () => {
           const currentSubject = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
-          common_vendor.index.__f__("log", "at components/chat/chat.vue:347", "获取当前主题", currentSubject.data.topic);
+          common_vendor.index.__f__("log", "at components/chat/chat.vue:373", "获取当前主题", currentSubject.data.topic);
           sbStore.setSubject(currentSubject.data.topic);
         }, 2e3);
       } else {
@@ -202,19 +226,19 @@ const _sfc_main = {
     };
     const stopRadio = () => {
       radioPlay.value = false;
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:367", "停止电台");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:393", "停止电台");
       audioPlayerStore.pauseBgMusic();
       audioPlayerStore.pauseTtsAudio();
     };
     const resumeRadio = () => {
       radioPlay.value = true;
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:374", "恢复电台");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:400", "恢复电台");
       try {
         audioPlayerStore.resumeTtsAudio();
         audioPlayerStore.resumeBgMusic();
         audioPlayerStore.setBgLoop(false);
       } catch (e) {
-        common_vendor.index.__f__("log", "at components/chat/chat.vue:383", "恢复电台失败", e);
+        common_vendor.index.__f__("log", "at components/chat/chat.vue:409", "恢复电台失败", e);
         audioPlayerStore.resumeTtsAudio();
       }
     };
@@ -222,8 +246,8 @@ const _sfc_main = {
       if (isRadioStore.isRadio) {
         voiceIconSrc.value = "../../static/voice-icon-disable.png";
       }
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:395", "聊天组件显示");
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:396", "聊天组件显示isRadio", isRadioStore.isRadio);
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:421", "聊天组件显示");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:422", "聊天组件显示isRadio", isRadioStore.isRadio);
       if (modelStore.model === "金种子杯模式") {
         placeholderStore.setRandomSpecialPlaceholder();
       } else {
@@ -231,7 +255,7 @@ const _sfc_main = {
       }
     });
     common_vendor.onLoad(() => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:407", "聊天组件加载完成");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:433", "聊天组件加载完成");
     });
     common_vendor.onUnload(() => {
       common_vendor.index.offKeyboardHeightChange();
@@ -243,7 +267,7 @@ const _sfc_main = {
       }, 2e3);
     };
     const backToQA = () => {
-      common_vendor.index.__f__("log", "at components/chat/chat.vue:422", "返回问答");
+      common_vendor.index.__f__("log", "at components/chat/chat.vue:448", "返回问答");
       audioPlayerStore.stopAllAudio();
       modelStore.setModel("QA模式");
       isRadioStore.setIsRadio(false);

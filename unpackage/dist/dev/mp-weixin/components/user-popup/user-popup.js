@@ -47,33 +47,8 @@ const _sfc_main = {
         } else {
           common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:123", "获取音色信息失败", toneRes.message);
         }
-        const userInfoRes = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "get");
-        if (userInfoRes.code === 0) {
-          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:127", "获取用户信息成功", userInfoRes.data);
-          user.value = userInfoRes.data;
-          avator.value = userInfoRes.data.avator;
-          toneId.value = userInfoRes.data.tone;
-          userName.value = userInfoRes.data.username;
-          userAge.value = calculateAge(userInfoRes.data.birth);
-          userMbtiShort.value = userInfoRes.data.mbti;
-          userMbti.value = userInfoRes.data.mbti_ch;
-          userSex.value = userInfoRes.data.sex;
-          sexSrc.value = userSex.value === "男" ? "../../static/male.png" : "../../static/female.png";
-          if (toneId.value && tones.value.length > 0) {
-            tones.value.forEach((item) => {
-              item.active = item.id === toneId.value;
-              if (item.active) {
-                selectedToneId.value = item.id;
-                currentTone.value = item;
-                currentTonePath.value = item.path;
-              }
-            });
-          }
-        } else {
-          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:156", "获取用户信息失败", userInfoRes.message);
-        }
       } catch (e) {
-        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:159", "获取音色信息失败", e);
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:126", "获取音色信息失败", e);
       }
     });
     const calculateAge = (birthDateString) => {
@@ -98,7 +73,7 @@ const _sfc_main = {
       return age;
     };
     const toneClick = (id, index) => {
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:195", "点击音色", id, index);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:162", "点击音色", id, index);
       tones.value.forEach((item, i) => {
         item.active = i === index;
       });
@@ -106,10 +81,10 @@ const _sfc_main = {
       currentTone.value = tones.value[index];
       const selectedTone = tones.value.find((item) => item.id === id);
       if (selectedTone) {
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:206", "选中的音色", selectedTone);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:173", "选中的音色", selectedTone);
         currentTonePath.value = selectedTone.path;
       } else {
-        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:209", "未找到对应的音色项");
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:176", "未找到对应的音色项");
       }
       tryListen();
     };
@@ -120,16 +95,17 @@ const _sfc_main = {
       }
       audioPlayer.value = common_vendor.index.createInnerAudioContext();
       audioPlayer.value.onError((res) => {
-        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:224", "音频播放错误", res);
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:191", "音频播放错误", res);
       });
       audioPlayer.value.src = path;
       audioPlayer.value.play();
       audioPlayer.value.onEnded(() => {
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:234", "试听音频播放完成");
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:201", "试听音频播放完成");
+        audioPlayerStore.setTtsVolume(1);
       });
       audioPlayer.value.onPlay(() => {
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:238", "试听音频开始播放");
-        audioPlayerStore.setTtsVolume(0.1);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:206", "试听音频开始播放");
+        audioPlayerStore.setTtsVolume(0);
       });
     };
     const tryListen = () => {
@@ -151,27 +127,51 @@ const _sfc_main = {
         });
         return;
       }
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:270", "更新音色", selectedToneId.value);
+      if (audioPlayer.value) {
+        audioPlayer.value.stop();
+        audioPlayer.value.destroy();
+      }
+      audioPlayer.value = null;
+      audioPlayerStore.setTtsVolume(1);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:243", "更新音色", selectedToneId.value);
+      if (selectedToneId.value == 6 && modelStore.model !== "金种子杯模式") {
+        common_vendor.index.__f__(
+          "log",
+          "at components/user-popup/user-popup.vue:247",
+          "选了金种子，直接切换模式，不更新音色了",
+          selectedToneId.value
+        );
+        toggleModelStore.triggerModelChange();
+        return;
+      }
+      if (selectedToneId.value == 6 && modelStore.model == "金种子杯模式") {
+        common_vendor.index.__f__(
+          "log",
+          "at components/user-popup/user-popup.vue:256",
+          "金种子杯模式下选中的是音色6，什么都不做",
+          selectedToneId.value
+        );
+      }
       const res = await utils_request.request(`${utils_config.baseUrl}/tone/update`, "post", {
         tone_id: selectedToneId.value
       });
       if (res.code === 0) {
         audioPlayerStore.setTtsVolume(1);
-        audioPlayer.value.stop();
-        audioPlayer.value.destroy();
-        audioPlayer.value = null;
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:280", "触发模式切换逻辑", selectedToneId.value);
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:281", "触发模式切换逻辑", modelStore.model);
-        if (selectedToneId.value == 6 && modelStore.model !== "金种子杯模式") {
-          toggleModelStore.triggerModelChange();
-        }
-        if (modelStore.model == "金种子杯模式" && selectedToneId.value !== 6) {
-          toggleModelStore.triggerModelChange();
-        }
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:268", "触发模式切换逻辑", selectedToneId.value);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:269", "触发模式切换逻辑", modelStore.model);
         common_vendor.index.showToast({
           title: "音色更新成功",
           icon: "success"
         });
+        if (modelStore.model == "金种子杯模式" && selectedToneId.value !== 6) {
+          common_vendor.index.__f__(
+            "log",
+            "at components/user-popup/user-popup.vue:277",
+            "金种子杯模式下面选了不是6的音色，触发模式切换逻辑",
+            selectedToneId.value
+          );
+          toggleModelStore.triggerModelChange();
+        }
       } else {
         common_vendor.index.showToast({
           title: "请稍后再试",
@@ -183,7 +183,7 @@ const _sfc_main = {
       common_vendor.index.chooseImage({
         count: 1,
         success: async (res) => {
-          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:309", "选择的头像", res.tempFilePaths[0]);
+          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:297", "选择的头像", res.tempFilePaths[0]);
           const avatorFile = res.tempFilePaths[0];
           common_vendor.index.getFileSystemManager().readFile({
             filePath: avatorFile,
@@ -198,14 +198,14 @@ const _sfc_main = {
                     pic_base64: base64String
                   }
                 );
-                common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:329", "头像上传成功", uploadResult);
+                common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:317", "头像上传成功", uploadResult);
                 common_vendor.index.showToast({
                   title: "头像更新成功",
                   icon: "success"
                 });
                 avator.value = uploadResult.data.avator_url;
               } catch (error) {
-                common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:336", "头像上传失败", error);
+                common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:324", "头像上传失败", error);
                 common_vendor.index.showToast({
                   title: "头像更新成功",
                   icon: "success"
@@ -213,7 +213,7 @@ const _sfc_main = {
               }
             },
             fail: (error) => {
-              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:344", "读取文件失败", error);
+              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:332", "读取文件失败", error);
               common_vendor.index.showToast({
                 title: "头像更新成功",
                 icon: "success"
@@ -222,7 +222,7 @@ const _sfc_main = {
           });
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:353", "选择头像失败", error);
+          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:341", "选择头像失败", error);
         }
       });
     };
@@ -266,7 +266,7 @@ const _sfc_main = {
                 });
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:403", "修改昵称失败", error);
+              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:391", "修改昵称失败", error);
               common_vendor.index.showToast({
                 title: "网络错误，请稍后再试",
                 icon: "none"
@@ -283,15 +283,63 @@ const _sfc_main = {
     };
     const userPopupRef = common_vendor.ref(null);
     const popupChange = (e) => {
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:422", "popupChange", e);
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:423", "状态", e.show);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:410", "popupChange", e);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:411", "状态", e.show);
     };
-    const open = () => {
+    const open = async () => {
+      try {
+        const userInfoRes = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "get");
+        if (userInfoRes.code === 0) {
+          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:418", "获取用户信息成功", userInfoRes.data);
+          user.value = userInfoRes.data;
+          avator.value = userInfoRes.data.avator;
+          toneId.value = userInfoRes.data.tone;
+          common_vendor.index.setStorage({
+            key: "toneId",
+            data: toneId.value
+          });
+          userName.value = userInfoRes.data.username;
+          userAge.value = calculateAge(userInfoRes.data.birth);
+          userMbtiShort.value = userInfoRes.data.mbti;
+          userMbti.value = userInfoRes.data.mbti_ch;
+          userSex.value = userInfoRes.data.sex;
+          sexSrc.value = userSex.value === "男" ? "../../static/male.png" : "../../static/female.png";
+          if (toneId.value && tones.value.length > 0) {
+            tones.value.forEach((item) => {
+              item.active = item.id === toneId.value;
+              if (item.active) {
+                selectedToneId.value = item.id;
+                currentTone.value = item;
+                currentTonePath.value = item.path;
+              }
+            });
+          }
+        } else {
+          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:451", "获取用户信息失败", userInfoRes.message);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:454", "打开弹窗失败", error);
+      }
       userPopupRef.value.open("bottom");
       if (modelStore.model === "金种子杯模式") {
         const index = tones.value.findIndex((item) => item.id === 6);
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:430", "打开了音色页面，金种子杯模式");
-        toneClick(6, index);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:460", "打开了音色页面，金种子杯模式");
+        autoClick(6, index);
+      }
+    };
+    const autoClick = (id, index) => {
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:466", "点击音色", id, index);
+      tones.value.forEach((item, i) => {
+        item.active = i === index;
+      });
+      selectedToneId.value = id;
+      currentTone.value = tones.value[index];
+      const selectedTone = tones.value.find((item) => item.id === id);
+      if (selectedTone) {
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:477", "选中的音色", selectedTone);
+        currentTonePath.value = selectedTone.path;
+      } else {
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:480", "未找到对应的音色项");
       }
     };
     const close = () => {

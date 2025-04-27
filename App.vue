@@ -5,8 +5,32 @@
       // 判断用户是否授权
       const token = uni.getStorageSync('token')
       if (!token) {
-        uni.reLaunch({
-          url: '/pages/login/login',
+        console.log('游客身份体验')
+        //游客身份体验
+        uni.setStorage({
+          key: 'tourist',
+          data: true,
+          success: (result) => {
+            console.log('游客身份存储成功:', result)
+          },
+        })
+        //新手引导页设置token
+        uni.setStorage({
+          key: 'isFirst',
+          data: true,
+          success: (result) => {
+            console.log('首次使用存储成功:', result)
+            uni.reLaunch({
+              url: '/pages/index/index',
+            })
+          },
+          fail: (error) => {
+            console.log('首次使用存储失败:', error)
+            uni.showToast({
+              title: '游客身份体验失败',
+              icon: 'none',
+            })
+          },
         })
       } else {
         uni.request({

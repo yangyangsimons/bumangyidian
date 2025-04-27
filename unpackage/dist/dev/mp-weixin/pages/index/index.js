@@ -20,7 +20,7 @@ const chat = () => "../../components/chat/chat.js";
 const guide = () => "../../components/guide/guide.js";
 const recordAnimation = () => "../../components/record-animation/record-animation.js";
 const scrollSpeed = 1;
-const scrollDelay = 15;
+const scrollDelay = 10;
 const _sfc_main = {
   __name: "index",
   setup(__props) {
@@ -127,7 +127,7 @@ const _sfc_main = {
         duration: 2500
       });
       if (isTogglingModel.value) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:246", "切换模式操作进行中，请勿重复点击");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:253", "切换模式操作进行中，请勿重复点击");
         common_vendor.index.showToast({
           title: "操作进行中，请稍候",
           icon: "none"
@@ -138,12 +138,12 @@ const _sfc_main = {
         isTogglingModel.value = true;
         currentModel.value = currentModel.value === "常规模式" ? "金种子杯模式" : "常规模式";
         bgSrc.value = systemModelConfig[currentModel.value].pic_url;
-        common_vendor.index.__f__("log", "at pages/index/index.vue:262", `切换到${currentModel.value}`);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:269", `切换到${currentModel.value}`);
         audioPlayerStore.reportCurrentProgress();
         audioPlayerStore.stopAllAudio();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:267", "停止并清空所有音频队列");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:274", "停止并清空所有音频队列");
         barrageStore.clearMessages();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:269", "清空消息列表");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:276", "清空消息列表");
         if (currentModel.value === "金种子杯模式") {
           modelStore.setModel("金种子杯模式");
           placeholderStore.setRandomSpecialPlaceholder();
@@ -153,11 +153,11 @@ const _sfc_main = {
           placeholderStore.setRandomNormalPlaceholder();
         }
         await wsStore.close();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:284", "模式切换WebSocket连接已关闭");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:291", "模式切换WebSocket连接已关闭");
         await new Promise((resolve) => setTimeout(resolve, 1e3));
         try {
           await wsStore.connect();
-          common_vendor.index.__f__("log", "at pages/index/index.vue:292", "切换模式的socket重新连接成功");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:299", "切换模式的socket重新连接成功");
           await new Promise((resolve) => setTimeout(resolve, 1e3));
           if (currentModel.value === "金种子杯模式") {
             changeModelSrc.value = "../../static/changeModel-2.png";
@@ -166,7 +166,7 @@ const _sfc_main = {
               input_type: 3,
               text: ""
             });
-            common_vendor.index.__f__("log", "at pages/index/index.vue:305", "模式切换消息发送成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:312", "模式切换消息发送成功");
           } else {
             changeModelSrc.value = "../../static/changeModel.png";
             modelStore.setModel("常规模式");
@@ -175,7 +175,7 @@ const _sfc_main = {
               input_type: 1,
               text: ""
             });
-            common_vendor.index.__f__("log", "at pages/index/index.vue:314", "模式切换消息发送成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:321", "模式切换消息发送成功");
           }
           common_vendor.index.showToast({
             title: "模式切换成功",
@@ -183,7 +183,7 @@ const _sfc_main = {
             duration: 1500
           });
         } catch (error) {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:323", "WebSocket操作失败:", error);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:330", "WebSocket操作失败:", error);
           common_vendor.index.showToast({
             title: "切换失败，请稍后再试",
             icon: "none"
@@ -197,7 +197,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:339", "切换模式过程中出错:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:346", "切换模式过程中出错:", error);
         common_vendor.index.showToast({
           title: "切换失败，请稍后再试",
           icon: "none"
@@ -207,12 +207,12 @@ const _sfc_main = {
       }
     };
     const handleSubmit = (message) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:350", message, "handleSubmit");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:357", message, "handleSubmit");
     };
     const fetchSystemConfig = async () => {
       try {
         const res = await utils_request.request(`${utils_config.baseUrl}/system/get_system_setting`, "GET");
-        common_vendor.index.__f__("log", "at pages/index/index.vue:357", "获取系统配置", res);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:364", "获取系统配置", res);
         if (res.data && res.data.shine_point) {
           Object.assign(shinePointConfig, res.data.shine_point);
         }
@@ -227,37 +227,37 @@ const _sfc_main = {
           bgSrc.value = systemModelConfig[currentModel.value].pic_url;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:384", "获取系统配置失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:391", "获取系统配置失败:", error);
       }
     };
     common_vendor.onShow(async () => {
       try {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:391", "主页面显示");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:398", "主页面显示");
         const currentSubject = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
-        common_vendor.index.__f__("log", "at pages/index/index.vue:394", "获取当前主题", currentSubject.data.topic);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:401", "获取当前主题", currentSubject.data.topic);
         sbStore.setSubject(currentSubject.data.topic);
         await fetchSystemConfig();
         if (isRadio.value) {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:403", "电台模式下执行的onShow逻辑", isRadio.value);
-          common_vendor.index.__f__("log", "at pages/index/index.vue:404", "背景音乐是否正在播放", audioPlayerStore.bgIsPlaying);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:410", "电台模式下执行的onShow逻辑", isRadio.value);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:411", "背景音乐是否正在播放", audioPlayerStore.bgIsPlaying);
           if (!wsStore.isConnected) {
             await wsStore.connect();
-            common_vendor.index.__f__("log", "at pages/index/index.vue:409", "socket连接成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:416", "socket连接成功");
           }
         } else {
           if (!wsStore.isConnected) {
             await wsStore.connect();
-            common_vendor.index.__f__("log", "at pages/index/index.vue:417", "socket连接成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:424", "socket连接成功");
             await wsStore.sendMessage({
               system_model: currentModel.value,
               input_type: 3,
               text: ""
             });
-            common_vendor.index.__f__("log", "at pages/index/index.vue:425", "发送input_type=3的初始消息成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:432", "发送input_type=3的初始消息成功");
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:429", "页面显示时发生错误:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:436", "页面显示时发生错误:", error);
         common_vendor.index.showToast({
           title: "连接失败，请重试",
           icon: "none"
@@ -265,20 +265,34 @@ const _sfc_main = {
       }
     });
     common_vendor.onHide(async () => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:439", "onHide主页面隐藏");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:446", "onHide主页面隐藏");
       audioPlayerStore.reportCurrentProgress();
-      common_vendor.index.__f__("log", "at pages/index/index.vue:443", "音频播放状态已上报");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:450", "音频播放状态已上报");
       if (isRadio.value) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:448", "电台模式下不停止背景音乐onHide", isRadio.value);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:455", "电台模式下不停止背景音乐onHide", isRadio.value);
         audioPlayerStore.stopTtsAudio();
       } else {
         audioPlayerStore.stopAllAudio();
         barrageStore.clearMessages();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:453", "停止并清空所有音频队列", "非电台模式下停止背景音乐");
-        common_vendor.index.__f__("log", "at pages/index/index.vue:455", "清空消息列表");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:460", "停止并清空所有音频队列", "非电台模式下停止背景音乐");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:462", "清空消息列表");
       }
       await wsStore.close();
-      common_vendor.index.__f__("log", "at pages/index/index.vue:460", "Hidesocket连接关闭");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:467", "Hidesocket连接关闭");
+    });
+    common_vendor.onShareAppMessage(() => {
+      common_vendor.index.__f__("log", "at pages/index/index.vue:470", "onShareAppMessage......");
+      return {
+        title: `不芒一点，陪你世界加一点`,
+        imageUrl: "../../static/share.png",
+        path: "/pages/index/index"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      common_vendor.index.__f__("log", "at pages/index/index.vue:478", "onShareTimeline......");
+      return {
+        title: `不芒一点，陪你世界加一点`
+      };
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -316,5 +330,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-1cf27b2a"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/index/index.js.map

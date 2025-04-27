@@ -175,7 +175,7 @@ const _sfc_main = {
           };
         }),
         c: common_vendor.o(handleNext),
-        d: common_assets._imports_1$2,
+        d: common_assets._imports_1,
         e: common_vendor.o(skip)
       };
     };

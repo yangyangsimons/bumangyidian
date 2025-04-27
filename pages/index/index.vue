@@ -69,7 +69,14 @@
 <script setup>
   import { ref, reactive, computed, nextTick, watch } from 'vue'
   import { wsUrl, baseUrl } from '../../utils/config'
-  import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
+  import {
+    onLoad,
+    onUnload,
+    onShow,
+    onHide,
+    onShareAppMessage,
+    onShareTimeline,
+  } from '@dcloudio/uni-app'
   import request from '@/utils/request'
   import barrage from '@/components/barrage/barrage.vue'
   import chat from '@/components/chat/chat.vue'
@@ -120,7 +127,7 @@
   let scrollTimer = null
   let textWidth = 0
   const scrollSpeed = 1 // 每次移动的像素
-  const scrollDelay = 15 // 滚动间隔（毫秒）
+  const scrollDelay = 10 // 滚动间隔（毫秒）
   // 生命周期钩子
   onShow(() => {
     nextTick(() => {
@@ -458,6 +465,20 @@
     // 关闭WebSocket连接
     await wsStore.close()
     console.log('Hidesocket连接关闭')
+  })
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+      imageUrl: '../../static/share.png',
+      path: '/pages/index/index',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+    }
   })
 </script>
 

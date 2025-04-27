@@ -17,7 +17,7 @@
     <view class="main">
       <button v-if="!agreeProtocol" class="wx-login" @click="clickBtn">
         <image class="wechat-icon" src="../../static/wechat.png" />
-        <text class="wechat-text">微信登录</text>
+        <text class="wechat-text">手机号登录</text>
       </button>
       <button
         v-else
@@ -26,8 +26,16 @@
         @getphonenumber="handleWechatLogin"
       >
         <image class="wechat-icon" src="../../static/wechat.png" />
-        <text class="wechat-text">微信登录</text>
+        <text class="wechat-text">手机号登录</text>
       </button>
+      <view class="skip" @click="unLoginTry">
+        <text>不登录，跳过</text>
+        <image
+          class="skip-icon"
+          src="../../static/skip.png"
+          mode="scaleToFill"
+        />
+      </view>
     </view>
     <view class="footer">
       <view class="radio-wrapper" @click="agreeProtocol = !agreeProtocol">
@@ -65,6 +73,35 @@
   const agreeProtocol = ref(false) // 协议同意状态
 
   // 微信登录和手机号的处理
+  const unLoginTry = async () => {
+    console.log('游客身份体验')
+    //游客身份体验
+    uni.setStorage({
+      key: 'tourist',
+      data: true,
+      success: (result) => {
+        console.log('游客身份存储成功:', result)
+      },
+    })
+    //新手引导页设置token
+    uni.setStorage({
+      key: 'isFirst',
+      data: true,
+      success: (result) => {
+        console.log('首次使用存储成功:', result)
+        uni.reLaunch({
+          url: '/pages/index/index',
+        })
+      },
+      fail: (error) => {
+        console.log('首次使用存储失败:', error)
+        uni.showToast({
+          title: '游客身份体验失败',
+          icon: 'none',
+        })
+      },
+    })
+  }
   const token = ref('')
   // 处理协议/隐私政策点击
   const openAgreement = (type) => {
@@ -88,6 +125,12 @@
   }
   const handleWechatLogin = async (e) => {
     const phoneCode = e.detail.code
+    if (phoneCode === undefined) {
+      return uni.showToast({
+        title: '获取手机号登录',
+        icon: 'none',
+      })
+    }
     console.log('获取到的手机号code', phoneCode)
     if (!agreeProtocol.value) {
       return uni.showToast({
@@ -251,11 +294,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       width: 686rpx;
       height: 220rpx;
       position: absolute;
-      bottom: 100rpx;
+      bottom: 200rpx;
       font-size: 28rpx;
       font-weight: 700;
       wx-button {
@@ -313,9 +356,27 @@
         font-weight: 700;
       }
       image {
-        width: 40rpx;
-        height: 40rpx;
+        width: 28rpx;
+        height: 29rpx;
         margin-right: 8rpx;
+        margin-bottom: 3rpx;
+      }
+      .skip {
+        width: 300rpx;
+        // border: 1px solid red;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 28rpx;
+        letter-spacing: 3rpx;
+        color: rgba(26, 28, 30, 0.75);
+        margin-top: 34rpx;
+        .skip-icon {
+          width: 12rpx;
+          height: 20rpx;
+          margin-left: 15rpx;
+        }
       }
     }
     .footer {

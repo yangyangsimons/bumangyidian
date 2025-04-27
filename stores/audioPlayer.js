@@ -150,6 +150,8 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     if (bgAudioManager.value) {
       // 使用当前主题设置标题
       bgAudioManager.value.title = musicTitle.value
+        ? musicTitle.value
+        : '不芒一点'
       bgAudioManager.value.epname = '小程序背景音乐'
 
       // 如果需要可以设置封面
