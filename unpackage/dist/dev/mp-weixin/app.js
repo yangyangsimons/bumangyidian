@@ -10,28 +10,45 @@ if (!Math) {
 }
 const _sfc_main = {
   onLaunch: function() {
-    common_vendor.index.__f__("log", "at App.vue:4", "App Launch");
+    const updateManager = common_vendor.wx$1.getUpdateManager();
+    updateManager.onCheckForUpdate(function(res) {
+      common_vendor.index.__f__("log", "at App.vue:8", "版本更新的回调", res.hasUpdate);
+    });
+    updateManager.onUpdateReady(function() {
+      common_vendor.wx$1.showModal({
+        title: "更新提示",
+        content: "新版本已经准备好，是否重启应用？",
+        success(res) {
+          if (res.confirm) {
+            updateManager.applyUpdate();
+          }
+        }
+      });
+    });
+    updateManager.onUpdateFailed(function() {
+    });
+    common_vendor.index.__f__("log", "at App.vue:28", "App Launch");
     const token = common_vendor.index.getStorageSync("token");
     if (!token) {
-      common_vendor.index.__f__("log", "at App.vue:8", "游客身份体验");
+      common_vendor.index.__f__("log", "at App.vue:32", "游客身份体验");
       common_vendor.index.setStorage({
         key: "tourist",
         data: true,
         success: (result) => {
-          common_vendor.index.__f__("log", "at App.vue:14", "游客身份存储成功:", result);
+          common_vendor.index.__f__("log", "at App.vue:38", "游客身份存储成功:", result);
         }
       });
       common_vendor.index.setStorage({
         key: "isFirst",
         data: true,
         success: (result) => {
-          common_vendor.index.__f__("log", "at App.vue:22", "首次使用存储成功:", result);
+          common_vendor.index.__f__("log", "at App.vue:46", "首次使用存储成功:", result);
           common_vendor.index.reLaunch({
             url: "/pages/index/index"
           });
         },
         fail: (error) => {
-          common_vendor.index.__f__("log", "at App.vue:28", "首次使用存储失败:", error);
+          common_vendor.index.__f__("log", "at App.vue:52", "首次使用存储失败:", error);
           common_vendor.index.showToast({
             title: "游客身份体验失败",
             icon: "none"
@@ -47,14 +64,14 @@ const _sfc_main = {
         },
         method: "GET",
         success: (res) => {
-          common_vendor.index.__f__("log", "at App.vue:44", "获取用户信息", res);
+          common_vendor.index.__f__("log", "at App.vue:68", "获取用户信息", res);
           if (res.data.code === 0 && res.data.data.birth) {
-            common_vendor.index.__f__("log", "at App.vue:46", "用户已注册生日是：", res.data.data.birth);
+            common_vendor.index.__f__("log", "at App.vue:70", "用户已注册生日是：", res.data.data.birth);
             common_vendor.index.reLaunch({
               url: "/pages/index/index"
             });
           } else if (res.data.code === 0 && !res.data.data.birth) {
-            common_vendor.index.__f__("log", "at App.vue:51", "用户未注册");
+            common_vendor.index.__f__("log", "at App.vue:75", "用户未注册");
             common_vendor.index.reLaunch({
               url: "/pages/hello/hello"
             });
@@ -70,10 +87,10 @@ const _sfc_main = {
     }
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:69", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:93", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:72", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:96", "App Hide");
   }
 };
 function createApp() {
