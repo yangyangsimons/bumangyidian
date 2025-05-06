@@ -73,19 +73,22 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
             try {
               socketTask = common_vendor.index.connectSocket({
                 url: `${utils_config.wsUrl}/content/ws`,
-                header: { Authorization: `bearer ${token}` },
+                header: {
+                  Authorization: `bearer ${token}`,
+                  is_yk: token ? "0" : "1"
+                },
                 success: () => {
-                  common_vendor.index.__f__("log", "at stores/websocket.js:103", "WebSocket连接请求已发送");
+                  common_vendor.index.__f__("log", "at stores/websocket.js:106", "WebSocket连接请求已发送");
                 },
                 fail: (err) => {
-                  common_vendor.index.__f__("error", "at stores/websocket.js:106", "WebSocket连接请求失败", err);
+                  common_vendor.index.__f__("error", "at stores/websocket.js:109", "WebSocket连接请求失败", err);
                   isConnecting.value = false;
                   reject(err);
                 }
               });
               const connectTimeout = setTimeout(() => {
                 if (!isConnected.value && isConnecting.value) {
-                  common_vendor.index.__f__("error", "at stores/websocket.js:115", "WebSocket连接超时");
+                  common_vendor.index.__f__("error", "at stores/websocket.js:118", "WebSocket连接超时");
                   if (socketTask) {
                     socketTask.close();
                     socketTask = null;
@@ -95,7 +98,7 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
                 }
               }, 1e4);
               socketTask.onOpen(() => {
-                common_vendor.index.__f__("log", "at stores/websocket.js:126", "WebSocket连接已打开");
+                common_vendor.index.__f__("log", "at stores/websocket.js:129", "WebSocket连接已打开");
                 clearTimeout(connectTimeout);
                 isConnected.value = true;
                 isConnecting.value = false;
@@ -107,11 +110,11 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
                 }, 300);
               });
               socketTask.onMessage((res2) => {
-                common_vendor.index.__f__("log", "at stores/websocket.js:142", "WebSocket收到消息:", res2.data);
+                common_vendor.index.__f__("log", "at stores/websocket.js:145", "WebSocket收到消息:", res2.data);
                 messageProcessor.processMessage(res2.data);
               });
               socketTask.onError((err) => {
-                common_vendor.index.__f__("error", "at stores/websocket.js:148", "WebSocket发生错误:", err);
+                common_vendor.index.__f__("error", "at stores/websocket.js:151", "WebSocket发生错误:", err);
                 clearTimeout(connectTimeout);
                 isConnected.value = false;
                 isConnecting.value = false;
@@ -119,19 +122,19 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
                 reject(err);
               });
               socketTask.onClose(() => {
-                common_vendor.index.__f__("log", "at stores/websocket.js:157", "WebSocket连接已关闭");
+                common_vendor.index.__f__("log", "at stores/websocket.js:160", "WebSocket连接已关闭......");
                 isConnected.value = false;
                 isConnecting.value = false;
                 socketTask = null;
               });
             } catch (error) {
-              common_vendor.index.__f__("error", "at stores/websocket.js:163", "创建WebSocket连接出错:", error);
+              common_vendor.index.__f__("error", "at stores/websocket.js:166", "创建WebSocket连接出错:", error);
               isConnecting.value = false;
               reject(error);
             }
           },
           fail: function(err) {
-            common_vendor.index.__f__("error", "at stores/websocket.js:169", "获取网络类型失败:", err);
+            common_vendor.index.__f__("error", "at stores/websocket.js:172", "获取网络类型失败:", err);
             isConnecting.value = false;
             reject(new Error("无法获取网络类型"));
           }
@@ -151,11 +154,11 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
       socketTask.send({
         data: JSON.stringify(message),
         success: () => {
-          common_vendor.index.__f__("log", "at stores/websocket.js:191", "WebSocket消息发送成功");
+          common_vendor.index.__f__("log", "at stores/websocket.js:194", "WebSocket消息发送成功");
           resolve();
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at stores/websocket.js:195", "WebSocket消息发送失败", err);
+          common_vendor.index.__f__("error", "at stores/websocket.js:198", "WebSocket消息发送失败", err);
           reject(err);
         }
       });
@@ -163,14 +166,13 @@ const useWebSocketStore = common_vendor.defineStore("websocket", () => {
   };
   const sendMessage = async (message) => {
     if (!isConnected.value || !socketTask) {
-      common_vendor.index.__f__("log", "at stores/websocket.js:205", "WebSocket未连接，消息加入队列");
+      common_vendor.index.__f__("log", "at stores/websocket.js:208", "WebSocket未连接，消息加入队列");
       messageQueue.value.push(message);
       return Promise.reject(new Error("WebSocket未连接，消息加入队列"));
     }
     return _doSendMessage(message);
   };
   const close = async () => {
-    common_vendor.index.__f__("log", "at stores/websocket.js:214", "关闭WebSocket连接");
     return ensureSocketClosed();
   };
   return { messages, connect, sendMessage, close, isConnected, isConnecting };

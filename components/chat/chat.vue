@@ -1,6 +1,10 @@
 <template>
   <view class="chat-container">
-    <view class="input-container-voice" v-if="showText && !isRadio">
+    <view
+      class="input-container-voice"
+      v-if="showText && !isRadio"
+      :style="colorSystem"
+    >
       <image
         class="input-icon"
         src="../../static/keyboard.png"
@@ -17,7 +21,11 @@
         按住说话
       </button>
     </view>
-    <view class="input-container-text" v-if="!showText && !isRadio">
+    <view
+      class="input-container-text"
+      v-if="!showText && !isRadio"
+      :style="colorSystem"
+    >
       <image
         class="input-voice-icon"
         src="../../static/voice.png"
@@ -26,8 +34,9 @@
       />
       <input
         type="text"
-        placeholder="聊点什么吧？"
-        placeholder-style="color:rgba(255, 255, 255, 0.4);"
+        :placeholder="placeholderStore.currentPlaceholder"
+        p
+        :placeholder-style="inputColor"
         class="input-field-text"
         @input="onKeyInput"
         :value="inputValue"
@@ -39,20 +48,28 @@
       />
       <view class="send" @tap.stop="handleSubmit" v-if="sendAble">
         <image
-          class="send-icon"
+          class="send-icon send-fly"
           src="../../static/send-icon.png"
           mode="scaleToFill"
         />
       </view>
-      <view class="send" v-if="!sendAble" @tap.stop="handleStopGenerate">
-        <image
-          class="send-icon"
-          src="../../static/send-disable.png"
-          mode="scaleToFill"
-        />
+      <view class="send wrap" v-if="!sendAble" @tap.stop="handleStopGenerate">
+        <view class="round"></view>
+        <view class="round"></view>
+        <view class="round"></view>
+        <view class="round"></view>
+        <view class="round"></view>
+        <view class="round"></view>
+        <view class="round"></view>
+        <view class="round"></view>
       </view>
     </view>
-    <view class="input-container-text" v-if="isRadio">
+    <view
+      class="input-container-text mainbox"
+      v-if="isRadio"
+      :style="colorSystem"
+    >
+      <!-- <view class="moving-element"></view> -->
       <image
         class="input-voice-icon"
         src="../../static/radio.png"
@@ -60,11 +77,13 @@
       />
       <input
         type="text"
-        placeholder="电台播出中"
-        placeholder-style="color:rgba(255, 255, 255, 0.4);"
+        :placeholder="radioText"
+        :placeholder-style="inputColor"
         class="input-field-text"
         adjust-position="true"
         disabled
+        @tap="radioInputtap"
+        @longpress="backToQA"
       />
       <view class="send" @tap.stop="stopRadio" v-if="radioPlay">
         <image
@@ -83,7 +102,7 @@
     </view>
     <image
       class="voice-icon"
-      src="../../static/voice-icon.png"
+      :src="voiceIconSrc"
       mode="scaleToFill"
       @click="toggleUserPopup"
     />
@@ -103,20 +122,34 @@
   import { useSendStore } from '../../stores/send'
   import { useIsRadioStore } from '../../stores/isRadio'
   import { useAudioPlayerStore } from '../../stores/audioPlayer'
+  import { subjectShowStore } from '../../stores/subjectShow'
+  import { usePlaceholderStore } from '../../stores/placeholderStore'
   import request from '@/utils/request'
 
+  // 获取placeholder store
+  const placeholderStore = usePlaceholderStore()
+  const subjectShow = subjectShowStore()
+  const radioText = ref('电台播出中')
   const audioPlayerStore = useAudioPlayerStore()
   const sbStore = useSubjectStore()
   const wsStore = useWebSocketStore()
   const sendStore = useSendStore()
   const isRadioStore = useIsRadioStore()
   const radioPlay = ref(true)
+  const colorSystem = ref('background: rgba(0, 0, 0, 0.2);')
+  const inputColor = ref('color:rgba(255, 255, 255, 1)')
   // 设置能否发送消息
   const sendAble = computed(() => {
     return sendStore.send
   })
   const isRadio = computed(() => {
     return isRadioStore.isRadio
+  })
+
+  const voiceIconSrc = computed(() => {
+    return isRadio.value
+      ? '../../static/voice-icon-disable.png'
+      : '../../static/voice-icon.png'
   })
   // const isRadio = ref(true)
   // 初始化聊天模式
@@ -127,9 +160,10 @@
   const recordingStore = useRecordingStore()
   const uploadMessage = ref({})
   const keyboardHeight = ref(32) // 默认底部距离
-
+  const placeholder = ref('')
   const emit = defineEmits(['submit'])
   const showText = ref(false)
+
   var plugin = requirePlugin('WechatSI')
   let manager = plugin.getRecordRecognitionManager()
   const userPopupRef = ref(null)
@@ -174,6 +208,33 @@
 
   // 监听键盘高度变化
   const onInputFocus = (e) => {
+    console.log('输入框获取焦点', e)
+    // 判断是否已经登录过了，token是否存在
+    const token = uni.getStorageSync('token')
+    if (!token) {
+      uni.showModal({
+        title: '',
+        content: '登录后体验完整功能',
+        success: async (res) => {
+          if (res.confirm) {
+            console.log('用户点击确定')
+            await wsStore.close()
+            audioPlayerStore.stopAllAudio()
+            barrageStore.clearMessages()
+            console.log('用户点击确定')
+            // 1秒钟之后跳转登录
+            setTimeout(() => {
+              uni.reLaunch({
+                url: '/pages/login/login',
+              })
+            }, 1000)
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        },
+      })
+      return
+    }
     // 获取键盘高度
     uni.onKeyboardHeightChange((res) => {
       if (res.height > 0) {
@@ -201,6 +262,7 @@
 
   // 录音开始
   const startRecord = () => {
+    audioPlayerStore.setTtsVolume(0)
     console.log('开始录音')
     recordingStore.startRecording()
     console.log(recordingStore.isRecording)
@@ -213,6 +275,7 @@
   // 当用户松开手指时，结束录音并开始识别
   const endRecord = () => {
     console.log('结束录音')
+    audioPlayerStore.setTtsVolume(1)
     recordingStore.stopRecording()
     console.log(recordingStore.isRecording)
     manager.stop()
@@ -233,6 +296,7 @@
       message.value = res.result
       // 发送识别结果到服务器
       // sendStore.setSend(false) // 设置不能发送消息
+
       handleUploadMessage(message.value)
       // barrageStore.addMessage({
       //   type: 'user',
@@ -252,6 +316,14 @@
 
   // 提交消息
   const handleSubmit = () => {
+    if (!sendAble.value) {
+      console.log('不能发送消息')
+      uni.showLoading({
+        title: '加载中',
+        mask: true,
+      })
+      return
+    }
     if (!inputValue.value.trim()) return // 避免发送空消息
 
     // 保存当前输入值
@@ -282,6 +354,7 @@
   //上传的消息处理
   const handleUploadMessage = async (userMessage) => {
     if (!userMessage || !userMessage.trim()) return
+    console.log('上传消息了sendAble:', sendAble.value)
 
     console.log('上传的消息:', userMessage)
     // 这里可以添加处理上传消息的逻辑
@@ -312,6 +385,7 @@
       type: 'user',
       content: userMessage, // 使用传入的userMessage而不是inputValue
     })
+    audioPlayerStore.stopTtsAudio()
   }
   // 停止电台
   const stopRadio = () => {
@@ -340,7 +414,18 @@
 
   onShow(() => {
     // 页面显示时可以进行一些操作
+
+    if (isRadioStore.isRadio) {
+      voiceIconSrc.value = '../../static/voice-icon-disable.png'
+    }
     console.log('聊天组件显示')
+    console.log('聊天组件显示isRadio', isRadioStore.isRadio)
+    //随机placeholder
+    if (modelStore.model === '金种子杯模式') {
+      placeholderStore.setRandomSpecialPlaceholder()
+    } else {
+      placeholderStore.setRandomNormalPlaceholder()
+    }
   })
 
   onLoad(() => {
@@ -352,104 +437,22 @@
     // 移除键盘高度监听
     uni.offKeyboardHeightChange()
   })
+
+  const radioInputtap = () => {
+    radioText.value = '长按退出电台,可以聊天哦'
+    setTimeout(() => {
+      radioText.value = '电台播出中'
+    }, 2000)
+  }
+  const backToQA = () => {
+    console.log('返回问答')
+    audioPlayerStore.stopAllAudio()
+    modelStore.setModel('QA模式')
+    isRadioStore.setIsRadio(false)
+    subjectShow.setSubjectShow(true)
+  }
 </script>
 
 <style lang="scss" scoped>
-  .chat-container {
-    bottom: 44rpx;
-    box-sizing: border-box;
-    height: 90rpx;
-    display: flex;
-    align-items: center;
-    position: absolute;
-    left: 0;
-    margin-left: 32rpx;
-    z-index: 1; // 确保在最上层
-    // transition: bottom 0.2s; // 平滑过渡
-    .input-container-voice {
-      position: relative;
-      display: flex;
-      align-items: center;
-      height: 84rpx;
-      width: 576rpx;
-      border-radius: 60rpx;
-      background: rgba(255, 255, 255, 0.29);
-      box-sizing: border-box;
-      .input-icon {
-        width: 36rpx;
-        height: 36rpx;
-        margin-left: 22rpx;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 1;
-      }
-      .input-field {
-        width: 100%;
-        height: 84rpx;
-        font-size: 32rpx;
-        font-weight: 400;
-        letter-spacing: 0rpx;
-        color: rgba(255, 255, 255, 1);
-        text-align: center;
-        vertical-align: center;
-        border-radius: 60rpx;
-        background-color: transparent;
-      }
-    }
-    .input-container-text {
-      position: relative;
-      display: flex;
-      align-items: center;
-      height: 84rpx;
-      width: 576rpx;
-      border-radius: 60rpx;
-      background: rgba(255, 255, 255, 0.29);
-      box-sizing: border-box;
-      color: rgba(255, 255, 255, 1);
-      .input-field-text {
-        width: 100%;
-        height: 84rpx;
-        letter-spacing: 0rpx;
-        text-align: left;
-        vertical-align: top;
-        border-radius: 60rpx;
-        background-color: transparent;
-        padding-left: 74rpx;
-        padding-right: 66rpx; // 为发送按钮留出空间
-      }
-      .input-voice-icon {
-        width: 36rpx;
-        height: 36rpx;
-        margin-left: 22rpx;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 1;
-      }
-      .send {
-        // border: 1px solid #fff;
-        width: 70rpx; // 增大点击区域
-        height: 70rpx; // 增大点击区域
-        position: absolute;
-        top: 50%;
-        right: 5rpx;
-        transform: translateY(-50%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        .send-icon {
-          width: 36rpx;
-          height: 36rpx;
-        }
-      }
-    }
-    .voice-icon {
-      width: 84rpx;
-      height: 84rpx;
-      border-radius: 50%;
-      margin: 0 24rpx;
-      margin-right: 32rpx;
-    }
-  }
+  @import './index.scss';
 </style>

@@ -82,7 +82,10 @@
   import { useModelStore } from '../../stores/model'
   // 导入音频播放器状态管理
   import { useAudioPlayerStore } from '@/stores/audioPlayer'
+  import { useToggleModelStore } from '../../stores/toggleModelStore'
 
+  const modelStore = useModelStore()
+  const toggleModelStore = useToggleModelStore()
   const wsStore = useWebSocketStore()
   // 初始化音频播放器状态管理
   const audioPlayerStore = useAudioPlayerStore()
@@ -118,39 +121,6 @@
         // 例如：将音色信息存储到状态管理中
       } else {
         console.error('获取音色信息失败', toneRes.message)
-      }
-      const userInfoRes = await request(`${baseUrl}/user/user_info`, 'get')
-      if (userInfoRes.code === 0) {
-        console.log('获取用户信息成功', userInfoRes.data)
-        user.value = userInfoRes.data
-        avator.value = userInfoRes.data.avator
-        toneId.value = userInfoRes.data.tone
-        userName.value = userInfoRes.data.username
-        userAge.value = calculateAge(userInfoRes.data.birth)
-        userMbtiShort.value = userInfoRes.data.mbti
-        userMbti.value = userInfoRes.data.mbti_ch
-        userSex.value = userInfoRes.data.sex
-        sexSrc.value =
-          userSex.value === '男'
-            ? '../../static/male.png'
-            : '../../static/female.png'
-        // 处理用户信息
-        // 例如：将用户信息存储到状态管理中
-        // 新增：设置初始选中的音色
-        if (toneId.value && tones.value.length > 0) {
-          tones.value.forEach((item) => {
-            // 根据用户的toneId设置音色的active状态
-            item.active = item.id === toneId.value
-            // 如果是当前选中的音色，更新相关状态
-            if (item.active) {
-              selectedToneId.value = item.id
-              currentTone.value = item
-              currentTonePath.value = item.path
-            }
-          })
-        }
-      } else {
-        console.error('获取用户信息失败', userInfoRes.message)
       }
     } catch (e) {
       console.error('获取音色信息失败', e)
@@ -200,6 +170,7 @@
     const selectedTone = tones.value.find((item) => item.id === id)
     //更新音色试听的path
     if (selectedTone) {
+      console.log('选中的音色', selectedTone)
       currentTonePath.value = selectedTone.path
     } else {
       console.error('未找到对应的音色项')
@@ -229,11 +200,11 @@
     audioPlayer.value.onEnded(() => {
       console.log('试听音频播放完成')
       // 播放完成后，继续播放原来的音频
+      audioPlayerStore.setTtsVolume(1)
     })
     audioPlayer.value.onPlay(() => {
       console.log('试听音频开始播放')
-      // 播放完成后，继续播放原来的音频
-      audioPlayerStore.setTtsVolume(0.1)
+      audioPlayerStore.setTtsVolume(0)
     })
   }
 
@@ -263,20 +234,52 @@
       })
       return
     }
+    if (audioPlayer.value) {
+      audioPlayer.value.stop()
+      audioPlayer.value.destroy()
+    }
+    audioPlayer.value = null
+    audioPlayerStore.setTtsVolume(1)
     console.log('更新音色', selectedToneId.value)
+    //先判断是不是选择了id为6的音色，这是金种子，不更新给后台
+    if (selectedToneId.value == 6 && modelStore.model !== '金种子杯模式') {
+      // 选中的是音色6，触发模式切换逻辑
+      console.log(
+        '选了金种子，直接切换模式，不更新音色了',
+        selectedToneId.value
+      )
+      toggleModelStore.triggerModelChange()
+      return
+    }
+    if (selectedToneId.value == 6 && modelStore.model == '金种子杯模式') {
+      //金种子杯模式下，选中的是音色6，什么都不做；
+      console.log(
+        '金种子杯模式下选中的是音色6，什么都不做',
+        selectedToneId.value
+      )
+    }
 
     const res = await request(`${baseUrl}/tone/update`, 'post', {
       tone_id: selectedToneId.value,
     })
     if (res.code === 0) {
       audioPlayerStore.setTtsVolume(1)
-      audioPlayer.value.stop()
-      audioPlayer.value.destroy()
-      audioPlayer.value = null
+
+      console.log('触发模式切换逻辑', selectedToneId.value)
+      console.log('触发模式切换逻辑', modelStore.model)
+
       uni.showToast({
         title: '音色更新成功',
         icon: 'success',
       })
+      if (modelStore.model == '金种子杯模式' && selectedToneId.value !== 6) {
+        // 选中的是音色不是6，触发模式切换逻辑
+        console.log(
+          '金种子杯模式下面选了不是6的音色，触发模式切换逻辑',
+          selectedToneId.value
+        )
+        toggleModelStore.triggerModelChange()
+      }
     } else {
       uni.showToast({
         title: '请稍后再试',
@@ -408,8 +411,74 @@
     console.log('状态', e.show)
   }
   // 暴露方法以便父组件调用
-  const open = () => {
+  const open = async () => {
+    try {
+      const userInfoRes = await request(`${baseUrl}/user/user_info`, 'get')
+      if (userInfoRes.code === 0) {
+        console.log('获取用户信息成功', userInfoRes.data)
+        user.value = userInfoRes.data
+        avator.value = userInfoRes.data.avator
+        toneId.value = userInfoRes.data.tone
+        uni.setStorage({
+          key: 'toneId',
+          data: toneId.value,
+        })
+        userName.value = userInfoRes.data.username
+        userAge.value = calculateAge(userInfoRes.data.birth)
+        userMbtiShort.value = userInfoRes.data.mbti
+        userMbti.value = userInfoRes.data.mbti_ch
+        userSex.value = userInfoRes.data.sex
+        sexSrc.value =
+          userSex.value === '男'
+            ? '../../static/male.png'
+            : '../../static/female.png'
+        // 处理用户信息
+        // 例如：将用户信息存储到状态管理中
+        // 新增：设置初始选中的音色
+        if (toneId.value && tones.value.length > 0) {
+          tones.value.forEach((item) => {
+            // 根据用户的toneId设置音色的active状态
+            item.active = item.id === toneId.value
+            // 如果是当前选中的音色，更新相关状态
+            if (item.active) {
+              selectedToneId.value = item.id
+              currentTone.value = item
+              currentTonePath.value = item.path
+            }
+          })
+        }
+      } else {
+        console.error('获取用户信息失败', userInfoRes.message)
+      }
+    } catch (error) {
+      console.error('打开弹窗失败', error)
+    }
+
     userPopupRef.value.open('bottom')
+    if (modelStore.model === '金种子杯模式') {
+      const index = tones.value.findIndex((item) => item.id === 6)
+      console.log('打开了音色页面，金种子杯模式')
+      autoClick(6, index)
+    }
+  }
+  const autoClick = (id, index) => {
+    // 点击音色时的处理逻辑
+    console.log('点击音色', id, index)
+    tones.value.forEach((item, i) => {
+      item.active = i === index
+    })
+    selectedToneId.value = id
+    currentTone.value = tones.value[index]
+
+    // 查找对应的音色项
+    const selectedTone = tones.value.find((item) => item.id === id)
+    //更新音色试听的path
+    if (selectedTone) {
+      console.log('选中的音色', selectedTone)
+      currentTonePath.value = selectedTone.path
+    } else {
+      console.error('未找到对应的音色项')
+    }
   }
 
   const close = () => {

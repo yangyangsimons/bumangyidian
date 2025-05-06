@@ -16,6 +16,7 @@
         position: absolute;
         top: 0;
         left: 0;
+        z-index: -1;
     }
     .subject-container {
         margin-left: 40rpx;
@@ -25,6 +26,7 @@
         font-weight: 500;
         font-size: 56rpx;
         max-width: 550rpx;
+
         .title {
             height: 80rpx;
             line-height: 80rpx;
@@ -32,20 +34,37 @@
             font-weight: 400;
             text-wrap: nowrap;
         }
+
         .subject-scroll-view {
             width: 100%;
+            overflow: hidden;
             white-space: nowrap;
-
+            mask: linear-gradient(
+                to right,
+                transparent 0%,
+                /* 左端透明 */ rgba(0, 0, 0, 1) 10%,
+                /* 渐变到不透明 */ rgba(0, 0, 0, 1) 90%,
+                /* 中间不透明区域 */ transparent 100% /* 右端透明 */
+            );
             /* 隐藏滚动条 */
             &::-webkit-scrollbar {
                 display: none;
             }
         }
 
+        .marquee-content {
+            display: inline-flex;
+            white-space: nowrap;
+        }
+
         .subject {
             display: inline-block;
             white-space: nowrap;
-            padding-right: 40rpx; // 增加一些右侧空间
+            padding-right: 40rpx;
+        }
+
+        .space {
+            width: 60rpx; // 两个文本之间的间距
         }
     }
     .barrage-container {
@@ -58,16 +77,13 @@
 
     .changeModel {
         position: absolute;
-        width: 174rpx;
+        width: 195rpx;
         height: 80rpx;
         top: 244rpx;
         right: 0;
         z-index: 10;
         color: white;
-        border-radius:
-            12rpx 0px,
-            0px,
-            12rpx;
+        border-radius: 12rpx 0px 0px 12rpx;
         background: rgba(0, 0, 0, 0.5);
         display: flex;
         flex-direction: column;
@@ -123,15 +139,6 @@
             background: rgba(26, 28, 30, 0.54);
             white-space: normal; // 确保文本正常换行
             box-sizing: border-box; // 确保padding和border在宽度计算中
-        }
-    }
-
-    @keyframes shine {
-        from {
-            box-shadow: 0 0 5rpx rgba(242, 242, 240, 0.5);
-        }
-        to {
-            box-shadow: 0 0 10rpx rgba(63, 63, 62, 0.9);
         }
     }
 }

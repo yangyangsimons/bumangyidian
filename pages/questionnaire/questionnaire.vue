@@ -2,8 +2,11 @@
   <view class="questionnaire-container">
     <image class="global-title" src="../../static/global-title.png"></image>
     <view class="header">
-      <text class="title">{{ question_text }}</text>
-      <text class="describe">方便我们为你提供更精准的服务</text>
+      <view class="title">
+        <text>你的 MBTI 是什么</text>
+        <view class="bar"></view>
+      </view>
+      <text class="describe">让我们更懂你一点</text>
     </view>
     <view class="main">
       <view class="mbti-container">
@@ -23,7 +26,10 @@
       <button class="next" @click="handleNext">
         <text class="next-text">开启</text>
       </button>
-      <text class="skip" @click="skip">不知道，跳过 ></text>
+      <view class="skip" @click="skip"
+        ><text>不知道，跳过</text>
+        <image class="skip-icon" src="../../static/skip.png" mode="scaleToFill"
+      /></view>
     </view>
   </view>
 </template>

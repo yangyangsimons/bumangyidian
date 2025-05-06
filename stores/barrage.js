@@ -1,16 +1,17 @@
 // stores/barrage.js
 import { defineStore } from 'pinia'
 import { useMessageProcessorStore } from './messageProcessor'
+
 export const useBarrageStore = defineStore('barrage', {
   state: () => ({
     messages: [],
 
-    //用户跟踪当前流式消息的ID
+    // 用户跟踪当前流式消息的ID
     currentStreamingMessageId: null,
   }),
   actions: {
     addMessage(payload) {
-      const messageId = Date.now()
+      const messageId = payload.id || Date.now()
       // 如果消息类型是流式消息
       if (payload.isStreaming) {
         this.currentStreamingMessageId = messageId
@@ -18,7 +19,7 @@ export const useBarrageStore = defineStore('barrage', {
 
       this.messages.push({
         ...payload,
-        id: Date.now(),
+        id: messageId,
         timestamp: new Date().toISOString(),
       })
       console.log('所有消息', this.messages)
@@ -79,6 +80,19 @@ export const useBarrageStore = defineStore('barrage', {
       // 重置 messageProcessor 中的状态
       const messageProcessorStore = useMessageProcessorStore()
       messageProcessorStore.resetProcessor()
+    },
+
+    // 更新特定消息内容
+    updateMessageContent(messageId, content) {
+      const msgIndex = this.messages.findIndex((msg) => msg.id === messageId)
+      if (msgIndex !== -1) {
+        this.messages[msgIndex].content = content
+      }
+    },
+
+    // 查找特定类型的消息
+    findMessageByType(type) {
+      return this.messages.find((msg) => msg.type === type)
     },
   },
 })

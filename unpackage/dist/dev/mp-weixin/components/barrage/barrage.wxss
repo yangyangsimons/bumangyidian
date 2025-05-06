@@ -27,9 +27,29 @@
   height: 100%;
   border-radius: 16rpx;
 }
-.barrage-container .scroll-view.data-v-cddbe1be {
+.barrage-container .scroll-container.data-v-cddbe1be {
+  -webkit-mask: -webkit-gradient(linear, right 20%, right top, from(#000), to(transparent));
+  mask: gradient(linear, right 20%, right top, from(#000), to(transparent));
+  position: relative;
   height: 100%;
-  padding: 20rpx;
+}
+.barrage-container .scroll-container .top-mask.data-v-cddbe1be {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10%;
+  z-index: 10;
+  pointer-events: none;
+  border-top-left-radius: 16rpx;
+  border-top-right-radius: 16rpx;
+  z-index: 0;
+}
+.barrage-container .scroll-view.data-v-cddbe1be {
+  -webkit-mask: -webkit-gradient(linear, right 20%, right top, from(#000), to(transparent));
+  mask: gradient(linear, right 20%, right top, from(#000), to(transparent));
+  height: 100%;
+  padding: 35rpx;
   box-sizing: border-box;
 }
 .barrage-container .scroll-view .messages-wrapper.data-v-cddbe1be {
@@ -39,7 +59,6 @@
   flex-direction: column;
   justify-content: flex-end;
   width: 690rpx;
-  border: 1px slod red;
 }
 .barrage-container .scroll-view .messages-wrapper .message-bubble.data-v-cddbe1be {
   display: flex;
@@ -54,7 +73,8 @@
   font-size: 28rpx;
   font-weight: 400;
   vertical-align: middle;
-  padding: 8rpx 16rpx 8rpx 24rpx;
+  padding: 16rpx 24rpx;
+  padding-right: 20rpx;
 }
 .barrage-container .scroll-view .messages-wrapper .message-bubble .content-box .type.data-v-cddbe1be {
   color: rgba(255, 255, 255, 0.37);
@@ -63,13 +83,18 @@
   color: white;
   text-wrap: break-word;
   word-break: break-all;
+  line-height: 45rpx;
+  letter-spacing: 1rpx;
 }
 .barrage-container .scroll-view .messages-wrapper .message-bubble.user.data-v-cddbe1be {
   justify-content: flex-end;
+  margin-left: 100rpx;
+  margin-right: 10rpx;
   max-width: 100%;
-  min-width: 100rpx;
+  min-width: 150rpx;
 }
 .barrage-container .scroll-view .messages-wrapper .message-bubble.user .content-box.data-v-cddbe1be {
+  padding-right: 20rpx;
   background: linear-gradient(220.44deg, #d3f84f 0%, #a7ee27 100%);
 }
 .barrage-container .scroll-view .messages-wrapper .message-bubble.user .content-box .content.data-v-cddbe1be {

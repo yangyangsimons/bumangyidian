@@ -12,12 +12,12 @@
         <image class="logo" src="../../static/logo.png" />
       </view>
       <image src="../../static/logo-title.png" class="title">不芒一点</image>
-      <text class="describe">你的专属电台</text>
+      <view class="describe"> <text>为你世界加一点</text> </view>
     </view>
     <view class="main">
       <button v-if="!agreeProtocol" class="wx-login" @click="clickBtn">
         <image class="wechat-icon" src="../../static/wechat.png" />
-        <text class="wechat-text">微信登录</text>
+        <text class="wechat-text">手机号登录</text>
       </button>
       <button
         v-else
@@ -26,8 +26,16 @@
         @getphonenumber="handleWechatLogin"
       >
         <image class="wechat-icon" src="../../static/wechat.png" />
-        <text class="wechat-text">微信登录</text>
+        <text class="wechat-text">手机号登录</text>
       </button>
+      <view class="skip" @click="unLoginTry">
+        <text>不登录，跳过</text>
+        <image
+          class="skip-icon"
+          src="../../static/skip.png"
+          mode="scaleToFill"
+        />
+      </view>
     </view>
     <view class="footer">
       <view class="radio-wrapper" @click="agreeProtocol = !agreeProtocol">
@@ -42,9 +50,13 @@
       </view>
       <text class="agreement">
         <text class="agreement-text">我已阅读同意不芒一点</text>
-        <text class="agreement-link">《用户协议》</text>
+        <text class="agreement-link" @click="openAgreement('user')"
+          >《用户协议》</text
+        >
         <text class="agreement-text">和</text>
-        <text class="agreement-link">《隐私政策》</text>
+        <text class="agreement-link" @click="openAgreement('privacy')"
+          >《隐私政策》</text
+        >
       </text>
     </view>
   </view>
@@ -61,7 +73,47 @@
   const agreeProtocol = ref(false) // 协议同意状态
 
   // 微信登录和手机号的处理
+  const unLoginTry = async () => {
+    console.log('游客身份体验')
+    //游客身份体验
+    uni.setStorage({
+      key: 'tourist',
+      data: true,
+      success: (result) => {
+        console.log('游客身份存储成功:', result)
+      },
+    })
+    //新手引导页设置token
+    uni.setStorage({
+      key: 'isFirst',
+      data: true,
+      success: (result) => {
+        console.log('首次使用存储成功:', result)
+        uni.reLaunch({
+          url: '/pages/index/index',
+        })
+      },
+      fail: (error) => {
+        console.log('首次使用存储失败:', error)
+        uni.showToast({
+          title: '游客身份体验失败',
+          icon: 'none',
+        })
+      },
+    })
+  }
   const token = ref('')
+  // 处理协议/隐私政策点击
+  const openAgreement = (type) => {
+    // 根据类型确定跳转的URL
+    const url =
+      type === 'user'
+        ? '/pages/agreement/agreement?type=user'
+        : '/pages/agreement/agreement?type=privacy'
+
+    // 跳转到协议展示页面
+    uni.navigateTo({ url })
+  }
   const clickBtn = () => {
     console.log('点击了微信登录按钮')
     if (!agreeProtocol.value) {
@@ -73,6 +125,12 @@
   }
   const handleWechatLogin = async (e) => {
     const phoneCode = e.detail.code
+    if (phoneCode === undefined) {
+      return uni.showToast({
+        title: '获取手机号登录',
+        icon: 'none',
+      })
+    }
     console.log('获取到的手机号code', phoneCode)
     if (!agreeProtocol.value) {
       return uni.showToast({
@@ -186,6 +244,7 @@
       }
     }
     .header {
+      // border: 1px solid red;
       position: absolute;
       top: 456rpx;
       left: 50%;
@@ -194,7 +253,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      width: 274rpx;
+      width: 350rpx;
       height: 306rpx;
       .logo-container {
         width: 142rpx;
@@ -216,25 +275,38 @@
         height: 40rpx;
       }
       .describe {
-        text-align: center;
+        // border: 1px solid red;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: right;
         font-size: 24rpx;
         font-weight: 300;
         color: rgba(0, 0, 0, 1);
         letter-spacing: 21rpx;
+        text {
+          margin-left: 21rpx;
+        }
       }
     }
     .main {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       width: 686rpx;
       height: 220rpx;
       position: absolute;
-      bottom: 100rpx;
+      bottom: 200rpx;
       font-size: 28rpx;
       font-weight: 700;
-
+      wx-button {
+        border: none;
+      }
+      wx-button:after {
+        display: none;
+      }
       .wechat {
         width: 686rpx;
         height: 90rpx;
@@ -284,9 +356,27 @@
         font-weight: 700;
       }
       image {
-        width: 40rpx;
-        height: 40rpx;
+        width: 28rpx;
+        height: 29rpx;
         margin-right: 8rpx;
+        margin-bottom: 3rpx;
+      }
+      .skip {
+        width: 300rpx;
+        // border: 1px solid red;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 28rpx;
+        letter-spacing: 3rpx;
+        color: rgba(26, 28, 30, 0.75);
+        margin-top: 34rpx;
+        .skip-icon {
+          width: 12rpx;
+          height: 20rpx;
+          margin-left: 15rpx;
+        }
       }
     }
     .footer {

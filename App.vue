@@ -1,12 +1,60 @@
 <script>
   export default {
     onLaunch: function () {
+      const updateManager = wx.getUpdateManager()
+
+      updateManager.onCheckForUpdate(function (res) {
+        // 请求完新版本信息的回调
+        console.log('版本更新的回调', res.hasUpdate)
+      })
+
+      updateManager.onUpdateReady(function () {
+        wx.showModal({
+          title: '更新提示',
+          content: '新版本已经准备好，是否重启应用？',
+          success(res) {
+            if (res.confirm) {
+              // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+              updateManager.applyUpdate()
+            }
+          },
+        })
+      })
+
+      updateManager.onUpdateFailed(function () {
+        // 新版本下载失败
+      })
+
       console.log('App Launch')
       // 判断用户是否授权
       const token = uni.getStorageSync('token')
       if (!token) {
-        uni.reLaunch({
-          url: '/pages/login/login',
+        console.log('游客身份体验')
+        //游客身份体验
+        uni.setStorage({
+          key: 'tourist',
+          data: true,
+          success: (result) => {
+            console.log('游客身份存储成功:', result)
+          },
+        })
+        //新手引导页设置token
+        uni.setStorage({
+          key: 'isFirst',
+          data: true,
+          success: (result) => {
+            console.log('首次使用存储成功:', result)
+            uni.reLaunch({
+              url: '/pages/index/index',
+            })
+          },
+          fail: (error) => {
+            console.log('首次使用存储失败:', error)
+            uni.showToast({
+              title: '游客身份体验失败',
+              icon: 'none',
+            })
+          },
         })
       } else {
         uni.request({

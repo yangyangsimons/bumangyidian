@@ -98,7 +98,10 @@ export const useWebSocketStore = defineStore('websocket', () => {
             try {
               socketTask = uni.connectSocket({
                 url: `${wsUrl}/content/ws`,
-                header: { Authorization: `bearer ${token}` },
+                header: {
+                  Authorization: `bearer ${token}`,
+                  is_yk: token ? '0' : '1',
+                },
                 success: () => {
                   console.log('WebSocket连接请求已发送')
                 },
@@ -154,7 +157,7 @@ export const useWebSocketStore = defineStore('websocket', () => {
               })
 
               socketTask.onClose(() => {
-                console.log('WebSocket连接已关闭')
+                console.log('WebSocket连接已关闭......')
                 isConnected.value = false
                 isConnecting.value = false
                 socketTask = null
@@ -211,7 +214,6 @@ export const useWebSocketStore = defineStore('websocket', () => {
   }
 
   const close = async () => {
-    console.log('关闭WebSocket连接')
     return ensureSocketClosed()
   }
 

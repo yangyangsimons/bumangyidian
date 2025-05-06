@@ -3,8 +3,12 @@
     <image class="global-title" src="../../static/global-title.png"></image>
     <!-- <uni-nav-bar title="不芒一点" left-icon="left" /> -->
     <view class="header">
-      <text class="title">Hello</text>
-      <text class="describe">这是你的专属电台,先认识下吧</text>
+      <view class="title"
+        ><text>Hello</text>
+        <view class="bar"></view>
+      </view>
+
+      <text class="describe">填写基本信息，解锁更懂你的 AI 体验</text>
     </view>
     <view class="main">
       <view class="sex-container">
@@ -115,6 +119,16 @@
         },
         fail: (error) => {
           console.log('出生日期存储失败:', error)
+        },
+      })
+      uni.setStorage({
+        key: 'isFirst',
+        data: true,
+        success: (result) => {
+          console.log('首次使用存储成功:', result)
+        },
+        fail: (error) => {
+          console.log('首次使用存储失败:', error)
         },
       })
     } else {

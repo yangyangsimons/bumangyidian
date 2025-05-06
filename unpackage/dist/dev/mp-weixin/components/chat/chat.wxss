@@ -65,6 +65,69 @@
   border-radius: 60rpx;
   background-color: transparent;
 }
+.chat-container .input-container-text.mainbox.data-v-5a9fb32a {
+  position: relative;
+  overflow: hidden;
+  padding: 1px;
+}
+.chat-container .input-container-text.mainbox .moving-element.data-v-5a9fb32a {
+  position: absolute;
+  top: 0;
+  left: 60rpx;
+  width: 120rpx;
+  height: 10rpx;
+  background: linear-gradient(90deg, transparent 0%, #a9ec2c 100%);
+  border-radius: 17rpx;
+  animation: moveAround-5a9fb32a 20s linear infinite;
+  transform: translate(-60rpx, -5rpx);
+}
+@keyframes moveAround-5a9fb32a {
+0% {
+    left: 17rpx;
+    top: 0rpx;
+}
+  /* 左上角起点 */
+43.64% {
+    left: 559rpx;
+    top: 0rpx;
+}
+  /* 右上角 */
+50% {
+    left: 576rpx;
+    top: 17rpx;
+}
+  /* 右上转弯 */
+56.36% {
+    left: 576rpx;
+    top: 67rpx;
+}
+  /* 右边 */
+62.73% {
+    left: 559rpx;
+    top: 84rpx;
+}
+  /* 右下转弯 */
+93.64% {
+    left: 17rpx;
+    top: 84rpx;
+}
+  /* 左下角 */
+94.70% {
+    left: 0rpx;
+    top: 67rpx;
+}
+  /* 左下转弯 */
+98.80% {
+    left: 0rpx;
+    top: 17rpx;
+}
+  /* 左边 */
+100% {
+    left: 17rpx;
+    top: 0rpx;
+}
+  /* 回到起点 */
+}
 .chat-container .input-container-text.data-v-5a9fb32a {
   position: relative;
   display: flex;
@@ -101,15 +164,97 @@
   height: 70rpx;
   position: absolute;
   top: 50%;
-  right: 5rpx;
+  right: 10rpx;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  /* 注意z-index层级关系，依次递减 */
+  /* 注意动画延后animation-delay播放，依次递增 */
+  /* 至于小圆球则越来越小 */
 }
 .chat-container .input-container-text .send .send-icon.data-v-5a9fb32a {
+  width: 50rpx;
+  height: 50rpx;
+}
+.chat-container .input-container-text .send .send-icon.send-fly.data-v-5a9fb32a {
   width: 36rpx;
   height: 36rpx;
+}
+.chat-container .input-container-text .send .send.wrap.data-v-5a9fb32a {
+  width: 90rpx;
+  height: 90rpx;
+  top: 30%;
+  /* transform-origin: 设置的效果搭配边框看，效果更加明显 */
+  /* border: 1px solid #e9e9e9; */
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a {
+  top: 15%;
+  position: absolute;
+  width: 5rpx;
+  height: 5rpx;
+  border-radius: 50%;
+  /* 加上动画效果 */
+  animation: circleRound-5a9fb32a 2.3s ease infinite;
+  /* 设置旋转中心，搭配.wrap的border看 */
+  transform-origin: 50% 25rpx;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(1) {
+  z-index: 7;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(2) {
+  height: 12rpx;
+  width: 12rpx;
+  background-color: #cdf91d;
+  animation-delay: 0.2s;
+  z-index: 6;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(3) {
+  height: 11rpx;
+  width: 11rpx;
+  background-color: #cdf91d;
+  animation-delay: 0.4s;
+  z-index: 5;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(4) {
+  height: 10rpx;
+  width: 10rpx;
+  background-color: #cdf91d;
+  animation-delay: 0.6s;
+  z-index: 4;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(5) {
+  height: 9rpx;
+  width: 9rpx;
+  background-color: #cdf91d;
+  animation-delay: 0.8s;
+  z-index: 3;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(6) {
+  height: 8rpx;
+  width: 8rx;
+  background-color: #cdf91d;
+  animation-delay: 1s;
+  z-index: 2;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(7) {
+  height: 7rpx;
+  width: 7rpx;
+  background-color: #cdf91d;
+  animation-delay: 1.2s;
+  z-index: 1;
+}
+.chat-container .input-container-text .send .round.data-v-5a9fb32a:nth-child(8) {
+  height: 6rpx;
+  width: 6rpx;
+  background-color: #cdf91d;
+  animation-delay: 1.4s;
+  z-index: 1;
+}
+@keyframes circleRound-5a9fb32a {
+to {
+    transform: rotate(1turn);
+}
 }
 .chat-container .voice-icon.data-v-5a9fb32a {
   width: 84rpx;

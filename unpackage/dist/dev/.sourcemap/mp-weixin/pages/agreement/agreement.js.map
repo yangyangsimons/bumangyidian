@@ -1,0 +1,1 @@
+{"version":3,"file":"agreement.js","sources":["pages/agreement/agreement.vue?type=page"],"sourcesContent":["import MiniProgramPage from '/Users/lynnyang/work/project/xjlab/HBuilderProjects/bumangyidian/pages/agreement/agreement.vue'\nwx.createPage(MiniProgramPage)"],"names":["MiniProgramPage"],"mappings":";;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,WAAWA,SAAe;"}

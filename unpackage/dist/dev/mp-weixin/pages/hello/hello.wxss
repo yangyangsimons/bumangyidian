@@ -58,8 +58,16 @@
   font-weight: 700;
   color: #1a1c1e;
 }
+.hello-container .header .title .bar.data-v-dc3958f6 {
+  width: 100%;
+  height: 12rpx;
+  background: linear-gradient(90deg, #d3f84f 0%, #a7ee27 100%);
+  border-radius: 6rpx;
+  margin-top: -38rpx;
+}
 .hello-container .header .describe.data-v-dc3958f6 {
-  font-size: 48rpx;
+  margin-top: 16rpx;
+  font-size: 40rpx;
   color: #101213;
   font-weight: 500;
 }

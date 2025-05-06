@@ -42,6 +42,7 @@
   position: absolute;
   top: 0;
   left: 0;
+  z-index: -1;
 }
 .cover .subject-container.data-v-1cf27b2a {
   margin-left: 40rpx;
@@ -61,16 +62,26 @@
 }
 .cover .subject-container .subject-scroll-view.data-v-1cf27b2a {
   width: 100%;
+  overflow: hidden;
   white-space: nowrap;
+  -webkit-mask: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+          mask: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
   /* 隐藏滚动条 */
 }
 .cover .subject-container .subject-scroll-view.data-v-1cf27b2a::-webkit-scrollbar {
   display: none;
 }
+.cover .subject-container .marquee-content.data-v-1cf27b2a {
+  display: inline-flex;
+  white-space: nowrap;
+}
 .cover .subject-container .subject.data-v-1cf27b2a {
   display: inline-block;
   white-space: nowrap;
   padding-right: 40rpx;
+}
+.cover .subject-container .space.data-v-1cf27b2a {
+  width: 60rpx;
 }
 .cover .barrage-container.data-v-1cf27b2a {
   width: 100%;
@@ -81,13 +92,13 @@
 }
 .cover .changeModel.data-v-1cf27b2a {
   position: absolute;
-  width: 174rpx;
+  width: 195rpx;
   height: 80rpx;
   top: 244rpx;
   right: 0;
   z-index: 10;
   color: white;
-  border-radius: 12rpx 0px, 0px, 12rpx;
+  border-radius: 12rpx 0px 0px 12rpx;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
@@ -124,7 +135,7 @@
   border-radius: 50%;
   width: 50rpx;
   height: 50rpx;
-  animation: shine-1cf27b2a 1s infinite alternate;
+  animation: shine 1s infinite alternate;
 }
 .cover .shine-point .shining-text.data-v-1cf27b2a {
   position: absolute;
@@ -142,14 +153,6 @@
   background: rgba(26, 28, 30, 0.54);
   white-space: normal;
   box-sizing: border-box;
-}
-@keyframes shine-1cf27b2a {
-from {
-    box-shadow: 0 0 5rpx rgba(242, 242, 240, 0.5);
-}
-to {
-    box-shadow: 0 0 10rpx rgba(63, 63, 62, 0.9);
-}
 }
 .popupshow.data-v-1cf27b2a {
   position: absolute;

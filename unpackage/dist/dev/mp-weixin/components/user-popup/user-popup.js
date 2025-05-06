@@ -7,6 +7,7 @@ const stores_websocket = require("../../stores/websocket.js");
 const stores_barrage = require("../../stores/barrage.js");
 const stores_model = require("../../stores/model.js");
 const stores_audioPlayer = require("../../stores/audioPlayer.js");
+const stores_toggleModelStore = require("../../stores/toggleModelStore.js");
 if (!Array) {
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
   _easycom_uni_popup2();
@@ -18,6 +19,8 @@ if (!Math) {
 const _sfc_main = {
   __name: "user-popup",
   setup(__props, { expose: __expose }) {
+    const modelStore = stores_model.useModelStore();
+    const toggleModelStore = stores_toggleModelStore.useToggleModelStore();
     stores_websocket.useWebSocketStore();
     const audioPlayerStore = stores_audioPlayer.useAudioPlayerStore();
     stores_barrage.useBarrageStore();
@@ -39,38 +42,13 @@ const _sfc_main = {
       try {
         const toneRes = await utils_request.request(`${utils_config.baseUrl}/tone/query`, "get");
         if (toneRes.code === 0) {
-          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:115", "获取音色信息成功", toneRes.data);
+          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:118", "获取音色信息成功", toneRes.data);
           tones.value = toneRes.data;
         } else {
-          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:120", "获取音色信息失败", toneRes.message);
-        }
-        const userInfoRes = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "get");
-        if (userInfoRes.code === 0) {
-          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:124", "获取用户信息成功", userInfoRes.data);
-          user.value = userInfoRes.data;
-          avator.value = userInfoRes.data.avator;
-          toneId.value = userInfoRes.data.tone;
-          userName.value = userInfoRes.data.username;
-          userAge.value = calculateAge(userInfoRes.data.birth);
-          userMbtiShort.value = userInfoRes.data.mbti;
-          userMbti.value = userInfoRes.data.mbti_ch;
-          userSex.value = userInfoRes.data.sex;
-          sexSrc.value = userSex.value === "男" ? "../../static/male.png" : "../../static/female.png";
-          if (toneId.value && tones.value.length > 0) {
-            tones.value.forEach((item) => {
-              item.active = item.id === toneId.value;
-              if (item.active) {
-                selectedToneId.value = item.id;
-                currentTone.value = item;
-                currentTonePath.value = item.path;
-              }
-            });
-          }
-        } else {
-          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:153", "获取用户信息失败", userInfoRes.message);
+          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:123", "获取音色信息失败", toneRes.message);
         }
       } catch (e) {
-        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:156", "获取音色信息失败", e);
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:126", "获取音色信息失败", e);
       }
     });
     const calculateAge = (birthDateString) => {
@@ -95,7 +73,7 @@ const _sfc_main = {
       return age;
     };
     const toneClick = (id, index) => {
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:192", "点击音色", id, index);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:162", "点击音色", id, index);
       tones.value.forEach((item, i) => {
         item.active = i === index;
       });
@@ -103,9 +81,10 @@ const _sfc_main = {
       currentTone.value = tones.value[index];
       const selectedTone = tones.value.find((item) => item.id === id);
       if (selectedTone) {
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:173", "选中的音色", selectedTone);
         currentTonePath.value = selectedTone.path;
       } else {
-        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:205", "未找到对应的音色项");
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:176", "未找到对应的音色项");
       }
       tryListen();
     };
@@ -116,16 +95,17 @@ const _sfc_main = {
       }
       audioPlayer.value = common_vendor.index.createInnerAudioContext();
       audioPlayer.value.onError((res) => {
-        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:220", "音频播放错误", res);
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:191", "音频播放错误", res);
       });
       audioPlayer.value.src = path;
       audioPlayer.value.play();
       audioPlayer.value.onEnded(() => {
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:230", "试听音频播放完成");
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:201", "试听音频播放完成");
+        audioPlayerStore.setTtsVolume(1);
       });
       audioPlayer.value.onPlay(() => {
-        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:234", "试听音频开始播放");
-        audioPlayerStore.setTtsVolume(0.1);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:206", "试听音频开始播放");
+        audioPlayerStore.setTtsVolume(0);
       });
     };
     const tryListen = () => {
@@ -147,19 +127,51 @@ const _sfc_main = {
         });
         return;
       }
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:266", "更新音色", selectedToneId.value);
+      if (audioPlayer.value) {
+        audioPlayer.value.stop();
+        audioPlayer.value.destroy();
+      }
+      audioPlayer.value = null;
+      audioPlayerStore.setTtsVolume(1);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:243", "更新音色", selectedToneId.value);
+      if (selectedToneId.value == 6 && modelStore.model !== "金种子杯模式") {
+        common_vendor.index.__f__(
+          "log",
+          "at components/user-popup/user-popup.vue:247",
+          "选了金种子，直接切换模式，不更新音色了",
+          selectedToneId.value
+        );
+        toggleModelStore.triggerModelChange();
+        return;
+      }
+      if (selectedToneId.value == 6 && modelStore.model == "金种子杯模式") {
+        common_vendor.index.__f__(
+          "log",
+          "at components/user-popup/user-popup.vue:256",
+          "金种子杯模式下选中的是音色6，什么都不做",
+          selectedToneId.value
+        );
+      }
       const res = await utils_request.request(`${utils_config.baseUrl}/tone/update`, "post", {
         tone_id: selectedToneId.value
       });
       if (res.code === 0) {
         audioPlayerStore.setTtsVolume(1);
-        audioPlayer.value.stop();
-        audioPlayer.value.destroy();
-        audioPlayer.value = null;
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:268", "触发模式切换逻辑", selectedToneId.value);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:269", "触发模式切换逻辑", modelStore.model);
         common_vendor.index.showToast({
           title: "音色更新成功",
           icon: "success"
         });
+        if (modelStore.model == "金种子杯模式" && selectedToneId.value !== 6) {
+          common_vendor.index.__f__(
+            "log",
+            "at components/user-popup/user-popup.vue:277",
+            "金种子杯模式下面选了不是6的音色，触发模式切换逻辑",
+            selectedToneId.value
+          );
+          toggleModelStore.triggerModelChange();
+        }
       } else {
         common_vendor.index.showToast({
           title: "请稍后再试",
@@ -171,7 +183,7 @@ const _sfc_main = {
       common_vendor.index.chooseImage({
         count: 1,
         success: async (res) => {
-          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:294", "选择的头像", res.tempFilePaths[0]);
+          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:297", "选择的头像", res.tempFilePaths[0]);
           const avatorFile = res.tempFilePaths[0];
           common_vendor.index.getFileSystemManager().readFile({
             filePath: avatorFile,
@@ -186,14 +198,14 @@ const _sfc_main = {
                     pic_base64: base64String
                   }
                 );
-                common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:314", "头像上传成功", uploadResult);
+                common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:317", "头像上传成功", uploadResult);
                 common_vendor.index.showToast({
                   title: "头像更新成功",
                   icon: "success"
                 });
                 avator.value = uploadResult.data.avator_url;
               } catch (error) {
-                common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:321", "头像上传失败", error);
+                common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:324", "头像上传失败", error);
                 common_vendor.index.showToast({
                   title: "头像更新成功",
                   icon: "success"
@@ -201,7 +213,7 @@ const _sfc_main = {
               }
             },
             fail: (error) => {
-              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:329", "读取文件失败", error);
+              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:332", "读取文件失败", error);
               common_vendor.index.showToast({
                 title: "头像更新成功",
                 icon: "success"
@@ -210,7 +222,7 @@ const _sfc_main = {
           });
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:338", "选择头像失败", error);
+          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:341", "选择头像失败", error);
         }
       });
     };
@@ -243,9 +255,9 @@ const _sfc_main = {
                   title: "昵称修改成功",
                   icon: "success"
                 });
-                const modelStore = stores_model.useModelStore();
-                if (modelStore.userInfo) {
-                  modelStore.updateUserInfo({ username: res.content });
+                const modelStore2 = stores_model.useModelStore();
+                if (modelStore2.userInfo) {
+                  modelStore2.updateUserInfo({ username: res.content });
                 }
               } else {
                 common_vendor.index.showToast({
@@ -254,7 +266,7 @@ const _sfc_main = {
                 });
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:388", "修改昵称失败", error);
+              common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:391", "修改昵称失败", error);
               common_vendor.index.showToast({
                 title: "网络错误，请稍后再试",
                 icon: "none"
@@ -271,11 +283,64 @@ const _sfc_main = {
     };
     const userPopupRef = common_vendor.ref(null);
     const popupChange = (e) => {
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:407", "popupChange", e);
-      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:408", "状态", e.show);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:410", "popupChange", e);
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:411", "状态", e.show);
     };
-    const open = () => {
+    const open = async () => {
+      try {
+        const userInfoRes = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "get");
+        if (userInfoRes.code === 0) {
+          common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:418", "获取用户信息成功", userInfoRes.data);
+          user.value = userInfoRes.data;
+          avator.value = userInfoRes.data.avator;
+          toneId.value = userInfoRes.data.tone;
+          common_vendor.index.setStorage({
+            key: "toneId",
+            data: toneId.value
+          });
+          userName.value = userInfoRes.data.username;
+          userAge.value = calculateAge(userInfoRes.data.birth);
+          userMbtiShort.value = userInfoRes.data.mbti;
+          userMbti.value = userInfoRes.data.mbti_ch;
+          userSex.value = userInfoRes.data.sex;
+          sexSrc.value = userSex.value === "男" ? "../../static/male.png" : "../../static/female.png";
+          if (toneId.value && tones.value.length > 0) {
+            tones.value.forEach((item) => {
+              item.active = item.id === toneId.value;
+              if (item.active) {
+                selectedToneId.value = item.id;
+                currentTone.value = item;
+                currentTonePath.value = item.path;
+              }
+            });
+          }
+        } else {
+          common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:451", "获取用户信息失败", userInfoRes.message);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:454", "打开弹窗失败", error);
+      }
       userPopupRef.value.open("bottom");
+      if (modelStore.model === "金种子杯模式") {
+        const index = tones.value.findIndex((item) => item.id === 6);
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:460", "打开了音色页面，金种子杯模式");
+        autoClick(6, index);
+      }
+    };
+    const autoClick = (id, index) => {
+      common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:466", "点击音色", id, index);
+      tones.value.forEach((item, i) => {
+        item.active = i === index;
+      });
+      selectedToneId.value = id;
+      currentTone.value = tones.value[index];
+      const selectedTone = tones.value.find((item) => item.id === id);
+      if (selectedTone) {
+        common_vendor.index.__f__("log", "at components/user-popup/user-popup.vue:477", "选中的音色", selectedTone);
+        currentTonePath.value = selectedTone.path;
+      } else {
+        common_vendor.index.__f__("error", "at components/user-popup/user-popup.vue:480", "未找到对应的音色项");
+      }
     };
     const close = () => {
       userPopupRef.value.close();
@@ -290,13 +355,13 @@ const _sfc_main = {
         b: avator.value,
         c: common_vendor.o(changeAvator),
         d: common_vendor.t(userName.value),
-        e: common_assets._imports_1$4,
+        e: common_assets._imports_1$6,
         f: common_vendor.o(changeName),
         g: common_vendor.t(userAge.value),
         h: sexSrc.value,
         i: common_vendor.t(userMbti.value),
         j: common_vendor.t(userMbtiShort.value),
-        k: common_assets._imports_1$4,
+        k: common_assets._imports_1$6,
         l: common_vendor.o(changeMbti),
         m: common_vendor.f(tones.value, (item, index, i0) => {
           return {
