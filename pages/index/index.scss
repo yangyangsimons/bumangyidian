@@ -141,4 +141,74 @@
             box-sizing: border-box; // 确保padding和border在宽度计算中
         }
     }
+    .ad-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        z-index: 100;
+        .img-container {
+            // border: 1px solid #fff;
+            border-radius: 20rpx;
+            position: absolute;
+            box-sizing: border-box;
+            // background-color: red;
+            top: 300rpx;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600rpx;
+            height: 800rpx;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            .ad-swiper {
+                width: 100%;
+                height: 100%;
+                border-radius: 20rpx;
+                overflow: hidden;
+                .ad-image {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 20rpx;
+                }
+            }
+            .custom-indicators {
+                position: absolute;
+                top: 820rpx;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                .indicator-dot {
+                    width: 15rpx;
+                    height: 15rpx;
+                    border-radius: 50%;
+                    background-color: rgba(255, 255, 255, 0.5);
+                    margin-right: 10rpx;
+                    opacity: 0.5;
+                    &.active {
+                        background-color: rgba(255, 255, 255, 1);
+                        opacity: 1;
+                    }
+                }
+                .indicator-dot:last-child {
+                    margin-right: 0;
+                }
+                .indicator-dot.active {
+                    background-color: rgba(255, 255, 255, 1);
+                }
+            }
+        }
+        .close {
+            position: absolute;
+            top: 1160rpx;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64rpx;
+            height: 64rpx;
+        }
+    }
 }
