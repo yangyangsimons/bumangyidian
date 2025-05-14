@@ -83,6 +83,7 @@
   // 导入音频播放器状态管理
   import { useAudioPlayerStore } from '@/stores/audioPlayer'
   import { useToggleModelStore } from '../../stores/toggleModelStore'
+  import { dmReport } from '../../utils/report'
 
   const modelStore = useModelStore()
   const toggleModelStore = useToggleModelStore()
@@ -110,6 +111,7 @@
   const userMbtiShort = ref('') // 用户MBTI类型简称
   const avator = ref('') // 用户头像
   const sexSrc = ref('') // 用户性别图标路径
+  const sptime = ref(0)
   onShow(async () => {
     // 页面显示时，获取用户信息
     try {
@@ -171,6 +173,20 @@
     //更新音色试听的path
     if (selectedTone) {
       console.log('选中的音色', selectedTone)
+      //上报选中音色
+      dmReport(
+        'click',
+        {},
+        {
+          page: 'userInfo',
+          contents: [
+            {
+              element_id: 'content',
+              element_content: `${selectedTone.name}`,
+            },
+          ],
+        }
+      )
       currentTonePath.value = selectedTone.path
     } else {
       console.error('未找到对应的音色项')
@@ -227,6 +243,19 @@
 
   // 更新音色按钮点击事件
   const updateTone = async () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'userInfo',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: `确认`,
+          },
+        ],
+      }
+    )
     if (!selectedToneId.value) {
       uni.showToast({
         title: '请先选择音色',
@@ -291,6 +320,19 @@
   //更换头像
   // 更换头像
   const changeAvator = async () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'userInfo',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: `修改头像`,
+          },
+        ],
+      }
+    )
     uni.chooseImage({
       count: 1,
       success: async (res) => {
@@ -344,6 +386,19 @@
   }
   //更换名字
   const changeName = async () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'userInfo',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: `修改昵称`,
+          },
+        ],
+      }
+    )
     uni.showModal({
       title: '修改昵称（不超过9个字）',
       editable: true,
@@ -400,6 +455,19 @@
   }
   //更换mbti
   const changeMbti = async () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'userInfo',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: `修改MBTI`,
+          },
+        ],
+      }
+    )
     uni.reLaunch({
       url: '/pages/questionnaire/questionnaire?changeMbti=changeMbti',
     })
@@ -409,9 +477,37 @@
   const popupChange = (e) => {
     console.log('popupChange', e)
     console.log('状态', e.show)
+    if (!e.show) {
+      const endTime = new Date().getTime()
+      const duration = endTime - sptime.value
+      dmReport(
+        'stay',
+        {},
+        {
+          contents: [
+            {
+              page: 'userInfo',
+              sptime: duration,
+            },
+          ],
+        }
+      )
+    }
   }
   // 暴露方法以便父组件调用
   const open = async () => {
+    sptime.value = new Date().getTime()
+    dmReport(
+      'pv',
+      {},
+      {
+        contents: [
+          {
+            page: 'userInfo',
+          },
+        ],
+      }
+    )
     try {
       const userInfoRes = await request(`${baseUrl}/user/user_info`, 'get')
       if (userInfoRes.code === 0) {
@@ -483,6 +579,7 @@
 
   const close = () => {
     userPopupRef.value.close()
+    console.log('关闭弹窗')
   }
 
   // 将方法暴露给父组件

@@ -125,6 +125,7 @@
   import { subjectShowStore } from '../../stores/subjectShow'
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import request from '@/utils/request'
+  import { dmReport } from '../../utils/report'
 
   // 获取placeholder store
   const placeholderStore = usePlaceholderStore()
@@ -195,6 +196,19 @@
   //控制用户信息弹窗
 
   const toggleUserPopup = () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '点击用户信息弹窗',
+          },
+        ],
+      }
+    )
     if (isRadio.value) {
       uni.showToast({
         title: '电台模式下无法查看用户信息',
@@ -209,6 +223,19 @@
   // 监听键盘高度变化
   const onInputFocus = (e) => {
     console.log('输入框获取焦点', e)
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '点击文字输入框',
+          },
+        ],
+      }
+    )
     // 判断是否已经登录过了，token是否存在
     const token = uni.getStorageSync('token')
     if (!token) {
@@ -254,14 +281,53 @@
     // 这里可以添加逻辑来切换输入类型
     console.log('切换到文字模式')
     showText.value = false
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '切换到文字输入',
+          },
+        ],
+      }
+    )
   }
   const changeInputTypeToVoice = () => {
     console.log('切换到语音模式')
     showText.value = true
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '切换到语音输入',
+          },
+        ],
+      }
+    )
   }
 
   // 录音开始
   const startRecord = () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '按住说话',
+          },
+        ],
+      }
+    )
     audioPlayerStore.setTtsVolume(0)
     console.log('开始录音')
     recordingStore.startRecording()
@@ -316,6 +382,19 @@
 
   // 提交消息
   const handleSubmit = () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '点击发送按钮',
+          },
+        ],
+      }
+    )
     if (!sendAble.value) {
       console.log('不能发送消息')
       uni.showLoading({
@@ -389,6 +468,19 @@
   }
   // 停止电台
   const stopRadio = () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '暂停电台播放',
+          },
+        ],
+      }
+    )
     radioPlay.value = false
     console.log('停止电台')
     audioPlayerStore.pauseBgMusic()
@@ -396,6 +488,19 @@
   }
   // 恢复电台
   const resumeRadio = () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '恢复电台播放',
+          },
+        ],
+      }
+    )
     radioPlay.value = true
     console.log('恢复电台')
     try {
@@ -439,6 +544,19 @@
   })
 
   const radioInputtap = () => {
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '电台模式点击输入框',
+          },
+        ],
+      }
+    )
     radioText.value = '长按退出电台,可以聊天哦'
     setTimeout(() => {
       radioText.value = '电台播出中'
@@ -446,10 +564,25 @@
   }
   const backToQA = () => {
     console.log('返回问答')
+    //上报退出电台
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: '长按退出电台',
+          },
+        ],
+      }
+    )
     audioPlayerStore.stopAllAudio()
     modelStore.setModel('QA模式')
     isRadioStore.setIsRadio(false)
     subjectShow.setSubjectShow(true)
+    sendStore.setSend(true)
   }
 </script>
 

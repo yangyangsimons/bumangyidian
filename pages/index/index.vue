@@ -62,6 +62,43 @@
       <barrage />
     </view>
     <chat @submit="handleSubmit" />
+    <view class="ad-container" v-if="showAd">
+      <view class="img-container">
+        <swiper
+          class="ad-swiper"
+          :indicator-dots="showDots"
+          :autoplay="autoplay"
+          :interval="interval"
+          :duration="duration"
+          :circular="circular"
+          @change="handleAdChange"
+        >
+          <swiper-item
+            v-for="(imageUrl, index) in adList"
+            :key="index"
+            class="swiper-item"
+          >
+            <image
+              :src="imageUrl"
+              class="ad-image"
+              mode="aspectFill"
+              @tap="handleAdClick(index)"
+            />
+          </swiper-item>
+        </swiper>
+
+        <!-- 自定义指示点 -->
+        <view class="custom-indicators">
+          <view
+            v-for="(_, index) in adList"
+            :key="index"
+            class="indicator-dot"
+            :class="{ active: current === index }"
+          ></view>
+        </view>
+      </view>
+      <img class="close" src="../../static/close.png" @tap="handleAdClose" />
+    </view>
     <guide />
   </view>
 </template>
@@ -84,6 +121,7 @@
   import { useWebSocketStore } from '@/stores/websocket'
   import { useBarrageStore } from '../../stores/barrage'
   import { useModelStore } from '../../stores/model'
+  import { dmReport } from '../../utils/report'
   // 导入音频播放器状态管理
   import { useAudioPlayerStore } from '@/stores/audioPlayer'
   import recordAnimation from '../../components/record-animation/record-animation.vue'
@@ -93,8 +131,18 @@
   import { subjectShowStore } from '../../stores/subjectShow'
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import { useToggleModelStore } from '../../stores/toggleModelStore'
-
+  const showAd = ref(false)
+  const adList = ref([])
+  const showDots = ref(false)
   const toggleModelStore = useToggleModelStore()
+  const sptime = ref(0)
+  const current = ref(0)
+  const handleAdClose = () => {
+    showAd.value = false
+  }
+  const handleAdChange = (e) => {
+    current.value = e.detail.current
+  }
 
   // 监听 store 中的状态变化
   watch(
@@ -276,12 +324,38 @@
       console.log('清空消息列表')
       // 更新状态管理
       if (currentModel.value === '金种子杯模式') {
+        dmReport(
+          'click',
+          {},
+          {
+            page: 'homePage',
+            contents: [
+              {
+                element_id: 'content',
+                element_content: '点击切换到金种子',
+              },
+            ],
+          }
+        )
         //更新随机的placeholder
 
         modelStore.setModel('金种子杯模式')
         placeholderStore.setRandomSpecialPlaceholder()
         isRadioStore.setIsRadio(false)
       } else {
+        dmReport(
+          'click',
+          {},
+          {
+            page: 'homePage',
+            contents: [
+              {
+                element_id: 'content',
+                element_content: '点击切换到常规模式',
+              },
+            ],
+          }
+        )
         modelStore.setModel('常规模式')
         placeholderStore.setRandomNormalPlaceholder()
       }
@@ -393,9 +467,32 @@
   }
 
   onShow(async () => {
+    sptime.value = new Date().getTime()
+    dmReport(
+      'pv',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            page: 'homePage',
+          },
+        ],
+      }
+    )
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
+      //从后端获取是否有广告
+      const adRes = await request(
+        `${baseUrl}/system/get_valid_notify_pic`,
+        'GET'
+      )
+      console.log('获取广告', adRes)
+      if (adRes.code == 0 && adRes.data.length > 0) {
+        adList.value = adRes.data
+        showAd.value = true
+      }
       // 获取当前主题
       const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')
       console.log('获取当前主题', currentSubject.data.topic)
@@ -443,6 +540,16 @@
 
   onHide(async () => {
     // 页面隐藏时关闭WebSocket连接
+    const endTime = new Date().getTime()
+    const duration = endTime - sptime.value
+    dmReport(
+      'stay',
+      {},
+      {
+        page: 'homePage',
+        sptime: duration,
+      }
+    )
     console.log('onHide主页面隐藏')
 
     // 上报当前音频播放状态
@@ -455,7 +562,8 @@
       console.log('电台模式下不停止背景音乐onHide', isRadio.value)
       audioPlayerStore.stopTtsAudio()
     } else {
-      audioPlayerStore.stopAllAudio()
+      // audioPlayerStore.stopAllAudio()
+      audioPlayerStore.stopTtsAudio()
       barrageStore.clearMessages()
       console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
       // 清空消息列表
