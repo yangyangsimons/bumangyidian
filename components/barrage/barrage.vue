@@ -14,7 +14,10 @@
             v-for="msg in messages"
             :key="msg.id"
             class="message-bubble"
-            :class="{ user: msg.type === 'user' }"
+            :class="{
+              user: msg.type === 'user',
+              leaveMessage: msg.type === 'leaveMessage',
+            }"
           >
             <view class="content-box">
               <text class="content">

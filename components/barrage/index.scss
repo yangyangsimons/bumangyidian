@@ -91,6 +91,22 @@
                     }
                 }
             }
+            view.message-bubble.leaveMessage {
+                justify-content: center;
+                max-width: 100%;
+                min-width: 150rpx;
+
+                .content-box {
+                    background: none;
+                    .content {
+                        color: #acacac;
+                    }
+
+                    .type {
+                        color: rgba(26, 28, 30, 0.5);
+                    }
+                }
+            }
         }
     }
 }

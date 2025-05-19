@@ -4,7 +4,8 @@
     "pages/hello/hello",
     "pages/questionnaire/questionnaire",
     "pages/index/index",
-    "pages/agreement/agreement"
+    "pages/agreement/agreement",
+    "pages/ad/ad"
   ],
   "window": {
     "navigationBarTextStyle": "black",

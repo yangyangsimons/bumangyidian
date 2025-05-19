@@ -74,6 +74,7 @@
         class="input-voice-icon"
         src="../../static/radio.png"
         mode="scaleToFill"
+        @longpress="backToQA"
       />
       <input
         type="text"
@@ -81,21 +82,33 @@
         :placeholder-style="inputColor"
         class="input-field-text"
         adjust-position="true"
-        disabled
-        @tap="radioInputtap"
-        @longpress="backToQA"
+        :value="radioInputMessage"
+        @focus="radioInputFocus"
+        @input="onRadioKeyInput"
+        @blur="onRadioInputBlur"
       />
-      <view class="send" @tap.stop="stopRadio" v-if="radioPlay">
+      <view class="send" @tap.stop="stopRadio" v-if="radioPlay && !radioInput">
         <image
           class="send-icon"
           src="../../static/play.png"
           mode="scaleToFill"
         />
       </view>
-      <view class="send" v-if="!radioPlay" @tap.stop="resumeRadio">
+      <view
+        class="send"
+        v-if="!radioPlay && !radioInput"
+        @tap.stop="resumeRadio"
+      >
         <image
           class="send-icon"
           src="../../static/stop.png"
+          mode="scaleToFill"
+        />
+      </view>
+      <view class="send" @click="handleRadioInputSubmit" v-if="radioInput">
+        <image
+          class="send-icon send-fly"
+          src="../../static/send-icon.png"
           mode="scaleToFill"
         />
       </view>
@@ -126,11 +139,15 @@
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import request from '@/utils/request'
   import { dmReport } from '../../utils/report'
+  import { on } from 'events'
 
+  //电台模式下输入框监控
+  const radioInput = ref(false)
+  const radioInputMessage = ref('')
   // 获取placeholder store
   const placeholderStore = usePlaceholderStore()
   const subjectShow = subjectShowStore()
-  const radioText = ref('电台播出中')
+  const radioText = ref('长按左侧图标退出电台')
   const audioPlayerStore = useAudioPlayerStore()
   const sbStore = useSubjectStore()
   const wsStore = useWebSocketStore()
@@ -400,6 +417,7 @@
       uni.showLoading({
         title: '加载中',
         mask: true,
+        duration: 1000,
       })
       return
     }
@@ -557,9 +575,9 @@
         ],
       }
     )
-    radioText.value = '长按退出电台,可以聊天哦'
+    radioText.value = '长按左侧图标退出电台'
     setTimeout(() => {
-      radioText.value = '电台播出中'
+      radioText.value = '电台播出中,长按左侧图标退出电台'
     }, 2000)
   }
   const backToQA = () => {
@@ -583,6 +601,58 @@
     isRadioStore.setIsRadio(false)
     subjectShow.setSubjectShow(true)
     sendStore.setSend(true)
+  }
+  // 电台模式下点击输入框允许发送
+  const onRadioKeyInput = (e) => {
+    console.log('电台模式下点击输入框允许发送')
+    console.log('电台模式下点击输入框允许发送', e)
+    radioInputMessage.value = e.detail.value
+  }
+  const radioInputFocus = (e) => {
+    console.log('电台模式下点击输入框允许发送')
+    console.log('电台模式下点击输入框允许发送', e)
+    radioInput.value = true
+  }
+  const handleRadioInputSubmit = async () => {
+    console.log('电台模式下点击发送按钮')
+    if (!radioInputMessage.value.trim()) return // 避免发送空消息
+    // 保存当前输入值
+    const currentInput = radioInputMessage.value
+
+    // 清空输入框
+    radioInputMessage.value = ''
+
+    //上传到服务器
+    const uploadMessage = await request(
+      `${baseUrl}/content/leave_message`,
+      'POST',
+      {
+        content: currentInput,
+      }
+    )
+    console.log('上传的消息:', uploadMessage)
+    if (uploadMessage.code === 0) {
+      uni.showToast({
+        title: '留言已收到',
+        icon: 'success',
+        duration: 1000,
+      })
+      barrageStore.addMessage({
+        type: 'leaveMessage',
+        content: currentInput,
+      })
+    } else {
+      uni.showToast({
+        title: '发送失败',
+        icon: 'none',
+        duration: 500,
+      })
+    }
+    //
+    radioInput.value = false
+  }
+  const onRadioInputBlur = () => {
+    radioInput.value = false
   }
 </script>
 

@@ -103,3 +103,17 @@
 .barrage-container .scroll-view .messages-wrapper .message-bubble.user .content-box .type.data-v-cddbe1be {
   color: rgba(26, 28, 30, 0.5);
 }
+.barrage-container .scroll-view .messages-wrapper view.message-bubble.leaveMessage.data-v-cddbe1be {
+  justify-content: center;
+  max-width: 100%;
+  min-width: 150rpx;
+}
+.barrage-container .scroll-view .messages-wrapper view.message-bubble.leaveMessage .content-box.data-v-cddbe1be {
+  background: none;
+}
+.barrage-container .scroll-view .messages-wrapper view.message-bubble.leaveMessage .content-box .content.data-v-cddbe1be {
+  color: #acacac;
+}
+.barrage-container .scroll-view .messages-wrapper view.message-bubble.leaveMessage .content-box .type.data-v-cddbe1be {
+  color: rgba(26, 28, 30, 0.5);
+}

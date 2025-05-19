@@ -65,6 +65,7 @@
     <view class="ad-container" v-if="showAd">
       <view class="img-container">
         <swiper
+          @click="adNav(index)"
           class="ad-swiper"
           :indicator-dots="showDots"
           :autoplay="autoplay"
@@ -139,6 +140,14 @@
   const current = ref(0)
   const handleAdClose = () => {
     showAd.value = false
+  }
+  const adNav = (index) => {
+    // 根据类型确定跳转的URL
+    const url =
+      '/pages/ad/ad?address=https://mp.weixin.qq.com/s/E0GNo-SGbGQuIJIqfdWd7A'
+
+    // 跳转到协议展示页面
+    uni.navigateTo({ url })
   }
   const handleAdChange = (e) => {
     current.value = e.detail.current
@@ -389,7 +398,7 @@
           modelStore.setModel('常规模式')
           await wsStore.sendMessage({
             system_model: currentModel.value,
-            input_type: 1,
+            input_type: 3,
             text: '',
           })
           console.log('模式切换消息发送成功')
@@ -513,6 +522,11 @@
           console.log('socket连接成功')
 
           // 发送连接成功的消息 - 仅在页面首次加载时
+          await wsStore.sendMessage({
+            system_model: currentModel.value,
+            input_type: 3,
+            text: '',
+          })
         }
       } else {
         // 尝试连接WebSocket
@@ -531,10 +545,6 @@
       }
     } catch (error) {
       console.error('页面显示时发生错误:', error)
-      uni.showToast({
-        title: '连接失败，请重试',
-        icon: 'none',
-      })
     }
   })
 
