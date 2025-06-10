@@ -8,6 +8,7 @@ const _sfc_main = {
       const pages = getCurrentPages();
       const currentPage = pages[pages.length - 1];
       adUrl.value = currentPage.options.address;
+      common_vendor.index.__f__("log", "at pages/ad/ad.vue:17", "广告链接:", adUrl.value);
     });
     return (_ctx, _cache) => {
       return {

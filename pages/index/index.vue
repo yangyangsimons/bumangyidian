@@ -65,7 +65,6 @@
     <view class="ad-container" v-if="showAd">
       <view class="img-container">
         <swiper
-          @click="adNav(index)"
           class="ad-swiper"
           :indicator-dots="showDots"
           :autoplay="autoplay"
@@ -75,16 +74,12 @@
           @change="handleAdChange"
         >
           <swiper-item
-            v-for="(imageUrl, index) in adList"
+            v-for="(imgObj, index) in adList"
             :key="index"
             class="swiper-item"
+            @click="adNav(imgObj.activity_url)"
           >
-            <image
-              :src="imageUrl"
-              class="ad-image"
-              mode="aspectFill"
-              @tap="handleAdClick(index)"
-            />
+            <image :src="imgObj.pic_url" class="ad-image" mode="aspectFill" />
           </swiper-item>
         </swiper>
 
@@ -141,10 +136,10 @@
   const handleAdClose = () => {
     showAd.value = false
   }
-  const adNav = (index) => {
+  const adNav = (adUrl) => {
     // 根据类型确定跳转的URL
-    const url =
-      '/pages/ad/ad?address=https://mp.weixin.qq.com/s/E0GNo-SGbGQuIJIqfdWd7A'
+    console.log('广告链接......:', adUrl)
+    const url = `/pages/ad/ad?address=${adUrl}`
 
     // 跳转到协议展示页面
     uni.navigateTo({ url })
@@ -494,7 +489,7 @@
       console.log('主页面显示')
       //从后端获取是否有广告
       const adRes = await request(
-        `${baseUrl}/system/get_valid_notify_pic`,
+        `${baseUrl}/system/get_activity_notify`,
         'GET'
       )
       console.log('获取广告', adRes)

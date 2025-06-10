@@ -14,6 +14,7 @@
     const pages = getCurrentPages()
     const currentPage = pages[pages.length - 1]
     adUrl.value = currentPage.options.address
+    console.log('广告链接:', adUrl.value)
   })
 </script>
 
