@@ -6214,14 +6214,14 @@ function populateParameters(fromRes, toRes) {
   let _SDKVersion = SDKVersion;
   const hostLanguage = (language || "").replace(/_/g, "-");
   const parameters = {
-    appId: "",
+    appId: "__UNI__FAB58FF",
     appName: "bumangyidian",
     appVersion: "1.0.0",
     appVersionCode: "100",
     appLanguage: getAppLanguage(hostLanguage),
-    uniCompileVersion: "4.64",
-    uniCompilerVersion: "4.64",
-    uniRuntimeVersion: "4.64",
+    uniCompileVersion: "4.66",
+    uniCompilerVersion: "4.66",
+    uniRuntimeVersion: "4.66",
     uniPlatform: "mp-weixin",
     deviceBrand,
     deviceModel: model,
@@ -6363,16 +6363,16 @@ const getAppBaseInfo = {
       hostName: _hostName,
       hostSDKVersion: SDKVersion,
       hostTheme: theme,
-      appId: "",
+      appId: "__UNI__FAB58FF",
       appName: "bumangyidian",
       appVersion: "1.0.0",
       appVersionCode: "100",
       appLanguage: getAppLanguage(hostLanguage),
       isUniAppX: false,
       uniPlatform: "mp-weixin",
-      uniCompileVersion: "4.64",
-      uniCompilerVersion: "4.64",
-      uniRuntimeVersion: "4.64"
+      uniCompileVersion: "4.66",
+      uniCompilerVersion: "4.66",
+      uniRuntimeVersion: "4.66"
     };
     extend(toRes, parameters);
   }
@@ -7112,9 +7112,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,172.21.108.80";
+  const hosts = "172.21.108.23,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_epyfVT";
+  const id = "mp-weixin_qq9CG6";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
