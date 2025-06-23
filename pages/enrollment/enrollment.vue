@@ -17,25 +17,21 @@
       </view>
 
       <!-- 用户图片显示区域 -->
-      <movable-area class="movable-area" v-if="userImage">
-        <movable-view
-          class="movable-view"
+      <view class="image-container" v-if="userImage">
+        <view
+          class="image-wrapper"
           :style="{
+            transform: `translate(${imageX}px, ${imageY}px) scale(${imageScale})`,
             width: imageWidth + 'px',
             height: imageHeight + 'px',
           }"
-          direction="all"
-          :x="imageX"
-          :y="imageY"
-          :scale="true"
-          :scale-min="0.5"
-          :scale-max="3"
-          @change="onImageChange"
-          @scale="onImageScale"
+          @touchstart="onTouchStart"
+          @touchmove="onTouchMove"
+          @touchend="onTouchEnd"
         >
           <image :src="userImage" mode="aspectFit" class="user-image"></image>
-        </movable-view>
-      </movable-area>
+        </view>
+      </view>
 
       <!-- 操作提示和重新选择按钮 -->
       <view class="controls" v-if="userImage">
@@ -67,6 +63,18 @@
   const imageWidth = ref(200)
   const imageHeight = ref(200)
   const imageScale = ref(1)
+
+  // 触摸相关数据
+  const touchData = ref({
+    startX: 0,
+    startY: 0,
+    startDistance: 0,
+    startScale: 1,
+    startImageX: 0,
+    startImageY: 0,
+    touching: false,
+    multiTouch: false,
+  })
 
   // 生命周期
   onMounted(() => {
@@ -112,15 +120,63 @@
     })
   }
 
-  // 图片移动和缩放事件（统一处理）
-  const onImageChange = (e) => {
-    imageX.value = e.detail.x
-    imageY.value = e.detail.y
+  // 计算两点间距离
+  const getDistance = (touch1, touch2) => {
+    const dx = touch1.clientX - touch2.clientX
+    const dy = touch1.clientY - touch2.clientY
+    return Math.sqrt(dx * dx + dy * dy)
   }
 
-  // 图片缩放事件
-  const onImageScale = (e) => {
-    imageScale.value = e.detail.scale
+  // 触摸开始
+  const onTouchStart = (e) => {
+    const touches = e.touches
+    touchData.value.touching = true
+
+    if (touches.length === 1) {
+      // 单指拖拽
+      touchData.value.multiTouch = false
+      touchData.value.startX = touches[0].clientX
+      touchData.value.startY = touches[0].clientY
+      touchData.value.startImageX = imageX.value
+      touchData.value.startImageY = imageY.value
+    } else if (touches.length === 2) {
+      // 双指缩放
+      touchData.value.multiTouch = true
+      touchData.value.startDistance = getDistance(touches[0], touches[1])
+      touchData.value.startScale = imageScale.value
+    }
+  }
+
+  // 触摸移动
+  const onTouchMove = (e) => {
+    if (!touchData.value.touching) return
+
+    e.preventDefault()
+    const touches = e.touches
+
+    if (touches.length === 1 && !touchData.value.multiTouch) {
+      // 单指拖拽
+      const deltaX = touches[0].clientX - touchData.value.startX
+      const deltaY = touches[0].clientY - touchData.value.startY
+
+      imageX.value = touchData.value.startImageX + deltaX
+      imageY.value = touchData.value.startImageY + deltaY
+    } else if (touches.length === 2) {
+      // 双指缩放
+      const currentDistance = getDistance(touches[0], touches[1])
+      const scaleRatio = currentDistance / touchData.value.startDistance
+      let newScale = touchData.value.startScale * scaleRatio
+
+      // 限制缩放范围
+      newScale = Math.max(0.5, Math.min(3, newScale))
+      imageScale.value = newScale
+    }
+  }
+
+  // 触摸结束
+  const onTouchEnd = (e) => {
+    touchData.value.touching = false
+    touchData.value.multiTouch = false
   }
 
   // 下载图片
@@ -172,8 +228,8 @@
         const userImgHeight = imageHeight.value * imageScale.value
         ctx.drawImage(
           userImage.value,
-          imageX.value,
-          imageY.value + 100, // 考虑上方内容的偏移
+          imageX.value + (canvasWidth - imageWidth.value) / 2, // 考虑居中偏移
+          imageY.value + 150, // 考虑上方内容的偏移
           userImgWidth,
           userImgHeight
         )
@@ -264,19 +320,28 @@
       }
     }
 
-    .movable-area {
+    .image-container {
       width: 100%;
       height: 400px;
       margin-top: 50px;
+      position: relative;
+      overflow: hidden;
 
-      .movable-view {
-        position: relative;
+      .image-wrapper {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-left: -100px; // imageWidth / 2
+        margin-top: -100px; // imageHeight / 2
+        touch-action: none;
+        transition: none;
 
         .user-image {
           width: 100%;
           height: 100%;
           border-radius: 10px;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          pointer-events: none;
         }
       }
     }

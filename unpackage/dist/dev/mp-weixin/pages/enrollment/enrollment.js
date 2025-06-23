@@ -12,6 +12,16 @@ const _sfc_main = {
     const imageWidth = common_vendor.ref(200);
     const imageHeight = common_vendor.ref(200);
     const imageScale = common_vendor.ref(1);
+    const touchData = common_vendor.ref({
+      startX: 0,
+      startY: 0,
+      startDistance: 0,
+      startScale: 1,
+      startImageX: 0,
+      startImageY: 0,
+      touching: false,
+      multiTouch: false
+    });
     common_vendor.onMounted(() => {
       getUserCount();
     });
@@ -19,7 +29,7 @@ const _sfc_main = {
       try {
         userCount.value = 8888;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:89", "获取用户数量失败:", error);
+        common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:97", "获取用户数量失败:", error);
       }
     };
     const chooseImage = () => {
@@ -41,12 +51,47 @@ const _sfc_main = {
         }
       });
     };
-    const onImageChange = (e) => {
-      imageX.value = e.detail.x;
-      imageY.value = e.detail.y;
+    const getDistance = (touch1, touch2) => {
+      const dx = touch1.clientX - touch2.clientX;
+      const dy = touch1.clientY - touch2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
     };
-    const onImageScale = (e) => {
-      imageScale.value = e.detail.scale;
+    const onTouchStart = (e) => {
+      const touches = e.touches;
+      touchData.value.touching = true;
+      if (touches.length === 1) {
+        touchData.value.multiTouch = false;
+        touchData.value.startX = touches[0].clientX;
+        touchData.value.startY = touches[0].clientY;
+        touchData.value.startImageX = imageX.value;
+        touchData.value.startImageY = imageY.value;
+      } else if (touches.length === 2) {
+        touchData.value.multiTouch = true;
+        touchData.value.startDistance = getDistance(touches[0], touches[1]);
+        touchData.value.startScale = imageScale.value;
+      }
+    };
+    const onTouchMove = (e) => {
+      if (!touchData.value.touching)
+        return;
+      e.preventDefault();
+      const touches = e.touches;
+      if (touches.length === 1 && !touchData.value.multiTouch) {
+        const deltaX = touches[0].clientX - touchData.value.startX;
+        const deltaY = touches[0].clientY - touchData.value.startY;
+        imageX.value = touchData.value.startImageX + deltaX;
+        imageY.value = touchData.value.startImageY + deltaY;
+      } else if (touches.length === 2) {
+        const currentDistance = getDistance(touches[0], touches[1]);
+        const scaleRatio = currentDistance / touchData.value.startDistance;
+        let newScale = touchData.value.startScale * scaleRatio;
+        newScale = Math.max(0.5, Math.min(3, newScale));
+        imageScale.value = newScale;
+      }
+    };
+    const onTouchEnd = (e) => {
+      touchData.value.touching = false;
+      touchData.value.multiTouch = false;
     };
     const downloadImage = () => {
       if (!userImage.value) {
@@ -83,8 +128,9 @@ const _sfc_main = {
           const userImgHeight = imageHeight.value * imageScale.value;
           ctx.drawImage(
             userImage.value,
-            imageX.value,
-            imageY.value + 100,
+            imageX.value + (canvasWidth - imageWidth.value) / 2,
+            // 考虑居中偏移
+            imageY.value + 150,
             // 考虑上方内容的偏移
             userImgWidth,
             userImgHeight
@@ -125,12 +171,12 @@ const _sfc_main = {
         e: userImage.value
       }, userImage.value ? {
         f: userImage.value,
-        g: imageWidth.value + "px",
-        h: imageHeight.value + "px",
-        i: imageX.value,
-        j: imageY.value,
-        k: common_vendor.o(onImageChange),
-        l: common_vendor.o(onImageScale)
+        g: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
+        h: imageWidth.value + "px",
+        i: imageHeight.value + "px",
+        j: common_vendor.o(onTouchStart),
+        k: common_vendor.o(onTouchMove),
+        l: common_vendor.o(onTouchEnd)
       } : {}, {
         m: userImage.value
       }, userImage.value ? {
