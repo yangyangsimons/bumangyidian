@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "danmaku-component": "../../components/DanmakuComponent/DanmakuComponent",
+    "barrage": "../../components/barrage/barrage",
+    "festival-chat": "../../components/festival-chat/festival-chat",
+    "guide": "../../components/guide/guide",
+    "record-animation": "../../components/record-animation/record-animation"
+  }
+}

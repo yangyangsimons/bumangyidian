@@ -1,0 +1,529 @@
+<template>
+  <view class="cover">
+    <image class="global-title" src="../../static/global-title.png"></image>
+
+    <!-- 当金种子杯模式有效时显示切换按钮 -->
+    <!-- <button
+      v-if="isGoldModeAvailable"
+      class="changeModel"
+      @click="toggleSystemModel"
+    >
+      <view class="botton-title">
+        <image
+          :src="changeModelSrc"
+          mode="scaleToFill"
+          class="change-model-pic"
+        />
+        <text class="model">{{
+          currentModel === '常规模式' ? '「不芒」学长' : '「树洞」模式'
+        }}</text>
+      </view>
+
+      <text class="talk">{{
+        currentModel === '常规模式' ? '创新创业专家解读' : '陪你早安到晚安'
+      }}</text>
+    </button> -->
+
+    <image :src="bgSrc" class="cover-image" mode="aspectFill" />
+    <view
+      v-if="shinePointVisible"
+      class="shine-point"
+      :style="{
+        left: `${shinePointConfig.x_ratio * 100}%`,
+        top: `${shinePointConfig.y_ratio * 100}%`,
+      }"
+    >
+      <image
+        class="shining-image"
+        src="../../static/shining-point.png"
+        mode="scaleToFill"
+      />
+      <text class="shining-text">{{ shinePointConfig.text }} </text>
+    </view>
+    <record-animation />
+    <!-- <view
+      class="subject-container"
+      v-if="currentModel != '金种子杯模式' && subjectShow"
+      :style="{ color: systemColor }"
+    >
+      <view class="title">今日话题</view>
+      <view class="subject-scroll-view">
+        <view
+          class="marquee-content"
+          :style="{ transform: `translateX(${-scrollPosition}px)` }"
+        >
+          <view class="subject">{{ subejctText }}</view>
+          <view class="space" v-if="needScroll"></view>
+          <view class="subject" v-if="needScroll">{{ subejctText }}</view>
+        </view>
+      </view>
+    </view> -->
+    <view class="barrage-container">
+      <barrage />
+    </view>
+    <festivalChat @submit="handleSubmit" />
+    <view class="ad-container" v-if="showAd">
+      <view class="img-container">
+        <swiper
+          class="ad-swiper"
+          :indicator-dots="showDots"
+          :autoplay="autoplay"
+          :interval="interval"
+          :duration="duration"
+          :circular="circular"
+          @change="handleAdChange"
+        >
+          <swiper-item
+            v-for="(imgObj, index) in adList"
+            :key="index"
+            class="swiper-item"
+            @click="adNav(imgObj.activity_url)"
+          >
+            <image :src="imgObj.pic_url" class="ad-image" mode="aspectFill" />
+          </swiper-item>
+        </swiper>
+
+        <!-- 自定义指示点 -->
+        <view class="custom-indicators">
+          <view
+            v-for="(_, index) in adList"
+            :key="index"
+            class="indicator-dot"
+            :class="{ active: current === index }"
+          ></view>
+        </view>
+      </view>
+      <img class="close" src="../../static/close.png" @tap="handleAdClose" />
+    </view>
+    <guide />
+    <view class="danmaku">
+      <DanmakuComponent ref="danmakuRef" />
+    </view>
+  </view>
+</template>
+
+<script setup>
+  import {
+    ref,
+    reactive,
+    computed,
+    nextTick,
+    watch,
+    onBeforeUnmount,
+  } from 'vue'
+  import { wsUrl, baseUrl } from '../../utils/config'
+  import {
+    onLoad,
+    onUnload,
+    onShow,
+    onHide,
+    onShareAppMessage,
+    onShareTimeline,
+  } from '@dcloudio/uni-app'
+  // import DanmakuComponent from '../../components/bullet/bullet.vue'
+  import DanmakuComponent from '@/components/DanmakuComponent/DanmakuComponent.vue'
+  import request from '@/utils/request'
+  import barrage from '@/components/barrage/barrage.vue'
+  import festivalChat from '@/components/festival-chat/festival-chat.vue'
+  import guide from '@/components/guide/guide.vue'
+  import { useWebSocketStore } from '@/stores/websocket'
+  import { useBarrageStore } from '../../stores/barrage'
+  import { useModelStore } from '../../stores/model'
+  import { dmReport } from '../../utils/report'
+  // 导入音频播放器状态管理
+  import { useAudioPlayerStore } from '@/stores/audioPlayer'
+  import recordAnimation from '../../components/record-animation/record-animation.vue'
+  //导入主题管理
+  import { useSubjectStore } from '../../stores/subject'
+  import { useIsRadioStore } from '../../stores/isRadio'
+  import { subjectShowStore } from '../../stores/subjectShow'
+  import { usePlaceholderStore } from '../../stores/placeholderStore'
+  import { useToggleModelStore } from '../../stores/toggleModelStore'
+
+  // ==================== 心跳机制相关变量 ====================
+  let heartbeatTimer = null
+
+  // ==================== 心跳机制函数 ====================
+  // 启动心跳机制
+  const startHeartbeat = () => {
+    // 清除已存在的定时器，避免重复创建
+    stopHeartbeat()
+
+    heartbeatTimer = setInterval(async () => {
+      try {
+        // 只在WebSocket连接有效时发送心跳消息
+        if (wsStore.isConnected) {
+          await wsStore.sendMessage({
+            system_model: currentModel.value,
+            input_type: 5,
+            text: '',
+          })
+          console.log('心跳消息发送成功')
+        } else {
+          console.warn('WebSocket未连接，跳过心跳消息发送')
+        }
+      } catch (error) {
+        console.error('心跳消息发送失败:', error)
+      }
+    }, 10000) // 每10秒发送一次心跳
+
+    console.log('心跳定时器已启动')
+  }
+
+  // 停止心跳机制
+  const stopHeartbeat = () => {
+    if (heartbeatTimer) {
+      clearInterval(heartbeatTimer)
+      heartbeatTimer = null
+      console.log('心跳定时器已清除')
+    }
+  }
+
+  // ==================== 原有代码 ====================
+  const showAd = ref(false)
+  const adList = ref([])
+  const showDots = ref(false)
+  const toggleModelStore = useToggleModelStore()
+  const sptime = ref(0)
+  const current = ref(0)
+
+  const danmakuRef = ref()
+  // 可以通过ref调用组件方法
+  const startDanmaku = () => {
+    console.log('开始弹幕')
+    danmakuRef.value?.startDanmaku()
+  }
+
+  const stopDanmaku = () => {
+    danmakuRef.value?.stopDanmaku()
+  }
+  const handleAdClose = () => {
+    showAd.value = false
+  }
+  const adNav = (adUrl) => {
+    // 根据类型确定跳转的URL
+    console.log('广告链接......:', adUrl)
+    const url = `/pages/ad/ad?address=${adUrl}`
+
+    // 跳转到协议展示页面
+    uni.navigateTo({ url })
+  }
+  const handleAdChange = (e) => {
+    current.value = e.detail.current
+  }
+
+  // 监听 store 中的状态变化
+  watch(
+    () => toggleModelStore.shouldToggleModel,
+    (newValue) => {
+      if (newValue) {
+        // 如果状态为 true，则执行 toggleModelchange 函数
+        toggleSystemModel()
+        // 执行完后重置状态
+        toggleModelStore.resetModelChangeFlag()
+      }
+    }
+  )
+  const placeholderStore = usePlaceholderStore()
+
+  //主题管理
+  const systemColor = ref('rgba(26, 28, 30, 1);')
+  const subjectshowStore = subjectShowStore()
+  const subjectShow = computed(() => {
+    return isRadioStore.isRadio || subjectshowStore.subjectShow ? true : false
+  })
+  //导入电台模式状态
+  const isRadioStore = useIsRadioStore()
+  const isRadio = computed(() => isRadioStore.isRadio)
+  const changeModelSrc = ref('../../static/changeModel.png')
+
+  // 响应式数据
+  const scrollPosition = ref(0)
+  const needScroll = ref(false)
+  let scrollTimer = null
+  let textWidth = 0
+  const scrollSpeed = 1 // 每次移动的像素
+  const scrollDelay = 10 // 滚动间隔（毫秒）
+  // 生命周期钩子
+  onShow(() => {
+    nextTick(() => {
+      initScroll()
+    })
+  })
+
+  onHide(() => {
+    stopScroll()
+  })
+
+  // 方法
+  const initScroll = () => {
+    const query = uni.createSelectorQuery()
+    query
+      .select('.subject')
+      .boundingClientRect((textRect) => {
+        query
+          .select('.subject-scroll-view')
+          .boundingClientRect((containerRect) => {
+            if (textRect && containerRect) {
+              textWidth = textRect.width
+
+              // 如果文本宽度大于容器宽度，需要滚动
+              if (textRect.width > containerRect.width) {
+                needScroll.value = true
+                startScroll()
+              }
+            }
+          })
+          .exec()
+      })
+      .exec()
+  }
+
+  const startScroll = () => {
+    stopScroll()
+
+    scrollTimer = setInterval(() => {
+      scrollPosition.value += scrollSpeed
+
+      // 当滚动到第一个文本的末尾时，重置位置
+      if (scrollPosition.value >= textWidth + 60) {
+        scrollPosition.value = 0
+      }
+    }, scrollDelay)
+  }
+
+  const stopScroll = () => {
+    if (scrollTimer) {
+      clearInterval(scrollTimer)
+      scrollTimer = null
+    }
+  }
+
+  const bgSrc = ref('../../static/index-bg.png')
+  const messages = ref([])
+  const subejctText = computed(() => sbStore.subject)
+  //初始化subject管理
+  const sbStore = useSubjectStore()
+  subejctText.value = sbStore.subject
+
+  const wsStore = useWebSocketStore()
+  // 初始化音频播放器状态管理
+  const audioPlayerStore = useAudioPlayerStore()
+  // 初始化弹幕状态管理
+  const barrageStore = useBarrageStore()
+
+  // 初始化模型状态管理
+  const modelStore = useModelStore()
+  // 添加状态管理
+  const currentModel = ref('常规模式')
+  const isGoldModeAvailable = ref(false)
+  const systemModelConfig = reactive({
+    常规模式: {
+      pic_id: 0,
+      pic_url: '',
+    },
+    金种子杯模式: {
+      pic_id: 0,
+      pic_url: '',
+      valid: false,
+    },
+  })
+  const shinePointConfig = reactive({
+    text: '',
+    valid: 0,
+    x_ratio: 0,
+    y_ratio: 0,
+  })
+
+  // 计算属性：是否显示亮点
+  const shinePointVisible = computed(() => {
+    if (typeof shinePointConfig.valid === 'boolean') {
+      return shinePointConfig.valid
+    } else {
+      return !!shinePointConfig.valid // 将数字转为布尔值
+    }
+  })
+
+  // 切换系统模式 - 只更新UI，不发送WebSocket消息
+  // 添加防抖变量
+  const isTogglingModel = ref(false)
+
+  const handleSubmit = (message) => {
+    console.log(message, 'handleSubmit')
+  }
+
+  // 从服务器获取系统配置
+  const fetchSystemConfig = async () => {
+    try {
+      const res = await request(`${baseUrl}/system/get_system_setting`, 'GET')
+      console.log('获取系统配置', res)
+
+      // 更新shine_point配置
+      if (res.data && res.data.shine_point) {
+        Object.assign(shinePointConfig, res.data.shine_point)
+      }
+
+      // 更新system_model配置
+      if (res.data && res.data.system_model) {
+        // 更新常规模式配置
+        if (res.data.system_model['常规模式']) {
+          systemModelConfig['常规模式'] = res.data.system_model['常规模式']
+        }
+
+        // 更新金种子杯模式配置
+        if (res.data.system_model['金种子杯模式']) {
+          systemModelConfig['金种子杯模式'] =
+            res.data.system_model['金种子杯模式']
+          // 检查金种子杯模式是否可用
+          isGoldModeAvailable.value =
+            !!res.data.system_model['金种子杯模式'].valid
+        }
+
+        // 设置当前背景图
+        bgSrc.value = systemModelConfig[currentModel.value].pic_url
+      }
+    } catch (error) {
+      console.error('获取系统配置失败:', error)
+    }
+  }
+
+  onShow(async () => {
+    // 开始弹幕
+    startDanmaku()
+    startHeartbeat()
+    console.log('71活动页面显示')
+    // 页面显示时记录时间戳
+    sptime.value = new Date().getTime()
+    dmReport(
+      'pv',
+      {},
+      {
+        page: 'homePage',
+        contents: [
+          {
+            page: 'homePage',
+          },
+        ],
+      }
+    )
+    try {
+      // 页面显示时可以进行一些操作
+      console.log('主页面显示')
+      //从后端获取是否有广告
+      const adRes = await request(
+        `${baseUrl}/system/get_activity_notify`,
+        'GET'
+      )
+      console.log('获取广告', adRes)
+      if (adRes.code == 0 && adRes.data.length > 0) {
+        adList.value = adRes.data
+        showAd.value = true
+      }
+      // 获取当前主题
+      const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')
+      console.log('获取当前主题', currentSubject.data.topic)
+      // 更新主题
+      sbStore.setSubject(currentSubject.data.topic)
+      // 获取系统配置
+      await fetchSystemConfig()
+
+      // 设置当前模式
+      if (isRadio.value) {
+        // 如果是电台模式，直接返回
+        console.log('电台模式下执行的onShow逻辑', isRadio.value)
+        console.log('背景音乐是否正在播放', audioPlayerStore.bgIsPlaying)
+        // audioPlayerStore.stopAllAudio()
+        // 尝试连接WebSocket
+        if (!wsStore.isConnected) {
+          await wsStore.connect()
+          console.log('socket连接成功')
+          // WebSocket连接成功后启动心跳
+          startHeartbeat()
+        }
+      } else {
+        // 尝试连接WebSocket
+        if (!wsStore.isConnected) {
+          await wsStore.connect()
+          console.log('socket连接成功')
+          // WebSocket连接成功后启动心跳
+          startHeartbeat()
+        }
+      }
+    } catch (error) {
+      console.error('页面显示时发生错误:', error)
+    }
+  })
+
+  onHide(async () => {
+    // 页面隐藏时关闭WebSocket连接
+    const endTime = new Date().getTime()
+    const duration = endTime - sptime.value
+    dmReport(
+      'stay',
+      {},
+      {
+        page: 'homePage',
+        sptime: duration,
+      }
+    )
+    console.log('onHide主页面隐藏')
+
+    // 停止心跳定时器
+    stopHeartbeat()
+
+    // 上报当前音频播放状态
+    audioPlayerStore.reportCurrentProgress()
+    console.log('音频播放状态已上报')
+
+    // 停止并清空所有音频队列
+    if (isRadio.value) {
+      // 如果是电台模式，就不停止背景音乐
+      console.log('电台模式下不停止背景音乐onHide', isRadio.value)
+      audioPlayerStore.stopTtsAudio()
+    } else {
+      // audioPlayerStore.stopAllAudio()
+      audioPlayerStore.stopTtsAudio()
+      barrageStore.clearMessages()
+      console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
+      // 清空消息列表
+      console.log('清空消息列表')
+    }
+
+    // 关闭WebSocket连接
+    await wsStore.close()
+    console.log('Hidesocket连接关闭')
+  })
+
+  // 组件卸载前的清理工作
+  onBeforeUnmount(() => {
+    console.log('组件即将卸载，清理定时器')
+    stopHeartbeat()
+    stopScroll()
+  })
+
+  // 页面卸载时的清理工作
+  onUnload(() => {
+    console.log('页面卸载，清理定时器')
+    stopHeartbeat()
+    stopScroll()
+  })
+
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+      imageUrl: '../../static/share.png',
+      path: '/pages/index/index',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+    }
+  })
+</script>
+
+<style lang="scss" scoped>
+  @import './index.scss';
+</style>

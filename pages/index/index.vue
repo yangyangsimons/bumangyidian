@@ -100,7 +100,14 @@
 </template>
 
 <script setup>
-  import { ref, reactive, computed, nextTick, watch } from 'vue'
+  import {
+    ref,
+    reactive,
+    computed,
+    nextTick,
+    watch,
+    onBeforeUnmount,
+  } from 'vue'
   import { wsUrl, baseUrl } from '../../utils/config'
   import {
     onLoad,
@@ -127,7 +134,7 @@
   import { subjectShowStore } from '../../stores/subjectShow'
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import { useToggleModelStore } from '../../stores/toggleModelStore'
-  const showAd = ref(false)
+  const showAd = ref(true)
   const adList = ref([])
   const showDots = ref(false)
   const toggleModelStore = useToggleModelStore()
@@ -139,10 +146,13 @@
   const adNav = (adUrl) => {
     // 根据类型确定跳转的URL
     console.log('广告链接......:', adUrl)
-    const url = `/pages/ad/ad?address=${adUrl}`
+    // const url = `/pages/ad/ad?address=${adUrl}`
+    const url = adUrl
 
     // 跳转到协议展示页面
-    uni.navigateTo({ url })
+    uni.reLaunch({
+      url: '/pages/festival/festival',
+    })
   }
   const handleAdChange = (e) => {
     current.value = e.detail.current
@@ -488,15 +498,24 @@
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
       //从后端获取是否有广告
-      const adRes = await request(
-        `${baseUrl}/system/get_activity_notify`,
-        'GET'
-      )
-      console.log('获取广告', adRes)
-      if (adRes.code == 0 && adRes.data.length > 0) {
-        adList.value = adRes.data
-        showAd.value = true
-      }
+      // const adRes = await request(
+      //   `${baseUrl}/system/get_activity_notify`,
+      //   'GET'
+      // )
+      // console.log('获取广告', adRes)
+      // if (adRes.code == 0 && adRes.data.length > 0) {
+      //   adList.value = adRes.data
+      //   showAd.value = true
+      // }
+      adList.value = [
+        {
+          // pic_url: '../../static/festival-bg.png',
+          pic_url:
+            'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/notify_pic%2F20250626083746_%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_2025-06-26_083603_491.png',
+          activity_url: 'pages/festival/festival',
+        },
+      ]
+
       // 获取当前主题
       const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')
       console.log('获取当前主题', currentSubject.data.topic)
@@ -579,6 +598,46 @@
     await wsStore.close()
     console.log('Hidesocket连接关闭')
   })
+
+  // 组件卸载前的清理工作
+  // onBeforeUnmount(async () => {
+  //   console.log('组件即将卸载，清理定时器')
+  //   // 页面隐藏时关闭WebSocket连接
+  //   const endTime = new Date().getTime()
+  //   const duration = endTime - sptime.value
+  //   dmReport(
+  //     'stay',
+  //     {},
+  //     {
+  //       page: 'homePage',
+  //       sptime: duration,
+  //     }
+  //   )
+  //   console.log('onHide主页面隐藏')
+
+  //   // 上报当前音频播放状态
+  //   audioPlayerStore.reportCurrentProgress()
+  //   console.log('音频播放状态已上报')
+
+  //   // 停止并清空所有音频队列
+  //   if (isRadio.value) {
+  //     // 如果是电台模式，就不停止背景音乐
+  //     console.log('电台模式下不停止背景音乐onHide', isRadio.value)
+  //     audioPlayerStore.stopTtsAudio()
+  //   } else {
+  //     // audioPlayerStore.stopAllAudio()
+  //     audioPlayerStore.stopTtsAudio()
+  //     barrageStore.clearMessages()
+  //     console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
+  //     // 清空消息列表
+  //     console.log('清空消息列表')
+  //   }
+
+  //   // 关闭WebSocket连接
+  //   await wsStore.close()
+  //   console.log('Hidesocket连接关闭')
+  // })
+
   onShareAppMessage(() => {
     console.log('onShareAppMessage......')
     return {

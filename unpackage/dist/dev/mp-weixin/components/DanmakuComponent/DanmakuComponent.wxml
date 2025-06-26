@@ -1,0 +1,1 @@
+<view class="danmaku-container data-v-9c727690"><view wx:for="{{a}}" wx:for-item="track" wx:key="b" class="danmaku-track data-v-9c727690"><view wx:for="{{track.a}}" wx:for-item="danmaku" wx:key="b" class="danmaku-item data-v-9c727690" style="{{danmaku.c}}">{{danmaku.a}}</view></view></view>

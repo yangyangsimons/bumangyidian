@@ -17,6 +17,9 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
   const accumulatedText = ref('')
   const lastSectionId = ref(null)
 
+  // 添加用于去重的变量
+  const lastFullText = ref('')
+
   // 添加歌词相关状态
   const lyricSyncInterval = ref(null)
   const currentLyrics = ref([])
@@ -250,13 +253,42 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     sendStore.setSend(true)
     const { full_text } = data
 
-    // 如果有full_text，用它替换累积的文本
-    if (full_text) {
-      accumulatedText.value = full_text
+    // 获取要展示的文本内容
+    const textToShow = full_text || accumulatedText.value
+
+    // 去空处理：如果文本为空、null、undefined或只包含空白字符，直接返回
+    if (!textToShow || textToShow.trim() === '') {
+      console.log('文本为空，跳过展示')
+      // 重置流式状态
+      isStreaming.value = false
+      accumulatedText.value = ''
+      return
     }
 
-    // 结束流式消息，使用累积的文本或full_text
-    barrageStore.finishStreamingMessage(full_text || accumulatedText.value)
+    // 去重处理：如果与上一次的full_text相同，跳过展示
+    if (textToShow === lastFullText.value) {
+      console.log('文本与上次相同，跳过展示:', textToShow)
+      // 重置流式状态
+      isStreaming.value = false
+      accumulatedText.value = ''
+      return
+    }
+
+    // 更新上一次的文本记录
+    lastFullText.value = textToShow
+
+    // 判断是否有正在进行的流式消息
+    if (isStreaming.value && barrageStore.currentStreamingMessageId) {
+      // 如果有流式消息，完成它
+      barrageStore.finishStreamingMessage(textToShow)
+    } else {
+      // 如果没有流式消息，直接添加新消息
+      barrageStore.addMessage({
+        type: 'ai',
+        content: textToShow,
+        isStreaming: false,
+      })
+    }
 
     // 重置流式状态
     isStreaming.value = false
@@ -303,6 +335,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     isStreaming.value = false
     accumulatedText.value = ''
     lastSectionId.value = null
+    lastFullText.value = '' // 重置去重记录
 
     // 停止歌词同步
     stopLyricSync()

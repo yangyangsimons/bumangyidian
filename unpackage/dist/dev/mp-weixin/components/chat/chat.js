@@ -14,11 +14,7 @@ const stores_subjectShow = require("../../stores/subjectShow.js");
 const stores_placeholderStore = require("../../stores/placeholderStore.js");
 const utils_request = require("../../utils/request.js");
 const utils_report = require("../../utils/report.js");
-new Proxy({}, {
-  get(_, key) {
-    throw new Error(`Module "events" has been externalized for browser compatibility. Cannot access "events.${key}" in client code.  See https://vitejs.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.`);
-  }
-});
+require("../../__vite-browser-external_events.js");
 if (!Array) {
   const _easycom_user_popup2 = common_vendor.resolveComponent("user-popup");
   _easycom_user_popup2();
