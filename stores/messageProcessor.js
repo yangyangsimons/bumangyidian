@@ -248,7 +248,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
 
   // 处理结束消息
   const handleFinishMessage = (data) => {
-    console.log('收到结束消息', data)
+    // console.log('收到结束消息', data)
     // 设置可以发送消息
     sendStore.setSend(true)
     const { full_text } = data
@@ -258,7 +258,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
 
     // 去空处理：如果文本为空、null、undefined或只包含空白字符，直接返回
     if (!textToShow || textToShow.trim() === '') {
-      console.log('文本为空，跳过展示')
+      // console.log('文本为空，跳过展示')
       // 重置流式状态
       isStreaming.value = false
       accumulatedText.value = ''
@@ -267,7 +267,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
 
     // 去重处理：如果与上一次的full_text相同，跳过展示
     if (textToShow === lastFullText.value) {
-      console.log('文本与上次相同，跳过展示:', textToShow)
+      // console.log('文本与上次相同，跳过展示:', textToShow)
       // 重置流式状态
       isStreaming.value = false
       accumulatedText.value = ''

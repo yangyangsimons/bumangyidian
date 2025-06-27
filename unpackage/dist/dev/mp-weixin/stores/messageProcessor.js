@@ -160,18 +160,15 @@ const useMessageProcessorStore = common_vendor.defineStore("messageProcessor", (
     }
   };
   const handleFinishMessage = (data) => {
-    common_vendor.index.__f__("log", "at stores/messageProcessor.js:251", "收到结束消息", data);
     sendStore.setSend(true);
     const { full_text } = data;
     const textToShow = full_text || accumulatedText.value;
     if (!textToShow || textToShow.trim() === "") {
-      common_vendor.index.__f__("log", "at stores/messageProcessor.js:261", "文本为空，跳过展示");
       isStreaming.value = false;
       accumulatedText.value = "";
       return;
     }
     if (textToShow === lastFullText.value) {
-      common_vendor.index.__f__("log", "at stores/messageProcessor.js:270", "文本与上次相同，跳过展示:", textToShow);
       isStreaming.value = false;
       accumulatedText.value = "";
       return;

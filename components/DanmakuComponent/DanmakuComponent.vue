@@ -158,7 +158,7 @@
           currentBatchIndex.value++
           isLastDanmakuShown.value = false
 
-          console.log('弹幕队列更新后长度:', danmakuQueue.value.length)
+          // console.log('弹幕队列更新后长度:', danmakuQueue.value.length)
         } else {
           // 没有新数据，延迟一段时间后再次尝试
           console.log('没有新的弹幕数据，等待中...')
@@ -216,7 +216,7 @@
   // 显示弹幕
   const showDanmaku = () => {
     if (danmakuQueue.value.length === 0) {
-      console.log('弹幕队列为空')
+      // console.log('弹幕队列为空')
 
       // 检查是否还有未使用的批次
       const groups = divideIntoGroups(mockDanmakuData.value)
@@ -225,14 +225,14 @@
         const batchIndex = currentBatchIndex.value
         const newData = groups[batchIndex]
 
-        console.log(`使用本地数据第${currentBatchIndex.value + 1}批:`, newData)
+        // console.log(`使用本地数据第${currentBatchIndex.value + 1}批:`, newData)
 
         newData.forEach((content) => {
           danmakuQueue.value.push(createDanmaku(content))
         })
 
         currentBatchIndex.value++
-        console.log('本地批次弹幕队列更新后长度:', danmakuQueue.value.length)
+        // console.log('本地批次弹幕队列更新后长度:', danmakuQueue.value.length)
       } else if (!isLastDanmakuShown.value && !isRequesting.value) {
         // 本地数据已用完，需要获取新数据
         isLastDanmakuShown.value = true
@@ -247,7 +247,7 @@
     const trackIndex = findAvailableTrack()
     const danmaku = danmakuQueue.value.shift()
 
-    console.log('显示弹幕:', danmaku.content, '轨道:', trackIndex)
+    // console.log('显示弹幕:', danmaku.content, '轨道:', trackIndex)
 
     // 添加到轨道
     tracks.value[trackIndex].push(danmaku)

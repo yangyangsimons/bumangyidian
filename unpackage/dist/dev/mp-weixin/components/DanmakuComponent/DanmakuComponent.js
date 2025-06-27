@@ -79,7 +79,6 @@ const _sfc_main = {
             });
             currentBatchIndex.value++;
             isLastDanmakuShown.value = false;
-            common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:161", "弹幕队列更新后长度:", danmakuQueue.value.length);
           } else {
             common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:164", "没有新的弹幕数据，等待中...");
             setTimeout(async () => {
@@ -125,17 +124,14 @@ const _sfc_main = {
     };
     const showDanmaku = () => {
       if (danmakuQueue.value.length === 0) {
-        common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:219", "弹幕队列为空");
         const groups = divideIntoGroups(mockDanmakuData.value);
         if (currentBatchIndex.value < groups.length) {
           const batchIndex = currentBatchIndex.value;
           const newData = groups[batchIndex];
-          common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:228", `使用本地数据第${currentBatchIndex.value + 1}批:`, newData);
           newData.forEach((content) => {
             danmakuQueue.value.push(createDanmaku(content));
           });
           currentBatchIndex.value++;
-          common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:235", "本地批次弹幕队列更新后长度:", danmakuQueue.value.length);
         } else if (!isLastDanmakuShown.value && !isRequesting.value) {
           isLastDanmakuShown.value = true;
           common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:239", "本地数据已用完，准备获取新数据");
@@ -147,7 +143,6 @@ const _sfc_main = {
       }
       const trackIndex = findAvailableTrack();
       const danmaku = danmakuQueue.value.shift();
-      common_vendor.index.__f__("log", "at components/DanmakuComponent/DanmakuComponent.vue:250", "显示弹幕:", danmaku.content, "轨道:", trackIndex);
       tracks.value[trackIndex].push(danmaku);
       common_vendor.nextTick$1(async () => {
         setTimeout(() => {
