@@ -57,7 +57,7 @@
   height: 80rpx;
   line-height: 80rpx;
   font-size: 36rpx;
-  font-weight: 400;
+  font-weight: 700;
   text-wrap: nowrap;
 }
 .cover .subject-container .subject-scroll-view.data-v-bfd19725 {
@@ -85,7 +85,7 @@
 }
 .cover .barrage-container.data-v-bfd19725 {
   width: 100%;
-  height: 1000rpx;
+  height: 900rpx;
   position: absolute;
   left: 0;
   bottom: 148rpx;

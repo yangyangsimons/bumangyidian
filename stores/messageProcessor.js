@@ -285,9 +285,18 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
       // 如果没有流式消息，直接添加新消息
       barrageStore.addMessage({
         type: 'ai',
-        content: textToShow,
+        content:
+          '请听，AI如何理解‘征程’的壮阔；请感受，AI如何诠释‘初心’的温度；请品味，AI如何赞扬‘创新’的活力；让我们看看「不芒」学长对节目的鉴赏吧~',
         isStreaming: false,
       })
+      // 延迟1000ms后展示
+      setTimeout(() => {
+        barrageStore.addMessage({
+          type: 'ai',
+          content: textToShow,
+          isStreaming: false,
+        })
+      }, 1000)
     }
 
     // 重置流式状态

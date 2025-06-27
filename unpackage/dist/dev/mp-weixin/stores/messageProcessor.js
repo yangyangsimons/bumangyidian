@@ -182,24 +182,31 @@ const useMessageProcessorStore = common_vendor.defineStore("messageProcessor", (
     } else {
       barrageStore.addMessage({
         type: "ai",
-        content: textToShow,
+        content: "请听，AI如何理解‘征程’的壮阔；请感受，AI如何诠释‘初心’的温度；请品味，AI如何赞扬‘创新’的活力；让我们看看「不芒」学长对节目的鉴赏吧~",
         isStreaming: false
       });
+      setTimeout(() => {
+        barrageStore.addMessage({
+          type: "ai",
+          content: textToShow,
+          isStreaming: false
+        });
+      }, 1e3);
     }
     isStreaming.value = false;
     accumulatedText.value = "";
   };
   const handleSubjectRequest = (data) => {
-    common_vendor.index.__f__("log", "at stores/messageProcessor.js:300", "收到主题选择请求", data);
+    common_vendor.index.__f__("log", "at stores/messageProcessor.js:309", "收到主题选择请求", data);
     const subjects = data.subjects.join("\n");
-    common_vendor.index.__f__("log", "at stores/messageProcessor.js:302", "可选主题列表", subjects);
+    common_vendor.index.__f__("log", "at stores/messageProcessor.js:311", "可选主题列表", subjects);
     barrageStore.addMessage({
       type: "subject",
       content: data.msg + "\n" + subjects
     });
   };
   const handleErrorMessage = (data) => {
-    common_vendor.index.__f__("log", "at stores/messageProcessor.js:312", "收到错误消息", data);
+    common_vendor.index.__f__("log", "at stores/messageProcessor.js:321", "收到错误消息", data);
     const { text } = data;
     common_vendor.index.showToast({
       title: text || "系统错误",

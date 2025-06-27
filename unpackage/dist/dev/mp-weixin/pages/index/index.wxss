@@ -171,7 +171,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 600rpx;
-  height: 800rpx;
+  height: 600rpx;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -189,7 +189,7 @@
 }
 .cover .ad-container .img-container .custom-indicators.data-v-1cf27b2a {
   position: absolute;
-  top: 820rpx;
+  top: 650rpx;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -216,7 +216,7 @@
 }
 .cover .ad-container .close.data-v-1cf27b2a {
   position: absolute;
-  top: 1160rpx;
+  top: 1000rpx;
   left: 50%;
   transform: translateX(-50%);
   width: 64rpx;

@@ -159,7 +159,7 @@
             left: 50%;
             transform: translateX(-50%);
             width: 600rpx;
-            height: 800rpx;
+            height: 600rpx;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -176,7 +176,7 @@
             }
             .custom-indicators {
                 position: absolute;
-                top: 820rpx;
+                top: 650rpx;
                 left: 50%;
                 transform: translateX(-50%);
                 display: flex;
@@ -204,7 +204,7 @@
         }
         .close {
             position: absolute;
-            top: 1160rpx;
+            top: 1000rpx;
             left: 50%;
             transform: translateX(-50%);
             width: 64rpx;

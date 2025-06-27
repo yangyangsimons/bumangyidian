@@ -1,6 +1,6 @@
 <template>
   <view class="cover">
-    <image class="global-title" src="../../static/global-title.png"></image>
+    <!-- <image class="global-title" src="../../static/global-title.png"></image> -->
 
     <!-- 当金种子杯模式有效时显示切换按钮 -->
     <!-- <button
@@ -24,7 +24,11 @@
       }}</text>
     </button> -->
 
-    <image :src="bgSrc" class="cover-image" mode="aspectFill" />
+    <image
+      src="../../static/festival-bg.jpg"
+      class="cover-image"
+      mode="aspectFill"
+    />
     <view
       v-if="shinePointVisible"
       class="shine-point"
@@ -41,12 +45,8 @@
       <text class="shining-text">{{ shinePointConfig.text }} </text>
     </view>
     <record-animation />
-    <!-- <view
-      class="subject-container"
-      v-if="currentModel != '金种子杯模式' && subjectShow"
-      :style="{ color: systemColor }"
-    >
-      <view class="title">今日话题</view>
+    <!-- <view class="subject-container" :style="{ color: systemColor }">
+      <view class="title">“文化+科技联盟”文艺汇演</view>
       <view class="subject-scroll-view">
         <view
           class="marquee-content"
@@ -388,12 +388,19 @@
   }
 
   onShow(async () => {
-    // 开始弹幕
+    barrageStore.clearMessages()
+    console.log('onShow主页面显示')
     startDanmaku()
     startHeartbeat()
     console.log('71活动页面显示')
     // 页面显示时记录时间戳
     sptime.value = new Date().getTime()
+    barrageStore.addMessage({
+      type: 'ai',
+      content:
+        '当舞台的灯光点亮，我们即将开启一场跨越时空的文艺之旅----湖南工商大学"文化+科技联盟"文艺汇演，每一个节目都是文化基因的当代诠释，每段表演都在诉说民族精神的传承与突破。\n接下来我们将借助 AI 的视角，带大家深度赏析这些精彩节目 ---- 从艺术表现到精神内核，从创新设计到情感共鸣，让科技为文艺赏析打开全新维度。现在，就让我们先沉浸于这场视听盛宴，随后一起解锁 AI 眼中的艺术密码吧！',
+      time: new Date().getTime(),
+    })
     dmReport(
       'pv',
       {},

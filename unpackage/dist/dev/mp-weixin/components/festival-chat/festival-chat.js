@@ -433,7 +433,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: showText.value && !isRadio.value
       }, showText.value && !isRadio.value ? {
-        b: common_assets._imports_0$2,
+        b: common_assets._imports_0$3,
         c: common_vendor.o(changeInputTypeToText),
         d: common_vendor.o(startRecord),
         e: common_vendor.o(endRecord),

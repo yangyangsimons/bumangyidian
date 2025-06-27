@@ -447,7 +447,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$5,
+        a: common_assets._imports_0$6,
         b: avator.value,
         c: common_vendor.o(changeAvator),
         d: common_vendor.t(userName.value),

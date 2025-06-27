@@ -197,10 +197,17 @@ const _sfc_main = {
       }
     };
     common_vendor.onShow(async () => {
+      barrageStore.clearMessages();
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:392", "onShow主页面显示");
       startDanmaku();
       startHeartbeat();
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:394", "71活动页面显示");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:395", "71活动页面显示");
       sptime.value = (/* @__PURE__ */ new Date()).getTime();
+      barrageStore.addMessage({
+        type: "ai",
+        content: '当舞台的灯光点亮，我们即将开启一场跨越时空的文艺之旅----湖南工商大学"文化+科技联盟"文艺汇演，每一个节目都是文化基因的当代诠释，每段表演都在诉说民族精神的传承与突破。\n接下来我们将借助 AI 的视角，带大家深度赏析这些精彩节目 ---- 从艺术表现到精神内核，从创新设计到情感共鸣，让科技为文艺赏析打开全新维度。现在，就让我们先沉浸于这场视听盛宴，随后一起解锁 AI 眼中的艺术密码吧！',
+        time: (/* @__PURE__ */ new Date()).getTime()
+      });
       utils_report.dmReport(
         "pv",
         {},
@@ -214,37 +221,37 @@ const _sfc_main = {
         }
       );
       try {
-        common_vendor.index.__f__("log", "at pages/festival/festival.vue:411", "主页面显示");
+        common_vendor.index.__f__("log", "at pages/festival/festival.vue:418", "主页面显示");
         const adRes = await utils_request.request(
           `${utils_config.baseUrl}/system/get_activity_notify`,
           "GET"
         );
-        common_vendor.index.__f__("log", "at pages/festival/festival.vue:417", "获取广告", adRes);
+        common_vendor.index.__f__("log", "at pages/festival/festival.vue:424", "获取广告", adRes);
         if (adRes.code == 0 && adRes.data.length > 0) {
           adList.value = adRes.data;
           showAd.value = true;
         }
         const currentSubject = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
-        common_vendor.index.__f__("log", "at pages/festival/festival.vue:424", "获取当前主题", currentSubject.data.topic);
+        common_vendor.index.__f__("log", "at pages/festival/festival.vue:431", "获取当前主题", currentSubject.data.topic);
         sbStore.setSubject(currentSubject.data.topic);
         await fetchSystemConfig();
         if (isRadio.value) {
-          common_vendor.index.__f__("log", "at pages/festival/festival.vue:433", "电台模式下执行的onShow逻辑", isRadio.value);
-          common_vendor.index.__f__("log", "at pages/festival/festival.vue:434", "背景音乐是否正在播放", audioPlayerStore.bgIsPlaying);
+          common_vendor.index.__f__("log", "at pages/festival/festival.vue:440", "电台模式下执行的onShow逻辑", isRadio.value);
+          common_vendor.index.__f__("log", "at pages/festival/festival.vue:441", "背景音乐是否正在播放", audioPlayerStore.bgIsPlaying);
           if (!wsStore.isConnected) {
             await wsStore.connect();
-            common_vendor.index.__f__("log", "at pages/festival/festival.vue:439", "socket连接成功");
+            common_vendor.index.__f__("log", "at pages/festival/festival.vue:446", "socket连接成功");
             startHeartbeat();
           }
         } else {
           if (!wsStore.isConnected) {
             await wsStore.connect();
-            common_vendor.index.__f__("log", "at pages/festival/festival.vue:447", "socket连接成功");
+            common_vendor.index.__f__("log", "at pages/festival/festival.vue:454", "socket连接成功");
             startHeartbeat();
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/festival/festival.vue:453", "页面显示时发生错误:", error);
+        common_vendor.index.__f__("error", "at pages/festival/festival.vue:460", "页面显示时发生错误:", error);
       }
     });
     common_vendor.onHide(async () => {
@@ -258,34 +265,34 @@ const _sfc_main = {
           sptime: duration
         }
       );
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:469", "onHide主页面隐藏");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:476", "onHide主页面隐藏");
       stopHeartbeat();
       audioPlayerStore.reportCurrentProgress();
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:476", "音频播放状态已上报");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:483", "音频播放状态已上报");
       if (isRadio.value) {
-        common_vendor.index.__f__("log", "at pages/festival/festival.vue:481", "电台模式下不停止背景音乐onHide", isRadio.value);
+        common_vendor.index.__f__("log", "at pages/festival/festival.vue:488", "电台模式下不停止背景音乐onHide", isRadio.value);
         audioPlayerStore.stopTtsAudio();
       } else {
         audioPlayerStore.stopTtsAudio();
         barrageStore.clearMessages();
-        common_vendor.index.__f__("log", "at pages/festival/festival.vue:487", "停止并清空所有音频队列", "非电台模式下停止背景音乐");
-        common_vendor.index.__f__("log", "at pages/festival/festival.vue:489", "清空消息列表");
+        common_vendor.index.__f__("log", "at pages/festival/festival.vue:494", "停止并清空所有音频队列", "非电台模式下停止背景音乐");
+        common_vendor.index.__f__("log", "at pages/festival/festival.vue:496", "清空消息列表");
       }
       await wsStore.close();
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:494", "Hidesocket连接关闭");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:501", "Hidesocket连接关闭");
     });
     common_vendor.onBeforeUnmount(() => {
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:499", "组件即将卸载，清理定时器");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:506", "组件即将卸载，清理定时器");
       stopHeartbeat();
       stopScroll();
     });
     common_vendor.onUnload(() => {
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:506", "页面卸载，清理定时器");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:513", "页面卸载，清理定时器");
       stopHeartbeat();
       stopScroll();
     });
     common_vendor.onShareAppMessage(() => {
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:512", "onShareAppMessage......");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:519", "onShareAppMessage......");
       return {
         title: `不芒一点，陪你世界加一点`,
         imageUrl: "../../static/share.png",
@@ -293,48 +300,47 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/festival/festival.vue:520", "onShareTimeline......");
+      common_vendor.index.__f__("log", "at pages/festival/festival.vue:527", "onShareTimeline......");
       return {
         title: `不芒一点，陪你世界加一点`
       };
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0,
-        b: bgSrc.value,
-        c: shinePointVisible.value
+        a: common_assets._imports_0$2,
+        b: shinePointVisible.value
       }, shinePointVisible.value ? {
-        d: common_assets._imports_1,
-        e: common_vendor.t(shinePointConfig.text),
-        f: `${shinePointConfig.x_ratio * 100}%`,
-        g: `${shinePointConfig.y_ratio * 100}%`
+        c: common_assets._imports_1,
+        d: common_vendor.t(shinePointConfig.text),
+        e: `${shinePointConfig.x_ratio * 100}%`,
+        f: `${shinePointConfig.y_ratio * 100}%`
       } : {}, {
-        h: common_vendor.o(handleSubmit),
-        i: showAd.value
+        g: common_vendor.o(handleSubmit),
+        h: showAd.value
       }, showAd.value ? {
-        j: common_vendor.f(adList.value, (imgObj, index, i0) => {
+        i: common_vendor.f(adList.value, (imgObj, index, i0) => {
           return {
             a: imgObj.pic_url,
             b: index,
             c: common_vendor.o(($event) => adNav(imgObj.activity_url), index)
           };
         }),
-        k: showDots.value,
-        l: _ctx.autoplay,
-        m: _ctx.interval,
-        n: _ctx.duration,
-        o: _ctx.circular,
-        p: common_vendor.o(handleAdChange),
-        q: common_vendor.f(adList.value, (_, index, i0) => {
+        j: showDots.value,
+        k: _ctx.autoplay,
+        l: _ctx.interval,
+        m: _ctx.duration,
+        n: _ctx.circular,
+        o: common_vendor.o(handleAdChange),
+        p: common_vendor.f(adList.value, (_, index, i0) => {
           return {
             a: index,
             b: current.value === index ? 1 : ""
           };
         }),
-        r: common_assets._imports_2,
-        s: common_vendor.o(handleAdClose)
+        q: common_assets._imports_2,
+        r: common_vendor.o(handleAdClose)
       } : {}, {
-        t: common_vendor.sr(danmakuRef, "bfd19725-4", {
+        s: common_vendor.sr(danmakuRef, "bfd19725-4", {
           "k": "danmakuRef"
         })
       });
