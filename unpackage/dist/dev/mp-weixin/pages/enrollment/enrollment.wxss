@@ -24,63 +24,131 @@
 /* 透明度 */
 /* 文章场景相关 */
 .container.data-v-3cdd96a5 {
-  width: 100vw;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-}
-.background-area.data-v-3cdd96a5 {
+  position: fixed;
   width: 100%;
-  height: 80vh;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
+  height: 100%;
+}
+.container .global-title.data-v-3cdd96a5 {
+  width: 243rpx;
+  height: 64rpx;
+  position: absolute;
+  top: 170rpx;
+  right: 32rpx;
+  z-index: 10;
+}
+.container .bg-img.data-v-3cdd96a5 {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+.container .slogon.data-v-3cdd96a5 {
+  position: absolute;
+  top: 10%;
+}
+.qrcode-container.data-v-3cdd96a5 {
+  padding: 10rpx;
+  position: absolute;
+  bottom: 0rpx;
+  left: 40rpx;
+  width: 160rpx;
+  height: 200rpx;
+  background-color: #000;
+  border-radius: 10rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
-.background-area .qr-code.data-v-3cdd96a5 {
-  width: 80px;
-  height: 80px;
+.qrcode-container .qrcode.data-v-3cdd96a5 {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 10rpx;
+}
+.qrcode-container .qrcode-text.data-v-3cdd96a5 {
+  text-align: center;
+  width: 140rpx;
+  font-size: 25rpx;
+  color: #fff;
+}
+.count-container.data-v-3cdd96a5 {
+  border: 1px solid #ccc;
   position: absolute;
-  top: 20px;
-  right: 20px;
+  bottom: 0rpx;
+  right: 0rpx;
+  width: 480rpx;
+  height: 170rpx;
 }
-.background-area .user-count-text.data-v-3cdd96a5 {
+.count-container .count-bg.data-v-3cdd96a5 {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+.count-container .user-count-text.data-v-3cdd96a5 {
+  position: absolute;
   color: #333;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 10px;
+  font-weight: 400;
   margin-top: 20px;
   text-align: center;
+  color: #fff;
+  top: 40%;
+  right: 5%;
+  transform: translateY(-50%);
 }
-.background-area .upload-area.data-v-3cdd96a5 {
-  width: 200px;
-  height: 200px;
-  border: 2px dashed #ccc;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 50px;
-  background-color: rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
+.count-container .user-count-text .number.data-v-3cdd96a5 {
+  color: #cdf91d;
+  font-weight: 600;
+  font-size: 30rpx;
 }
-.background-area .upload-area.data-v-3cdd96a5:active {
-  background-color: rgba(255, 255, 255, 0.9);
-  transform: scale(0.98);
-}
-.background-area .upload-area .upload-text.data-v-3cdd96a5 {
-  color: #666;
-  font-size: 14px;
-}
-.background-area .image-container.data-v-3cdd96a5 {
+.upload-area.data-v-3cdd96a5 {
   width: 100%;
-  height: 400px;
-  margin-top: 50px;
-  position: relative;
-  overflow: hidden;
+  height: 900rpx;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
-.background-area .image-container .image-wrapper.data-v-3cdd96a5 {
+.upload-area .stick-container.data-v-3cdd96a5 {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+.upload-area .upload-bg.data-v-3cdd96a5 {
+  width: 90%;
+  height: 90%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  pointer-events: none;
+}
+.upload-area .uopload-stick.data-v-3cdd96a5 {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: -5%;
+  left: 0;
+  pointer-events: none;
+}
+.image-container.data-v-3cdd96a5 {
+  width: 100%;
+  height: 900rpx;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: auto;
+}
+.image-container .image-wrapper.data-v-3cdd96a5 {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -88,66 +156,30 @@
   margin-top: -100px;
   touch-action: none;
   transition: none;
+  pointer-events: auto;
 }
-.background-area .image-container .image-wrapper .user-image.data-v-3cdd96a5 {
+.image-container .image-wrapper .user-image.data-v-3cdd96a5 {
   width: 100%;
   height: 100%;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   pointer-events: none;
 }
-.background-area .controls.data-v-3cdd96a5 {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-}
-.background-area .controls .tip-text text.data-v-3cdd96a5 {
-  color: #666;
-  font-size: 12px;
-  text-align: center;
-}
-.background-area .controls .reselect-btn.data-v-3cdd96a5 {
-  padding: 8px 20px;
-  background-color: rgba(255, 255, 255, 0.9);
-  color: #007aff;
-  border: 1px solid #007aff;
-  border-radius: 20px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-.background-area .controls .reselect-btn.data-v-3cdd96a5:active {
-  background-color: #007aff;
-  color: white;
-  transform: scale(0.95);
-}
-.download-btn.data-v-3cdd96a5 {
-  width: 80%;
-  height: 50px;
-  background: linear-gradient(135deg, #007aff, #0056d3);
-  color: white;
+.hidden-canvas.data-v-3cdd96a5 {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  width: 750px;
+  /* 与绘制尺寸保持一致 */
+  height: 1270px;
+  /* 与绘制尺寸保持一致 */
   border: none;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: 500;
-  margin: 20px auto;
-  display: block;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-  transition: all 0.3s ease;
-}
-.download-btn.data-v-3cdd96a5:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
-}
-.download-btn.data-v-3cdd96a5:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+  background: transparent;
 }
 .hidden-canvas.data-v-3cdd96a5 {
   position: fixed;
   top: -9999px;
   left: -9999px;
-  width: 375px;
-  height: 600px;
+  width: 750px;
+  height: 1270px;
 }

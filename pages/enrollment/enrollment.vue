@@ -1,19 +1,36 @@
 <template>
-  <view class="container">
+  <view class="container" @longpress="handleLongPress">
+    <image class="global-title" src="../../static/global-title.png"></image>
     <!-- 背景图 -->
-    <view
-      class="background-area"
-      :style="{ backgroundImage: `url(${backgroundImage})` }"
-    >
-      <!-- 二维码 -->
-      <image class="qr-code" :src="qrCodeImage" mode="aspectFit"></image>
+    <image
+      src="../../static/enrollment/bg.jpg"
+      alt=""
+      class="bg-img"
+      aspectFill
+    />
+    <!-- 宣言 -->
+    <view class="slogon">
+      <enroll-font class="slogon-text" />
+    </view>
+    <!-- 二维码 -->
+    <div class="qrcode-container">
+      <image class="qrcode" :src="qrCodeImage" mode="aspectFit"></image>
+      <text class="qrcode-text">扫一扫生成入学通知书</text>
+    </div>
 
-      <!-- 注册用户数文字 -->
-      <text class="user-count-text">你是第{{ userCount }}个注册的用户</text>
-
-      <!-- 用户图片上传区域 -->
-      <view class="upload-area" @tap="chooseImage" v-if="!userImage">
-        <text class="upload-text">点击上传图片</text>
+    <!-- 用户图片上传区域 -->
+    <view class="upload-area" @tap="chooseImage">
+      <view class="stick-container">
+        <image
+          src="../../static/enrollment/photo.png"
+          mode="scaleToFill"
+          class="upload-bg"
+        />
+        <image
+          src="../../static/enrollment/stick.png"
+          mode="aspectFit"
+          class="uopload-stick"
+        />
       </view>
 
       <!-- 用户图片显示区域 -->
@@ -29,21 +46,23 @@
           @touchmove="onTouchMove"
           @touchend="onTouchEnd"
         >
-          <image :src="userImage" mode="aspectFit" class="user-image"></image>
+          <image :src="userImage" mode="aspectFill" class="user-image"></image>
         </view>
-      </view>
-
-      <!-- 操作提示和重新选择按钮 -->
-      <view class="controls" v-if="userImage">
-        <view class="tip-text">
-          <text>双指缩放 · 拖动调整位置</text>
-        </view>
-        <button class="reselect-btn" @tap="chooseImage">重新选择图片</button>
       </view>
     </view>
 
-    <!-- 下载按钮 -->
-    <button class="download-btn" @tap="downloadImage">下载图片</button>
+    <!-- 注册用户数文字 -->
+    <view class="count-container">
+      <image
+        src="../../static/enrollment/count-bg.png"
+        mode="aspectFill"
+        class="count-bg"
+      />
+      <text class="user-count-text"
+        >我是第<text class="number">{{ userCount }}</text
+        >位签到的新生</text
+      >
+    </view>
 
     <!-- 隐藏的canvas -->
     <canvas canvas-id="downloadCanvas" class="hidden-canvas"></canvas>
@@ -52,10 +71,25 @@
 
 <script setup>
   import { ref, onMounted } from 'vue'
+  import EnrollFont from '@/components/enrollFont/enrollFont.vue'
+
+  // 相框坐标常量
+  const FRAME_POSITION = {
+    x: 125,
+    y: 275,
+    width: 500,
+    height: 525,
+  }
+
+  // 用户数量文字位置常量（右下角）
+  const TEXT_POSITION = {
+    x: 750 * 0.9, // 675
+    y: 1270 * 0.98, // 1244.6
+  }
 
   // 响应式数据
-  const backgroundImage = ref('/static/background.jpg') // 替换为你的背景图片路径
-  const qrCodeImage = ref('/static/qrcode.png') // 替换为你的二维码图片路径
+  const backgroundImage = ref('../../') // 替换为你的背景图片路径
+  const qrCodeImage = ref('../../static/enrollment/qrcode.jpg') // 替换为你的二维码图片路径
   const userCount = ref(8888)
   const userImage = ref('')
   const imageX = ref(0)
@@ -63,6 +97,22 @@
   const imageWidth = ref(200)
   const imageHeight = ref(200)
   const imageScale = ref(1)
+
+  // 计算图片的边界框
+  const frameBounds = ref({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+  })
+
+  // 相框在屏幕上的位置信息
+  const frameScreenRect = ref({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+  })
 
   // 触摸相关数据
   const touchData = ref({
@@ -74,12 +124,265 @@
     startImageY: 0,
     touching: false,
     multiTouch: false,
+    lastTouchTime: 0,
   })
 
   // 生命周期
   onMounted(() => {
     getUserCount()
+    getFrameBounds()
   })
+
+  // 获取准确的边界信息
+  const getFrameBounds = () => {
+    const query = uni.createSelectorQuery()
+
+    // 获取上传区域的尺寸
+    query
+      .select('.upload-area')
+      .boundingClientRect((uploadRect) => {
+        if (uploadRect) {
+          // 相框是75%的宽和68%的高，居中显示
+          frameBounds.value = {
+            width: uploadRect.width,
+            height: uploadRect.height,
+            frameWidth: uploadRect.width * 0.75,
+            frameHeight: uploadRect.height * 0.68,
+          }
+
+          // 保存屏幕位置信息
+          frameScreenRect.value = {
+            left: uploadRect.left,
+            top: uploadRect.top,
+            width: uploadRect.width,
+            height: uploadRect.height,
+          }
+        }
+      })
+      .exec()
+  }
+
+  // 获取相框在屏幕上的实际位置
+  const getFrameScreenPosition = () => {
+    return new Promise((resolve) => {
+      const query = uni.createSelectorQuery()
+      query
+        .select('.upload-area')
+        .boundingClientRect((rect) => {
+          if (rect) {
+            frameScreenRect.value = rect
+            resolve(rect)
+          }
+        })
+        .exec()
+    })
+  }
+
+  // 修改触摸移动逻辑中的缩放部分
+  const onTouchMove = (e) => {
+    if (!touchData.value.touching) return
+
+    e.preventDefault()
+    const touches = e.touches
+
+    if (touches.length === 1 && !touchData.value.multiTouch) {
+      // 单指拖拽
+      const deltaX = touches[0].clientX - touchData.value.startX
+      const deltaY = touches[0].clientY - touchData.value.startY
+
+      let newX = touchData.value.startImageX + deltaX
+      let newY = touchData.value.startImageY + deltaY
+
+      // 应用边界限制
+      const constrainedPos = constrainToFrame(newX, newY, imageScale.value)
+      imageX.value = constrainedPos.x
+      imageY.value = constrainedPos.y
+    } else if (touches.length === 2) {
+      // 双指缩放
+      if (!touchData.value.multiTouch) {
+        // 刚开始双指操作，重新记录初始状态
+        touchData.value.multiTouch = true
+        touchData.value.startDistance = getDistance(touches[0], touches[1])
+        touchData.value.startScale = imageScale.value
+        touchData.value.startImageX = imageX.value
+        touchData.value.startImageY = imageY.value
+        return
+      }
+
+      const currentDistance = getDistance(touches[0], touches[1])
+      const scaleRatio = currentDistance / touchData.value.startDistance
+      let newScale = touchData.value.startScale * scaleRatio
+
+      // 限制缩放范围 - 使用动态计算的最大缩放
+      const maxScale = getMaxScale()
+      newScale = Math.max(0.5, Math.min(maxScale, newScale))
+
+      // 计算缩放中心点（两个手指的中心）
+      const centerX = (touches[0].clientX + touches[1].clientX) / 2
+      const centerY = (touches[0].clientY + touches[1].clientY) / 2
+
+      // 计算缩放中心相对于相框中心的位置
+      const frameCenterX =
+        frameScreenRect.value.left + frameScreenRect.value.width / 2
+      const frameCenterY =
+        frameScreenRect.value.top + frameScreenRect.value.height / 2
+
+      const relativeCenterX = centerX - frameCenterX
+      const relativeCenterY = centerY - frameCenterY
+
+      // 计算缩放引起的位置偏移
+      const scaleDelta = newScale / touchData.value.startScale
+      const currentImageX = touchData.value.startImageX
+      const currentImageY = touchData.value.startImageY
+
+      // 基于缩放中心计算新位置
+      let newX =
+        relativeCenterX + (currentImageX - relativeCenterX) * scaleDelta
+      let newY =
+        relativeCenterY + (currentImageY - relativeCenterY) * scaleDelta
+
+      imageScale.value = newScale
+
+      // 缩放后重新约束位置
+      const constrainedPos = constrainToFrame(newX, newY, newScale)
+      imageX.value = constrainedPos.x
+      imageY.value = constrainedPos.y
+    }
+  }
+
+  // 修改约束函数，增加更精确的边界计算
+  // 修改约束函数，确保图片永远不超出相框
+  const constrainToFrame = (x, y, scale) => {
+    if (!frameBounds.value.width) return { x, y }
+
+    const scaledWidth = imageWidth.value * scale
+    const scaledHeight = imageHeight.value * scale
+
+    // 相框的实际显示区域
+    const frameWidth = frameBounds.value.frameWidth
+    const frameHeight = frameBounds.value.frameHeight
+
+    // 相框边界（相对于upload-area中心）
+    const frameLeft = -frameWidth / 2
+    const frameRight = frameWidth / 2
+    const frameTop = -frameHeight / 2
+    const frameBottom = frameHeight / 2
+
+    // 图片边界
+    const imgLeft = x - scaledWidth / 2
+    const imgRight = x + scaledWidth / 2
+    const imgTop = y - scaledHeight / 2
+    const imgBottom = y + scaledHeight / 2
+
+    let constrainedX = x
+    let constrainedY = y
+
+    // 水平约束 - 图片不能超出相框
+    if (imgLeft < frameLeft) {
+      constrainedX = frameLeft + scaledWidth / 2
+    } else if (imgRight > frameRight) {
+      constrainedX = frameRight - scaledWidth / 2
+    }
+
+    // 垂直约束 - 图片不能超出相框
+    if (imgTop < frameTop) {
+      constrainedY = frameTop + scaledHeight / 2
+    } else if (imgBottom > frameBottom) {
+      constrainedY = frameBottom - scaledHeight / 2
+    }
+
+    return { x: constrainedX, y: constrainedY }
+  }
+
+  // 修改缩放约束，防止缩放时超出相框
+  const getMaxScale = () => {
+    if (!frameBounds.value.width) return 3
+
+    const frameWidth = frameBounds.value.frameWidth
+    const frameHeight = frameBounds.value.frameHeight
+
+    // 计算不超出相框的最大缩放比例
+    const maxScaleX = frameWidth / imageWidth.value
+    const maxScaleY = frameHeight / imageHeight.value
+
+    // 取较小值，确保图片在任何方向都不超出相框
+    const maxScale = Math.min(maxScaleX, maxScaleY)
+
+    // 限制最大缩放不超过3倍，但也不超过相框限制
+    return Math.min(3, maxScale)
+  }
+
+  // 修改选择图片函数
+  const chooseImage = () => {
+    uni.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        userImage.value = res.tempFilePaths[0]
+        // 重置图片位置和缩放
+        imageX.value = 0
+        imageY.value = 0
+        imageScale.value = 1
+
+        // 获取边界信息
+        setTimeout(() => {
+          getFrameBounds()
+        }, 100)
+      },
+      fail: (error) => {
+        uni.showToast({
+          title: '选择图片失败',
+          icon: 'none',
+        })
+      },
+    })
+  }
+
+  // 计算两点间距离
+  const getDistance = (touch1, touch2) => {
+    const dx = touch1.clientX - touch2.clientX
+    const dy = touch1.clientY - touch2.clientY
+    return Math.sqrt(dx * dx + dy * dy)
+  }
+
+  // 修改触摸开始事件
+  const onTouchStart = (e) => {
+    const touches = e.touches
+    touchData.value.touching = true
+    touchData.value.lastTouchTime = Date.now()
+
+    // 更新相框位置信息
+    getFrameScreenPosition()
+
+    if (touches.length === 1) {
+      // 单指拖拽
+      touchData.value.multiTouch = false
+      touchData.value.startX = touches[0].clientX
+      touchData.value.startY = touches[0].clientY
+      touchData.value.startImageX = imageX.value
+      touchData.value.startImageY = imageY.value
+    } else if (touches.length === 2) {
+      // 双指缩放 - 在touchmove中处理初始化
+      touchData.value.multiTouch = false // 先设为false，在touchmove中检测到两指时再设为true
+    }
+  }
+
+  // 触摸结束
+  const onTouchEnd = (e) => {
+    // 如果所有手指都离开了屏幕
+    if (e.touches.length === 0) {
+      touchData.value.touching = false
+      touchData.value.multiTouch = false
+    } else if (e.touches.length === 1 && touchData.value.multiTouch) {
+      // 从双指变为单指，重新初始化单指拖拽
+      touchData.value.multiTouch = false
+      touchData.value.startX = e.touches[0].clientX
+      touchData.value.startY = e.touches[0].clientY
+      touchData.value.startImageX = imageX.value
+      touchData.value.startImageY = imageY.value
+    }
+  }
 
   // 获取用户注册数量
   const getUserCount = async () => {
@@ -98,317 +401,172 @@
     }
   }
 
-  // 选择图片
-  const chooseImage = () => {
-    uni.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
-      success: (res) => {
-        userImage.value = res.tempFilePaths[0]
-        // 重置图片位置和缩放
-        imageX.value = 0
-        imageY.value = 0
-        imageScale.value = 1
-      },
-      fail: (error) => {
-        uni.showToast({
-          title: '选择图片失败',
-          icon: 'none',
-        })
-      },
+  // 计算图片在canvas中的位置
+  const calculateImagePosition = () => {
+    if (!frameBounds.value.width || !userImage.value) {
+      return null
+    }
+
+    // 屏幕上相框的实际尺寸
+    const screenFrameWidth = frameBounds.value.frameWidth
+    const screenFrameHeight = frameBounds.value.frameHeight
+
+    // 计算屏幕坐标到canvas坐标的缩放比例
+    const scaleX = FRAME_POSITION.width / screenFrameWidth
+    const scaleY = FRAME_POSITION.height / screenFrameHeight
+
+    // 用户图片在屏幕上的实际尺寸和位置
+    const screenImageWidth = imageWidth.value * imageScale.value
+    const screenImageHeight = imageHeight.value * imageScale.value
+
+    // 转换为canvas尺寸
+    const canvasImageWidth = screenImageWidth * scaleX
+    const canvasImageHeight = screenImageHeight * scaleY
+
+    // 用户图片中心在屏幕相框中的偏移量
+    const screenOffsetX = imageX.value
+    const screenOffsetY = imageY.value
+
+    // 转换为canvas中的偏移量
+    const canvasOffsetX = screenOffsetX * scaleX
+    const canvasOffsetY = screenOffsetY * scaleY
+
+    // 计算图片在canvas中的最终位置（左上角）
+    const canvasImageX =
+      FRAME_POSITION.x +
+      FRAME_POSITION.width / 2 +
+      canvasOffsetX -
+      canvasImageWidth / 2
+    const canvasImageY =
+      FRAME_POSITION.y +
+      FRAME_POSITION.height / 2 +
+      canvasOffsetY -
+      canvasImageHeight / 2
+
+    return {
+      x: canvasImageX,
+      y: canvasImageY,
+      width: canvasImageWidth,
+      height: canvasImageHeight,
+    }
+  }
+
+  // 新的下载图片函数
+  const downloadImage = () => {
+    const canvasWidth = 750
+    const canvasHeight = 1270
+
+    const ctx = uni.createCanvasContext('downloadCanvas')
+
+    // 1. 绘制底图（包含logo、slogan、相框、二维码等所有固定元素）
+    ctx.drawImage(
+      '../../static/enrollment/1/entire-bg.png',
+      0,
+      0,
+      canvasWidth,
+      canvasHeight
+    )
+
+    // 2. 绘制用户照片（如果存在）
+    if (userImage.value) {
+      // 计算用户图片在canvas中的位置
+      const canvasImagePosition = calculateImagePosition()
+
+      if (canvasImagePosition) {
+        // 设置裁剪区域为相框
+        ctx.save()
+        ctx.beginPath()
+        ctx.rect(
+          FRAME_POSITION.x,
+          FRAME_POSITION.y,
+          FRAME_POSITION.width,
+          FRAME_POSITION.height
+        )
+        ctx.clip()
+
+        // 绘制用户图片
+        ctx.drawImage(
+          userImage.value,
+          canvasImagePosition.x,
+          canvasImagePosition.y,
+          canvasImagePosition.width,
+          canvasImagePosition.height
+        )
+
+        ctx.restore()
+      }
+    }
+
+    // 3. 绘制用户数量文字（右下角）
+    ctx.setFillStyle('#333333') // 根据你的设计调整颜色
+    ctx.setFontSize(28) // 根据需要调整字体大小
+    ctx.setTextAlign('right')
+    ctx.setTextBaseline('bottom')
+
+    const countText = `我是第${userCount.value}位签到的新生`
+    ctx.fillText(countText, TEXT_POSITION.x, TEXT_POSITION.y)
+
+    // 4. 执行绘制并保存
+    ctx.draw(false, () => {
+      uni.canvasToTempFilePath({
+        canvasId: 'downloadCanvas',
+        x: 0,
+        y: 0,
+        width: canvasWidth,
+        height: canvasHeight,
+        destWidth: canvasWidth,
+        destHeight: canvasHeight,
+        success: (res) => {
+          // 保存到相册
+          uni.saveImageToPhotosAlbum({
+            filePath: res.tempFilePath,
+            success: () => {
+              uni.showToast({
+                title: '保存成功',
+                icon: 'success',
+              })
+            },
+            fail: () => {
+              uni.showToast({
+                title: '保存失败，请检查相册权限',
+                icon: 'none',
+              })
+            },
+          })
+        },
+        fail: (error) => {
+          console.error('生成图片失败:', error)
+          uni.showToast({
+            title: '生成图片失败',
+            icon: 'none',
+          })
+        },
+      })
     })
   }
 
-  // 计算两点间距离
-  const getDistance = (touch1, touch2) => {
-    const dx = touch1.clientX - touch2.clientX
-    const dy = touch1.clientY - touch2.clientY
-    return Math.sqrt(dx * dx + dy * dy)
-  }
-
-  // 触摸开始
-  const onTouchStart = (e) => {
-    const touches = e.touches
-    touchData.value.touching = true
-
-    if (touches.length === 1) {
-      // 单指拖拽
-      touchData.value.multiTouch = false
-      touchData.value.startX = touches[0].clientX
-      touchData.value.startY = touches[0].clientY
-      touchData.value.startImageX = imageX.value
-      touchData.value.startImageY = imageY.value
-    } else if (touches.length === 2) {
-      // 双指缩放
-      touchData.value.multiTouch = true
-      touchData.value.startDistance = getDistance(touches[0], touches[1])
-      touchData.value.startScale = imageScale.value
-    }
-  }
-
-  // 触摸移动
-  const onTouchMove = (e) => {
-    if (!touchData.value.touching) return
-
-    e.preventDefault()
-    const touches = e.touches
-
-    if (touches.length === 1 && !touchData.value.multiTouch) {
-      // 单指拖拽
-      const deltaX = touches[0].clientX - touchData.value.startX
-      const deltaY = touches[0].clientY - touchData.value.startY
-
-      imageX.value = touchData.value.startImageX + deltaX
-      imageY.value = touchData.value.startImageY + deltaY
-    } else if (touches.length === 2) {
-      // 双指缩放
-      const currentDistance = getDistance(touches[0], touches[1])
-      const scaleRatio = currentDistance / touchData.value.startDistance
-      let newScale = touchData.value.startScale * scaleRatio
-
-      // 限制缩放范围
-      newScale = Math.max(0.5, Math.min(3, newScale))
-      imageScale.value = newScale
-    }
-  }
-
-  // 触摸结束
-  const onTouchEnd = (e) => {
-    touchData.value.touching = false
-    touchData.value.multiTouch = false
-  }
-
-  // 下载图片
-  const downloadImage = () => {
-    if (!userImage.value) {
-      uni.showToast({
-        title: '请先上传图片',
-        icon: 'none',
-      })
-      return
-    }
-
-    createCanvas()
-  }
-
-  // 创建canvas并合成图片
-  const createCanvas = () => {
-    const query = uni.createSelectorQuery()
-    query.select('.background-area').boundingClientRect()
-    query.exec((res) => {
-      const rect = res[0]
-      const canvasWidth = rect.width
-      const canvasHeight = rect.height
-
-      // 创建canvas上下文
-      const ctx = uni.createCanvasContext('downloadCanvas')
-
-      // 绘制背景图
-      ctx.drawImage(backgroundImage.value, 0, 0, canvasWidth, canvasHeight)
-
-      // 绘制二维码
-      const qrSize = 80
-      ctx.drawImage(
-        qrCodeImage.value,
-        canvasWidth - qrSize - 20,
-        20,
-        qrSize,
-        qrSize
-      )
-
-      // 绘制文字
-      ctx.setFontSize(16)
-      ctx.setFillStyle('#333')
-      ctx.fillText(`你是第${userCount.value}个注册的用户`, 20, 50)
-
-      // 绘制用户图片
-      if (userImage.value) {
-        const userImgWidth = imageWidth.value * imageScale.value
-        const userImgHeight = imageHeight.value * imageScale.value
-        ctx.drawImage(
-          userImage.value,
-          imageX.value + (canvasWidth - imageWidth.value) / 2, // 考虑居中偏移
-          imageY.value + 150, // 考虑上方内容的偏移
-          userImgWidth,
-          userImgHeight
-        )
-      }
-
-      ctx.draw(false, () => {
-        // 导出图片
-        uni.canvasToTempFilePath({
-          canvasId: 'downloadCanvas',
-          success: (res) => {
-            // 保存到相册
-            uni.saveImageToPhotosAlbum({
-              filePath: res.tempFilePath,
-              success: () => {
-                uni.showToast({
-                  title: '保存成功',
-                  icon: 'success',
-                })
-              },
-              fail: () => {
-                uni.showToast({
-                  title: '保存失败',
-                  icon: 'none',
-                })
-              },
-            })
-          },
-        })
-      })
+  // 长按事件处理
+  const handleLongPress = () => {
+    uni.showModal({
+      title: '提示',
+      content: '是否保存当前页面为图片？',
+      success: (res) => {
+        if (res.confirm) {
+          downloadImage() // 使用新的downloadImage函数
+        }
+      },
     })
   }
 </script>
 
 <style lang="scss" scoped>
-  .container {
-    width: 100vw;
-    min-height: 100vh;
-    background-color: #f5f5f5;
-  }
-
-  .background-area {
-    width: 100%;
-    height: 80vh;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    .qr-code {
-      width: 80px;
-      height: 80px;
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-
-    .user-count-text {
-      color: #333;
-      font-size: 16px;
-      font-weight: bold;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .upload-area {
-      width: 200px;
-      height: 200px;
-      border: 2px dashed #ccc;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 50px;
-      background-color: rgba(255, 255, 255, 0.8);
-      transition: all 0.3s ease;
-
-      &:active {
-        background-color: rgba(255, 255, 255, 0.9);
-        transform: scale(0.98);
-      }
-
-      .upload-text {
-        color: #666;
-        font-size: 14px;
-      }
-    }
-
-    .image-container {
-      width: 100%;
-      height: 400px;
-      margin-top: 50px;
-      position: relative;
-      overflow: hidden;
-
-      .image-wrapper {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        margin-left: -100px; // imageWidth / 2
-        margin-top: -100px; // imageHeight / 2
-        touch-action: none;
-        transition: none;
-
-        .user-image {
-          width: 100%;
-          height: 100%;
-          border-radius: 10px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          pointer-events: none;
-        }
-      }
-    }
-
-    .controls {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-
-      .tip-text {
-        text {
-          color: #666;
-          font-size: 12px;
-          text-align: center;
-        }
-      }
-
-      .reselect-btn {
-        padding: 8px 20px;
-        background-color: rgba(255, 255, 255, 0.9);
-        color: #007aff;
-        border: 1px solid #007aff;
-        border-radius: 20px;
-        font-size: 14px;
-        transition: all 0.3s ease;
-
-        &:active {
-          background-color: #007aff;
-          color: white;
-          transform: scale(0.95);
-        }
-      }
-    }
-  }
-
-  .download-btn {
-    width: 80%;
-    height: 50px;
-    background: linear-gradient(135deg, #007aff, #0056d3);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
-    font-weight: 500;
-    margin: 20px auto;
-    display: block;
-    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-    transition: all 0.3s ease;
-
-    &:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
-    }
-
-    &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-  }
+  @import './index.scss';
 
   .hidden-canvas {
     position: fixed;
     top: -9999px;
     left: -9999px;
-    width: 375px;
-    height: 600px;
+    width: 750px;
+    height: 1270px;
   }
 </style>

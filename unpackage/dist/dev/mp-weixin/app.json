@@ -1,10 +1,11 @@
 {
   "pages": [
     "pages/enrollment/enrollment",
+    "pages/loading/loading",
+    "pages/index/index",
     "pages/login/login",
     "pages/hello/hello",
     "pages/questionnaire/questionnaire",
-    "pages/index/index",
     "pages/agreement/agreement",
     "pages/ad/ad"
   ],

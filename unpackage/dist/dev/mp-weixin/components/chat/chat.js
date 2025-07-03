@@ -444,7 +444,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: showText.value && !isRadio.value
       }, showText.value && !isRadio.value ? {
-        b: common_assets._imports_0$2,
+        b: common_assets._imports_0$3,
         c: common_vendor.o(changeInputTypeToText),
         d: common_vendor.o(startRecord),
         e: common_vendor.o(endRecord),
@@ -454,7 +454,7 @@ const _sfc_main = {
       } : {}, {
         i: !showText.value && !isRadio.value
       }, !showText.value && !isRadio.value ? common_vendor.e({
-        j: common_assets._imports_1$4,
+        j: common_assets._imports_1$5,
         k: common_vendor.o(changeInputTypeToVoice),
         l: common_vendor.unref(placeholderStore).currentPlaceholder,
         m: inputColor.value,
@@ -465,7 +465,7 @@ const _sfc_main = {
         r: common_vendor.o(onInputBlur),
         s: sendAble.value
       }, sendAble.value ? {
-        t: common_assets._imports_2$3,
+        t: common_assets._imports_2$4,
         v: common_vendor.o(handleSubmit)
       } : {}, {
         w: !sendAble.value
@@ -476,7 +476,7 @@ const _sfc_main = {
       }) : {}, {
         z: isRadio.value
       }, isRadio.value ? common_vendor.e({
-        A: common_assets._imports_3$2,
+        A: common_assets._imports_3$3,
         B: common_vendor.o(backToQA),
         C: radioText.value,
         D: inputColor.value,
@@ -486,7 +486,7 @@ const _sfc_main = {
         H: common_vendor.o(onRadioInputBlur),
         I: radioPlay.value && !radioInput.value
       }, radioPlay.value && !radioInput.value ? {
-        J: common_assets._imports_4$1,
+        J: common_assets._imports_4$2,
         K: common_vendor.o(stopRadio)
       } : {}, {
         L: !radioPlay.value && !radioInput.value
@@ -496,7 +496,7 @@ const _sfc_main = {
       } : {}, {
         O: radioInput.value
       }, radioInput.value ? {
-        P: common_assets._imports_2$3,
+        P: common_assets._imports_2$4,
         Q: common_vendor.o(handleRadioInputSubmit)
       } : {}, {
         R: common_vendor.s(colorSystem.value)
