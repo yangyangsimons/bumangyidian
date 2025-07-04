@@ -106,7 +106,6 @@
   font-size: 30rpx;
 }
 .upload-area.data-v-3cdd96a5 {
-  border: 1px solid red;
   width: 100%;
   height: 900rpx;
   position: absolute;
@@ -115,7 +114,8 @@
   transform: translate(-50%, -50%);
 }
 .upload-area .tips.data-v-3cdd96a5 {
-  width: 100%;
+  width: 60%;
+  height: 50%;
   position: absolute;
   top: 40%;
   left: 50%;
@@ -123,6 +123,10 @@
   color: #ffffff45;
   font-size: 28rpx;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
 }
 .upload-area .school.data-v-3cdd96a5 {
   display: flex;
@@ -141,6 +145,21 @@
   font-weight: 600;
   font-size: 35rpx;
 }
+.upload-area .download.data-v-3cdd96a5 {
+  border: 1px solid red;
+  position: absolute;
+  bottom: 80rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200rpx;
+  height: 80rpx;
+  color: #000;
+  font-size: 30rpx;
+  text-align: center;
+  line-height: 60rpx;
+  border-radius: 30rpx;
+  z-index: 5;
+}
 .upload-area .stick-container.data-v-3cdd96a5 {
   width: 100%;
   height: 100%;
@@ -149,8 +168,16 @@
   pointer-events: none;
   transition: all 0.3s ease-in-out;
 }
+.upload-area .upload-bg.data-v-3cdd96a5 {
+  width: 90%;
+  height: 90%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  pointer-events: none;
+}
 .upload-area .uopload-stick.data-v-3cdd96a5 {
-  border: 1px solid #cdf91d;
   width: 100%;
   height: 100%;
   position: absolute;
@@ -169,6 +196,7 @@
   pointer-events: auto;
   -webkit-clip-path: inset(15% 15% 17% 12.5%);
           clip-path: inset(15% 15% 17% 12.5%);
+  background-color: #aaaaaa20;
 }
 .image-container .image-wrapper.data-v-3cdd96a5 {
   position: absolute;
@@ -180,6 +208,8 @@
   transition: none;
   pointer-events: auto;
   overflow: hidden;
+  -webkit-clip-path: inset(15% 15% 17% 12.5%);
+          clip-path: inset(15% 15% 17% 12.5%);
 }
 .image-container .image-wrapper .user-image.data-v-3cdd96a5 {
   width: 100%;

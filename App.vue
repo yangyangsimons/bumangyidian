@@ -96,7 +96,7 @@
         global: true,
         family: 'SmileySans-Oblique',
         source:
-          'url(https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/font/SmileySans-Oblique.ttf.woff2)',
+          'url(https://mang.5gradio.com.cn/static/SmileySans-Oblique.ttf)',
         success: (result) => {
           console.log('字体加载成功', result)
         },

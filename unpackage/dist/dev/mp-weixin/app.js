@@ -102,7 +102,7 @@ const _sfc_main = {
     common_vendor.index.loadFontFace({
       global: true,
       family: "SmileySans-Oblique",
-      source: "url(https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/font/SmileySans-Oblique.ttf.woff2)",
+      source: "url(https://mang.5gradio.com.cn/static/SmileySans-Oblique.ttf)",
       success: (result) => {
         common_vendor.index.__f__("log", "at App.vue:101", "字体加载成功", result);
       },

@@ -11,11 +11,6 @@ const _sfc_main = {
   __name: "enrollment",
   setup(__props) {
     const isTransitioning = common_vendor.ref(false);
-    const onStickerLoad = () => {
-      setTimeout(() => {
-        isTransitioning.value = false;
-      }, 300);
-    };
     const DECORATION_POSITION = {
       x: 35,
       y: 215,
@@ -24,8 +19,8 @@ const _sfc_main = {
     };
     const FRAME_POSITION = {
       x: 140,
-      y: 275,
-      width: 500,
+      y: 280,
+      width: 505,
       height: 500
     };
     const currentStickerIndex = common_vendor.ref(0);
@@ -40,9 +35,7 @@ const _sfc_main = {
       "stick-8.png"
     ]);
     const currentStickerSrc = common_vendor.computed(() => {
-      return `../../static/enrollment/decoration/decoration-${[
-        currentStickerIndex.value + 1
-      ]}.png`;
+      return `../../static/enrollment/${stickerList.value[currentStickerIndex.value]}`;
     });
     const stickerTouchData = common_vendor.ref({
       startX: 0,
@@ -51,7 +44,6 @@ const _sfc_main = {
       threshold: 50
       // 滑动阈值
     });
-    common_vendor.ref("../../");
     const qrCodeImage = common_vendor.ref("../../static/enrollment/qrcode.jpg");
     const userCount = common_vendor.ref(8888);
     const userImage = common_vendor.ref("");
@@ -62,6 +54,7 @@ const _sfc_main = {
     const imageScale = common_vendor.ref(1);
     const schoolName = common_vendor.ref("xx大学");
     const currentTime = common_vendor.ref("");
+    const ableDownload = common_vendor.ref(true);
     const frameBounds = common_vendor.ref({
       left: 0,
       top: 0,
@@ -130,8 +123,6 @@ const _sfc_main = {
         } else {
           switchSticker("next");
         }
-      } else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
-        chooseImage();
       }
       stickerTouchData.value.touching = false;
     };
@@ -154,12 +145,13 @@ const _sfc_main = {
         return;
       } else {
         userCount.value = userInfo.data.report_idx;
-        schoolName.value = userInfo.data.school_name;
-        if (schoolName.value === "公开版") {
-          schoolName.value = "注册后显示大学名称";
+        if (!userInfo.data.school_name || schoolName.value === "公开版") {
+          schoolName.value = "注册登录选择大学";
+        } else {
+          schoolName.value = userInfo.data.school_name;
         }
       }
-      common_vendor.index.__f__("log", "at pages/enrollment/enrollment.vue:468", "当前用户信息:", userInfo);
+      common_vendor.index.__f__("log", "at pages/enrollment/enrollment.vue:326", "当前用户信息:", userInfo);
       const now = /* @__PURE__ */ new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -176,7 +168,7 @@ const _sfc_main = {
           frameBounds.value = {
             width: uploadRect.width,
             height: uploadRect.height,
-            frameWidth: uploadRect.width * 0.7,
+            frameWidth: uploadRect.width * 0.76,
             frameHeight: uploadRect.height * 0.68
           };
           frameScreenRect.value = {
@@ -200,6 +192,7 @@ const _sfc_main = {
       });
     };
     const onTouchMove = (e) => {
+      ableDownload.value = false;
       if (!touchData.value.touching)
         return;
       e.preventDefault();
@@ -252,7 +245,7 @@ const _sfc_main = {
       const frameHeight = frameBounds.value.frameHeight;
       const frameLeft = -frameWidth / 2;
       const frameRight = frameWidth / 2;
-      const frameTop = -frameHeight / 2 - 20;
+      const frameTop = -frameHeight / 2;
       const frameBottom = frameHeight / 2;
       const imgLeft = x - scaledWidth / 2;
       const imgRight = x + scaledWidth / 2;
@@ -260,29 +253,49 @@ const _sfc_main = {
       const imgBottom = y + scaledHeight / 2;
       let constrainedX = x;
       let constrainedY = y;
-      if (imgLeft < frameLeft) {
-        constrainedX = frameLeft + scaledWidth / 2;
-      } else if (imgRight > frameRight) {
-        constrainedX = frameRight - scaledWidth / 2;
+      if (scaledWidth <= frameWidth) {
+        if (imgLeft < frameLeft) {
+          constrainedX = frameLeft + scaledWidth / 2;
+        } else if (imgRight > frameRight) {
+          constrainedX = frameRight - scaledWidth / 2;
+        }
+      } else {
+        if (imgLeft > frameLeft) {
+          constrainedX = frameLeft + scaledWidth / 2;
+        } else if (imgRight < frameRight) {
+          constrainedX = frameRight - scaledWidth / 2;
+        }
       }
-      if (imgTop < frameTop) {
-        constrainedY = frameTop + scaledHeight / 2;
-      } else if (imgBottom > frameBottom) {
-        constrainedY = frameBottom - scaledHeight / 2;
+      if (scaledHeight <= frameHeight) {
+        if (imgTop < frameTop) {
+          constrainedY = frameTop + scaledHeight / 2;
+        } else if (imgBottom > frameBottom) {
+          constrainedY = frameBottom - scaledHeight / 2;
+        }
+      } else {
+        if (imgTop > frameTop) {
+          constrainedY = frameTop + scaledHeight / 2;
+        } else if (imgBottom < frameBottom) {
+          constrainedY = frameBottom - scaledHeight / 2;
+        }
       }
       return { x: constrainedX, y: constrainedY };
     };
     const getMaxScale = () => {
       if (!frameBounds.value.width)
-        return 3;
+        return 2.5;
       const frameWidth = frameBounds.value.frameWidth;
       const frameHeight = frameBounds.value.frameHeight;
-      const maxScaleX = frameWidth / imageWidth.value;
-      const maxScaleY = frameHeight / imageHeight.value;
-      const maxScale = Math.min(maxScaleX, maxScaleY);
-      return Math.min(3, maxScale);
+      const maxScaleX = frameWidth * 2 / imageWidth.value;
+      const maxScaleY = frameHeight * 2 / imageHeight.value;
+      const maxScale = Math.max(maxScaleX, maxScaleY);
+      return Math.max(1.5, Math.min(3, maxScale));
     };
     const chooseImage = () => {
+      if (userImage.value) {
+        common_vendor.index.__f__("log", "at pages/enrollment/enrollment.vue:542", "已经选择过图片，无法再次选择", userImage.value);
+        return;
+      }
       common_vendor.index.chooseImage({
         count: 1,
         sizeType: ["compressed"],
@@ -310,6 +323,7 @@ const _sfc_main = {
       return Math.sqrt(dx * dx + dy * dy);
     };
     const onTouchStart = (e) => {
+      ableDownload.value = false;
       const touches = e.touches;
       touchData.value.touching = true;
       touchData.value.lastTouchTime = Date.now();
@@ -325,6 +339,7 @@ const _sfc_main = {
       }
     };
     const onTouchEnd = (e) => {
+      ableDownload.value = true;
       if (e.touches.length === 0) {
         touchData.value.touching = false;
         touchData.value.multiTouch = false;
@@ -362,6 +377,16 @@ const _sfc_main = {
       };
     };
     const downloadImage = () => {
+      if (userImage.value === "") {
+        common_vendor.index.showToast({
+          title: "请选择照片",
+          icon: "none"
+        });
+        return;
+      }
+      if (!ableDownload.value) {
+        return;
+      }
       const canvasWidth = 750;
       const canvasHeight = 1270;
       const ctx = common_vendor.index.createCanvasContext("downloadCanvas");
@@ -462,7 +487,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:899", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:797", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -474,7 +499,7 @@ const _sfc_main = {
     const handleLongPress = () => {
       common_vendor.index.showModal({
         title: "提示",
-        content: "是否保存当前页面为图片？",
+        content: "是否保存入学通知书？",
         success: (res) => {
           if (res.confirm) {
             downloadImage();
@@ -487,29 +512,28 @@ const _sfc_main = {
         a: common_assets._imports_0,
         b: common_assets._imports_1,
         c: qrCodeImage.value,
-        d: currentStickerIndex.value,
-        e: currentStickerSrc.value,
-        f: isTransitioning.value ? 1 : "",
-        g: common_vendor.o(onStickerLoad),
-        h: common_vendor.t(currentTime.value),
-        i: common_vendor.t(schoolName.value),
-        j: userImage.value
+        d: common_assets._imports_2,
+        e: currentStickerIndex.value,
+        f: currentStickerSrc.value,
+        g: common_vendor.t(currentTime.value),
+        h: common_vendor.t(schoolName.value),
+        i: common_vendor.o(chooseImage),
+        j: common_vendor.o(handleLongPress),
+        k: userImage.value
       }, userImage.value ? {
-        k: userImage.value,
-        l: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
-        m: imageWidth.value + "px",
-        n: imageHeight.value + "px",
-        o: common_vendor.o(onTouchStart),
-        p: common_vendor.o(onTouchMove),
-        q: common_vendor.o(onTouchEnd)
+        l: userImage.value,
+        m: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
+        n: imageWidth.value + "px",
+        o: imageHeight.value + "px",
+        p: common_vendor.o(onTouchStart),
+        q: common_vendor.o(onTouchMove),
+        r: common_vendor.o(onTouchEnd)
       } : {}, {
-        r: common_vendor.o(chooseImage),
         s: common_vendor.o(onStickerTouchStart),
         t: common_vendor.o(onStickerTouchMove),
         v: common_vendor.o(onStickerTouchEnd),
-        w: common_assets._imports_2,
-        x: common_vendor.t(userCount.value),
-        y: common_vendor.o(handleLongPress)
+        w: common_assets._imports_3,
+        x: common_vendor.t(userCount.value)
       });
     };
   }

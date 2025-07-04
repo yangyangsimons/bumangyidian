@@ -1,5 +1,5 @@
 <template>
-  <view class="container" @longpress="handleLongPress">
+  <view class="container">
     <image class="global-title" src="../../static/global-title.png"></image>
     <!-- 背景图 -->
     <image
@@ -21,32 +21,32 @@
     <!-- 用户图片上传区域 -->
     <view
       class="upload-area"
-      @tap="chooseImage"
       @touchstart="onStickerTouchStart"
       @touchmove="onStickerTouchMove"
       @touchend="onStickerTouchEnd"
     >
       <view class="stick-container">
-        <!-- <image
+        <image
           src="../../static/enrollment/photo.png"
           mode="scaleToFill"
           class="upload-bg"
-        /> -->
+        />
         <image
           :key="currentStickerIndex"
           :src="currentStickerSrc"
           mode="aspectFit"
           class="uopload-stick"
-          :class="{ 'fade-transition': isTransitioning }"
-          @load="onStickerLoad"
         />
-        <text class="tips">点击上传照片，左右滑动切换相框</text>
+
         <view class="school">
           <text class="verify-time">电子认证时间: {{ currentTime }}</text>
           <text class="school-name">{{ schoolName }}</text>
         </view>
       </view>
-
+      <view class="tips" @tap="chooseImage"
+        >点击上传照片，左右滑动切换相框</view
+      >
+      <view class="download" @tap="handleLongPress">立即生成</view>
       <!-- 用户图片显示区域 -->
       <view class="image-container" v-if="userImage">
         <view
@@ -104,149 +104,6 @@
   import request from '@/utils/request.js'
   const isTransitioning = ref(false)
 
-  // 贴纸加载完成后结束动画
-  const onStickerLoad = () => {
-    setTimeout(() => {
-      isTransitioning.value = false
-    }, 300)
-  }
-
-  // const measureFrame = () => {
-  //   // 获取设备信息
-  //   uni.getSystemInfo({
-  //     success: (sysInfo) => {
-  //       console.log('设备信息:', sysInfo)
-
-  //       // 计算实际的canvas尺寸
-  //       const devicePixelRatio = sysInfo.pixelRatio || 2
-  //       const screenWidth = sysInfo.screenWidth // 设备屏幕宽度（px）
-  //       const screenHeight = sysInfo.screenHeight // 设备屏幕高度（px）
-
-  //       // 方案一：按屏幕比例缩放
-  //       const canvasWidth = screenWidth
-  //       const canvasHeight = (screenWidth / 750) * 1270 // 保持底图比例
-
-  //       console.log(`Canvas尺寸: ${canvasWidth} x ${canvasHeight}`)
-
-  //       const ctx = uni.createCanvasContext('downloadCanvas')
-
-  //       // 绘制底图，让它填满canvas
-  //       ctx.drawImage(
-  //         '../../static/enrollment/entire-bg.png',
-  //         0,
-  //         0,
-  //         canvasWidth,
-  //         canvasHeight
-  //       )
-
-  //       // 绘制网格 - 按比例缩放
-  //       const scaleX = canvasWidth / 750
-  //       const scaleY = canvasHeight / 1270
-
-  //       ctx.setStrokeStyle('#ff0000')
-  //       ctx.setLineWidth(1)
-
-  //       // 垂直网格线（原750px按比例分25份）
-  //       for (let i = 0; i <= 30; i++) {
-  //         const x = (750 / 30) * i * scaleX // 每25px一条线
-  //         ctx.beginPath()
-  //         ctx.moveTo(x, 0)
-  //         ctx.lineTo(x, canvasHeight)
-
-  //         if (i % 4 === 0) {
-  //           // 每100px一条粗线
-  //           ctx.setLineWidth(2)
-  //           ctx.setStrokeStyle('#ff0000')
-  //         } else {
-  //           ctx.setLineWidth(1)
-  //           ctx.setStrokeStyle('#ffaaaa')
-  //         }
-  //         ctx.stroke()
-
-  //         // 标记坐标（原始750px坐标系）
-  //         if (i % 4 === 0) {
-  //           const originalX = (750 / 30) * i
-  //           ctx.setFillStyle('#ff0000')
-  //           ctx.setFontSize(12 * Math.min(scaleX, scaleY))
-  //           ctx.setTextAlign('center')
-  //           ctx.fillText(originalX.toString(), x, 20 * scaleY)
-  //         }
-  //       }
-
-  //       // 水平网格线
-  //       for (let i = 0; i <= 50; i++) {
-  //         const y = (1270 / 50) * i * scaleY // 每25.4px一条线
-  //         ctx.beginPath()
-  //         ctx.moveTo(0, y)
-  //         ctx.lineTo(canvasWidth, y)
-
-  //         if (i % 4 === 0) {
-  //           ctx.setLineWidth(2)
-  //           ctx.setStrokeStyle('#ff0000')
-  //         } else {
-  //           ctx.setLineWidth(1)
-  //           ctx.setStrokeStyle('#ffaaaa')
-  //         }
-  //         ctx.stroke()
-
-  //         // 标记坐标
-  //         if (i % 4 === 0) {
-  //           const originalY = (1270 / 50) * i
-  //           ctx.setFillStyle('#ff0000')
-  //           ctx.setFontSize(12 * Math.min(scaleX, scaleY))
-  //           ctx.setTextAlign('left')
-  //           ctx.fillText(originalY.toString(), 5 * scaleX, y + 15 * scaleY)
-  //         }
-  //       }
-
-  //       // 绘制测试矩形（按比例缩放）
-  //       ctx.setStrokeStyle('#00ff00')
-  //       ctx.setLineWidth(3)
-  //       ctx.beginPath()
-  //       ctx.rect(100 * scaleX, 200 * scaleY, 200 * scaleX, 150 * scaleY)
-  //       ctx.stroke()
-
-  //       ctx.setFillStyle('#00ff00')
-  //       ctx.setFontSize(14 * Math.min(scaleX, scaleY))
-  //       ctx.fillText('测试矩形(100,200,200,150)', 100 * scaleX, 190 * scaleY)
-
-  //       ctx.draw(false, () => {
-  //         uni.canvasToTempFilePath({
-  //           canvasId: 'downloadCanvas',
-  //           x: 0,
-  //           y: 0,
-  //           width: canvasWidth,
-  //           height: canvasHeight,
-  //           destWidth: canvasWidth * devicePixelRatio,
-  //           destHeight: canvasHeight * devicePixelRatio,
-  //           success: (res) => {
-  //             console.log('测量图生成成功:', res.tempFilePath)
-
-  //             uni.saveImageToPhotosAlbum({
-  //               filePath: res.tempFilePath,
-  //               success: () => {
-  //                 uni.showModal({
-  //                   title: '测量图已保存',
-  //                   content: `图片尺寸: ${canvasWidth}x${canvasHeight}\n网格上的数字是750x1270坐标系的值\n请查看相框位置对应的坐标`,
-  //                   showCancel: false,
-  //                 })
-  //               },
-  //               fail: () => {
-  //                 uni.previewImage({
-  //                   urls: [res.tempFilePath],
-  //                   current: res.tempFilePath,
-  //                 })
-  //               },
-  //             })
-  //           },
-  //           fail: (error) => {
-  //             console.error('生成测量图失败:', error)
-  //           },
-  //         })
-  //       })
-  //     },
-  //   })
-  // }
   // 装饰图片位置常量
   const DECORATION_POSITION = {
     x: 35,
@@ -258,8 +115,8 @@
   // 相框位置常量（用户照片区域，保持不变）
   const FRAME_POSITION = {
     x: 140,
-    y: 275,
-    width: 500,
+    y: 280,
+    width: 505,
     height: 500,
   }
 
@@ -289,16 +146,16 @@
   ])
 
   // 计算当前贴纸路径
-  // const currentStickerSrc = computed(() => {
-  //   return `../../static/enrollment/${
-  //     stickerList.value[currentStickerIndex.value]
-  //   }`
-  // })
   const currentStickerSrc = computed(() => {
-    return `../../static/enrollment/decoration/decoration-${[
-      currentStickerIndex.value + 1,
-    ]}.png`
+    return `../../static/enrollment/${
+      stickerList.value[currentStickerIndex.value]
+    }`
   })
+  // const currentStickerSrc = computed(() => {
+  //   return `../../static/enrollment/decoration/decoration-${[
+  //     currentStickerIndex.value + 1,
+  //   ]}.png`
+  // })
 
   // 贴纸滑动相关数据
   const stickerTouchData = ref({
@@ -309,7 +166,6 @@
   })
 
   // 响应式数据
-  const backgroundImage = ref('../../')
   const qrCodeImage = ref('../../static/enrollment/qrcode.jpg')
   const userCount = ref(8888)
   const userImage = ref('')
@@ -320,6 +176,7 @@
   const imageScale = ref(1)
   const schoolName = ref('xx大学')
   const currentTime = ref('')
+  const ableDownload = ref(true)
   // 计算图片的边界框
   const frameBounds = ref({
     left: 0,
@@ -421,7 +278,6 @@
       }
     } else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
       // 如果移动距离很小，认为是点击事件，执行选择图片
-      chooseImage()
     }
 
     stickerTouchData.value.touching = false
@@ -460,9 +316,11 @@
       return
     } else {
       userCount.value = userInfo.data.report_idx
-      schoolName.value = userInfo.data.school_name
-      if (schoolName.value === '公开版') {
-        schoolName.value = '注册后显示大学名称'
+      // schoolName.value = userInfo.data.school_name
+      if (!userInfo.data.school_name || schoolName.value === '公开版') {
+        schoolName.value = '注册登录选择大学'
+      } else {
+        schoolName.value = userInfo.data.school_name
       }
     }
     console.log('当前用户信息:', userInfo)
@@ -491,7 +349,7 @@
           frameBounds.value = {
             width: uploadRect.width,
             height: uploadRect.height,
-            frameWidth: uploadRect.width * 0.7,
+            frameWidth: uploadRect.width * 0.76,
             frameHeight: uploadRect.height * 0.68,
           }
 
@@ -525,6 +383,9 @@
 
   // 修改触摸移动逻辑中的缩放部分
   const onTouchMove = (e) => {
+    //操作过程不能下载
+    ableDownload.value = false
+
     if (!touchData.value.touching) return
 
     e.preventDefault()
@@ -610,8 +471,8 @@
     // 相框边界（相对于upload-area中心）
     const frameLeft = -frameWidth / 2
     const frameRight = frameWidth / 2
-    const frameTop = -frameHeight / 2 - 20 // 上边距15px
-    const frameBottom = frameHeight / 2 // 下边距17px
+    const frameTop = -frameHeight / 2 // 调整上边距
+    const frameBottom = frameHeight / 2 // 调整下边距
 
     // 图片边界
     const imgLeft = x - scaledWidth / 2
@@ -622,43 +483,65 @@
     let constrainedX = x
     let constrainedY = y
 
-    // 水平约束 - 图片不能超出相框
-    if (imgLeft < frameLeft) {
-      constrainedX = frameLeft + scaledWidth / 2
-    } else if (imgRight > frameRight) {
-      constrainedX = frameRight - scaledWidth / 2
+    // 如果图片小于相框，确保图片完全在相框内
+    if (scaledWidth <= frameWidth) {
+      if (imgLeft < frameLeft) {
+        constrainedX = frameLeft + scaledWidth / 2
+      } else if (imgRight > frameRight) {
+        constrainedX = frameRight - scaledWidth / 2
+      }
+    } else {
+      // 如果图片大于相框，确保相框区域完全被图片覆盖
+      if (imgLeft > frameLeft) {
+        constrainedX = frameLeft + scaledWidth / 2
+      } else if (imgRight < frameRight) {
+        constrainedX = frameRight - scaledWidth / 2
+      }
     }
 
-    // 垂直约束 - 图片不能超出相框
-    if (imgTop < frameTop) {
-      constrainedY = frameTop + scaledHeight / 2
-    } else if (imgBottom > frameBottom) {
-      constrainedY = frameBottom - scaledHeight / 2
+    // 垂直约束逻辑相同
+    if (scaledHeight <= frameHeight) {
+      if (imgTop < frameTop) {
+        constrainedY = frameTop + scaledHeight / 2
+      } else if (imgBottom > frameBottom) {
+        constrainedY = frameBottom - scaledHeight / 2
+      }
+    } else {
+      if (imgTop > frameTop) {
+        constrainedY = frameTop + scaledHeight / 2
+      } else if (imgBottom < frameBottom) {
+        constrainedY = frameBottom - scaledHeight / 2
+      }
     }
 
     return { x: constrainedX, y: constrainedY }
   }
 
   // 修改缩放约束，防止缩放时超出相框
+  // 修改缩放约束，设置更合理的缩放范围
   const getMaxScale = () => {
-    if (!frameBounds.value.width) return 3
+    if (!frameBounds.value.width) return 2.5
 
     const frameWidth = frameBounds.value.frameWidth
     const frameHeight = frameBounds.value.frameHeight
 
-    // 计算不超出相框的最大缩放比例
-    const maxScaleX = frameWidth / imageWidth.value
-    const maxScaleY = frameHeight / imageHeight.value
+    // 计算基于相框的合理最大缩放
+    const maxScaleX = (frameWidth * 2) / imageWidth.value // 允许图片宽度是相框的2倍
+    const maxScaleY = (frameHeight * 2) / imageHeight.value // 允许图片高度是相框的2倍
 
-    // 取较小值，确保图片在任何方向都不超出相框
-    const maxScale = Math.min(maxScaleX, maxScaleY)
+    // 取较大值，但限制在合理范围内
+    const maxScale = Math.max(maxScaleX, maxScaleY)
 
-    // 限制最大缩放不超过3倍，但也不超过相框限制
-    return Math.min(3, maxScale)
+    // 限制最大缩放在1.5-3倍之间
+    return Math.max(1.5, Math.min(3, maxScale))
   }
 
   // 修改选择图片函数
   const chooseImage = () => {
+    if (userImage.value) {
+      console.log('已经选择过图片，无法再次选择', userImage.value)
+      return
+    }
     uni.chooseImage({
       count: 1,
       sizeType: ['compressed'],
@@ -693,6 +576,9 @@
 
   // 修改触摸开始事件
   const onTouchStart = (e) => {
+    // 如果有用户图片，优先处理用户图片的触摸事件
+    ableDownload.value = false // 禁止下载，直到触摸结束
+
     const touches = e.touches
     touchData.value.touching = true
     touchData.value.lastTouchTime = Date.now()
@@ -716,6 +602,8 @@
   // 触摸结束
   const onTouchEnd = (e) => {
     // 如果所有手指都离开了屏幕
+    //可以下载
+    ableDownload.value = true
     if (e.touches.length === 0) {
       touchData.value.touching = false
       touchData.value.multiTouch = false
@@ -781,6 +669,16 @@
 
   // 新的下载图片函数
   const downloadImage = () => {
+    if (userImage.value === '') {
+      uni.showToast({
+        title: '请选择照片',
+        icon: 'none',
+      })
+      return
+    }
+    if (!ableDownload.value) {
+      return
+    }
     const canvasWidth = 750
     const canvasHeight = 1270
 
@@ -910,7 +808,7 @@
   const handleLongPress = () => {
     uni.showModal({
       title: '提示',
-      content: '是否保存当前页面为图片？',
+      content: '是否保存入学通知书？',
       success: (res) => {
         if (res.confirm) {
           downloadImage() // 使用新的downloadImage函数

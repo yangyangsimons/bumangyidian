@@ -476,7 +476,7 @@ const _sfc_main = {
       }) : {}, {
         z: isRadio.value
       }, isRadio.value ? common_vendor.e({
-        A: common_assets._imports_3$2,
+        A: common_assets._imports_3$3,
         B: common_vendor.o(backToQA),
         C: radioText.value,
         D: inputColor.value,
