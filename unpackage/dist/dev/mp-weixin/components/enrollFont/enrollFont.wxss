@@ -23,13 +23,9 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-@font-face {
-  font-family: "SmileySans-Oblique";
-  src: url("https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/font/SmileySans-Oblique.ttf.woff2");
-}
 .text-container.data-v-1f1e3606 {
   font-family: "SmileySans-Oblique", sans-serif;
-  font-size: 50rpx;
+  font-size: 40rpx;
   font-style: oblique;
   letter-spacing: 0.1em;
   width: 400rpx;
@@ -41,8 +37,9 @@
   justify-content: center;
   color: #fff;
   padding-left: 20rpx;
+  white-space: nowrap;
 }
-.text-container image.data-v-1f1e3606 {
+.text-container .slogon-bg.data-v-1f1e3606 {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -51,7 +48,8 @@
   z-index: -1;
 }
 .text-container .myname.data-v-1f1e3606 {
-  font-size: 30rpx;
+  font-size: 25rpx;
+  margin-top: 3rpx;
 }
 .text-container .myname .name-prefix.data-v-1f1e3606 {
   color: #fff;
@@ -64,7 +62,6 @@
 }
 .text-container .edit-input.data-v-1f1e3606 {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid #cdf91d;
   border-radius: 4rpx;
   padding: 5rpx 10rpx;
   color: #fff;

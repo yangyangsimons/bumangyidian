@@ -74,7 +74,6 @@
   color: #fff;
 }
 .count-container.data-v-3cdd96a5 {
-  border: 1px solid #ccc;
   position: absolute;
   bottom: 0rpx;
   right: 0rpx;
@@ -107,12 +106,40 @@
   font-size: 30rpx;
 }
 .upload-area.data-v-3cdd96a5 {
+  border: 1px solid red;
   width: 100%;
   height: 900rpx;
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 53%;
   transform: translate(-50%, -50%);
+}
+.upload-area .tips.data-v-3cdd96a5 {
+  width: 100%;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff45;
+  font-size: 28rpx;
+  text-align: center;
+}
+.upload-area .school.data-v-3cdd96a5 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: 74%;
+  left: 43%;
+  transform: rotate(5deg);
+  color: #aaaaaa;
+  font-size: 18rpx;
+  text-align: center;
+  white-space: nowrap;
+}
+.upload-area .school .school-name.data-v-3cdd96a5 {
+  font-weight: 600;
+  font-size: 35rpx;
 }
 .upload-area .stick-container.data-v-3cdd96a5 {
   width: 100%;
@@ -120,22 +147,15 @@
   position: relative;
   z-index: 2;
   pointer-events: none;
-}
-.upload-area .upload-bg.data-v-3cdd96a5 {
-  width: 90%;
-  height: 90%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  position: absolute;
-  pointer-events: none;
+  transition: all 0.3s ease-in-out;
 }
 .upload-area .uopload-stick.data-v-3cdd96a5 {
+  border: 1px solid #cdf91d;
   width: 100%;
   height: 100%;
   position: absolute;
-  top: -5%;
-  left: 0;
+  top: 0%;
+  left: 0%;
   pointer-events: none;
 }
 .image-container.data-v-3cdd96a5 {
@@ -147,6 +167,8 @@
   transform: translate(-50%, -50%);
   z-index: 1;
   pointer-events: auto;
+  -webkit-clip-path: inset(15% 15% 17% 12.5%);
+          clip-path: inset(15% 15% 17% 12.5%);
 }
 .image-container .image-wrapper.data-v-3cdd96a5 {
   position: absolute;
@@ -157,13 +179,14 @@
   touch-action: none;
   transition: none;
   pointer-events: auto;
+  overflow: hidden;
 }
 .image-container .image-wrapper .user-image.data-v-3cdd96a5 {
   width: 100%;
   height: 100%;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   pointer-events: none;
+  object-fit: cover;
 }
 .hidden-canvas.data-v-3cdd96a5 {
   position: fixed;

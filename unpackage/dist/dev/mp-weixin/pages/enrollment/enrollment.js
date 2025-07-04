@@ -1,6 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const utils_config = require("../../utils/config.js");
+const utils_request = require("../../utils/request.js");
 if (!Math) {
   EnrollFont();
 }
@@ -8,18 +10,47 @@ const EnrollFont = () => "../../components/enrollFont/enrollFont.js";
 const _sfc_main = {
   __name: "enrollment",
   setup(__props) {
+    const isTransitioning = common_vendor.ref(false);
+    const onStickerLoad = () => {
+      setTimeout(() => {
+        isTransitioning.value = false;
+      }, 300);
+    };
+    const DECORATION_POSITION = {
+      x: 35,
+      y: 215,
+      width: 690,
+      height: 735
+    };
     const FRAME_POSITION = {
-      x: 125,
+      x: 140,
       y: 275,
       width: 500,
-      height: 525
+      height: 500
     };
-    const TEXT_POSITION = {
-      x: 750 * 0.9,
-      // 675
-      y: 1270 * 0.98
-      // 1244.6
-    };
+    const currentStickerIndex = common_vendor.ref(0);
+    const stickerList = common_vendor.ref([
+      "stick-1.png",
+      "stick-2.png",
+      "stick-3.png",
+      "stick-4.png",
+      "stick-5.png",
+      "stick-6.png",
+      "stick-7.png",
+      "stick-8.png"
+    ]);
+    const currentStickerSrc = common_vendor.computed(() => {
+      return `../../static/enrollment/decoration/decoration-${[
+        currentStickerIndex.value + 1
+      ]}.png`;
+    });
+    const stickerTouchData = common_vendor.ref({
+      startX: 0,
+      startY: 0,
+      touching: false,
+      threshold: 50
+      // 滑动阈值
+    });
     common_vendor.ref("../../");
     const qrCodeImage = common_vendor.ref("../../static/enrollment/qrcode.jpg");
     const userCount = common_vendor.ref(8888);
@@ -29,6 +60,8 @@ const _sfc_main = {
     const imageWidth = common_vendor.ref(200);
     const imageHeight = common_vendor.ref(200);
     const imageScale = common_vendor.ref(1);
+    const schoolName = common_vendor.ref("xx大学");
+    const currentTime = common_vendor.ref("");
     const frameBounds = common_vendor.ref({
       left: 0,
       top: 0,
@@ -41,6 +74,18 @@ const _sfc_main = {
       width: 0,
       height: 0
     });
+    const TEXT_POSITION = {
+      x: 552,
+      y: 1215
+    };
+    const SCHOOL_POSITION = {
+      x: 325,
+      y: 805
+    };
+    const TIME_POSITION = {
+      x: 325,
+      y: 775
+    };
     const touchData = common_vendor.ref({
       startX: 0,
       startY: 0,
@@ -52,8 +97,76 @@ const _sfc_main = {
       multiTouch: false,
       lastTouchTime: 0
     });
-    common_vendor.onMounted(() => {
-      getUserCount();
+    const onStickerTouchStart = (e) => {
+      if (userImage.value && e.target.className && e.target.className.includes("image-wrapper")) {
+        return;
+      }
+      stickerTouchData.value.touching = true;
+      stickerTouchData.value.startX = e.touches[0].clientX;
+      stickerTouchData.value.startY = e.touches[0].clientY;
+    };
+    const onStickerTouchMove = (e) => {
+      if (!stickerTouchData.value.touching)
+        return;
+      if (userImage.value && touchData.value.touching) {
+        return;
+      }
+      e.preventDefault();
+    };
+    const onStickerTouchEnd = (e) => {
+      if (!stickerTouchData.value.touching)
+        return;
+      if (userImage.value && touchData.value.touching) {
+        stickerTouchData.value.touching = false;
+        return;
+      }
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const deltaX = endX - stickerTouchData.value.startX;
+      const deltaY = endY - stickerTouchData.value.startY;
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > stickerTouchData.value.threshold) {
+        if (deltaX > 0) {
+          switchSticker("prev");
+        } else {
+          switchSticker("next");
+        }
+      } else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+        chooseImage();
+      }
+      stickerTouchData.value.touching = false;
+    };
+    const switchSticker = (direction) => {
+      isTransitioning.value = true;
+      const maxIndex = stickerList.value.length - 1;
+      if (direction === "next") {
+        currentStickerIndex.value = currentStickerIndex.value >= maxIndex ? 0 : currentStickerIndex.value + 1;
+      } else if (direction === "prev") {
+        currentStickerIndex.value = currentStickerIndex.value <= 0 ? maxIndex : currentStickerIndex.value - 1;
+      }
+    };
+    common_vendor.onMounted(async () => {
+      const userInfo = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
+      if (userInfo.code !== 0) {
+        common_vendor.index.showToast({
+          title: "获取用户信息失败",
+          icon: "none"
+        });
+        return;
+      } else {
+        userCount.value = userInfo.data.report_idx;
+        schoolName.value = userInfo.data.school_name;
+        if (schoolName.value === "公开版") {
+          schoolName.value = "注册后显示大学名称";
+        }
+      }
+      common_vendor.index.__f__("log", "at pages/enrollment/enrollment.vue:468", "当前用户信息:", userInfo);
+      const now = /* @__PURE__ */ new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      currentTime.value = `${year}年${month}月${day}日 ${hour}:${minute}`;
       getFrameBounds();
     });
     const getFrameBounds = () => {
@@ -63,7 +176,7 @@ const _sfc_main = {
           frameBounds.value = {
             width: uploadRect.width,
             height: uploadRect.height,
-            frameWidth: uploadRect.width * 0.75,
+            frameWidth: uploadRect.width * 0.7,
             frameHeight: uploadRect.height * 0.68
           };
           frameScreenRect.value = {
@@ -139,7 +252,7 @@ const _sfc_main = {
       const frameHeight = frameBounds.value.frameHeight;
       const frameLeft = -frameWidth / 2;
       const frameRight = frameWidth / 2;
-      const frameTop = -frameHeight / 2;
+      const frameTop = -frameHeight / 2 - 20;
       const frameBottom = frameHeight / 2;
       const imgLeft = x - scaledWidth / 2;
       const imgRight = x + scaledWidth / 2;
@@ -223,13 +336,6 @@ const _sfc_main = {
         touchData.value.startImageY = imageY.value;
       }
     };
-    const getUserCount = async () => {
-      try {
-        userCount.value = 8888;
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:400", "获取用户数量失败:", error);
-      }
-    };
     const calculateImagePosition = () => {
       if (!frameBounds.value.width || !userImage.value) {
         return null;
@@ -260,7 +366,7 @@ const _sfc_main = {
       const canvasHeight = 1270;
       const ctx = common_vendor.index.createCanvasContext("downloadCanvas");
       ctx.drawImage(
-        "../../static/enrollment/1/entire-bg.png",
+        "../../static/enrollment/base-bg.png",
         0,
         0,
         canvasWidth,
@@ -273,9 +379,13 @@ const _sfc_main = {
           ctx.beginPath();
           ctx.rect(
             FRAME_POSITION.x,
+            // 125
             FRAME_POSITION.y,
+            // 275
             FRAME_POSITION.width,
+            // 500
             FRAME_POSITION.height
+            // 525
           );
           ctx.clip();
           ctx.drawImage(
@@ -288,12 +398,43 @@ const _sfc_main = {
           ctx.restore();
         }
       }
-      ctx.setFillStyle("#333333");
+      const decorationIndex = currentStickerIndex.value + 1;
+      ctx.drawImage(
+        `../../static/enrollment/decoration/decoration-${decorationIndex}.png`,
+        DECORATION_POSITION.x,
+        // 35
+        DECORATION_POSITION.y,
+        // 215
+        DECORATION_POSITION.width,
+        // 690
+        DECORATION_POSITION.height
+        // 735
+      );
+      ctx.setFillStyle("#cdf91d");
       ctx.setFontSize(28);
-      ctx.setTextAlign("right");
-      ctx.setTextBaseline("bottom");
-      const countText = `我是第${userCount.value}位签到的新生`;
+      ctx.setTextAlign("left");
+      ctx.setTextBaseline("middle");
+      const countText = `${userCount.value}`;
       ctx.fillText(countText, TEXT_POSITION.x, TEXT_POSITION.y);
+      ctx.save();
+      ctx.translate(TIME_POSITION.x, TIME_POSITION.y);
+      ctx.rotate(5 * Math.PI / 180);
+      ctx.setFillStyle("#aaa");
+      ctx.setFontSize(16);
+      ctx.setTextAlign("left");
+      ctx.setTextBaseline("middle");
+      const currentTImeText = `电子认证时间：${currentTime.value}`;
+      ctx.fillText(currentTImeText, 0, 0);
+      ctx.save();
+      ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y);
+      ctx.rotate(5 * Math.PI / 180);
+      ctx.setFillStyle("#aaa");
+      ctx.setFontSize(28);
+      ctx.setTextAlign("left");
+      ctx.setTextBaseline("middle");
+      const schoolText = `${schoolName.value}`;
+      ctx.fillText(schoolText, 0, 0);
+      ctx.restore();
       ctx.draw(false, () => {
         common_vendor.index.canvasToTempFilePath({
           canvasId: "downloadCanvas",
@@ -321,7 +462,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:538", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment/enrollment.vue:899", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -346,22 +487,29 @@ const _sfc_main = {
         a: common_assets._imports_0,
         b: common_assets._imports_1,
         c: qrCodeImage.value,
-        d: common_assets._imports_2,
-        e: common_assets._imports_3,
-        f: userImage.value
+        d: currentStickerIndex.value,
+        e: currentStickerSrc.value,
+        f: isTransitioning.value ? 1 : "",
+        g: common_vendor.o(onStickerLoad),
+        h: common_vendor.t(currentTime.value),
+        i: common_vendor.t(schoolName.value),
+        j: userImage.value
       }, userImage.value ? {
-        g: userImage.value,
-        h: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
-        i: imageWidth.value + "px",
-        j: imageHeight.value + "px",
-        k: common_vendor.o(onTouchStart),
-        l: common_vendor.o(onTouchMove),
-        m: common_vendor.o(onTouchEnd)
+        k: userImage.value,
+        l: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
+        m: imageWidth.value + "px",
+        n: imageHeight.value + "px",
+        o: common_vendor.o(onTouchStart),
+        p: common_vendor.o(onTouchMove),
+        q: common_vendor.o(onTouchEnd)
       } : {}, {
-        n: common_vendor.o(chooseImage),
-        o: common_assets._imports_4,
-        p: common_vendor.t(userCount.value),
-        q: common_vendor.o(handleLongPress)
+        r: common_vendor.o(chooseImage),
+        s: common_vendor.o(onStickerTouchStart),
+        t: common_vendor.o(onStickerTouchMove),
+        v: common_vendor.o(onStickerTouchEnd),
+        w: common_assets._imports_2,
+        x: common_vendor.t(userCount.value),
+        y: common_vendor.o(handleLongPress)
       });
     };
   }

@@ -19,18 +19,32 @@
     </div>
 
     <!-- 用户图片上传区域 -->
-    <view class="upload-area" @tap="chooseImage">
+    <view
+      class="upload-area"
+      @tap="chooseImage"
+      @touchstart="onStickerTouchStart"
+      @touchmove="onStickerTouchMove"
+      @touchend="onStickerTouchEnd"
+    >
       <view class="stick-container">
-        <image
+        <!-- <image
           src="../../static/enrollment/photo.png"
           mode="scaleToFill"
           class="upload-bg"
-        />
+        /> -->
         <image
-          src="../../static/enrollment/stick.png"
+          :key="currentStickerIndex"
+          :src="currentStickerSrc"
           mode="aspectFit"
           class="uopload-stick"
+          :class="{ 'fade-transition': isTransitioning }"
+          @load="onStickerLoad"
         />
+        <text class="tips">点击上传照片，左右滑动切换相框</text>
+        <view class="school">
+          <text class="verify-time">电子认证时间: {{ currentTime }}</text>
+          <text class="school-name">{{ schoolName }}</text>
+        </view>
       </view>
 
       <!-- 用户图片显示区域 -->
@@ -46,7 +60,7 @@
           @touchmove="onTouchMove"
           @touchend="onTouchEnd"
         >
-          <image :src="userImage" mode="aspectFill" class="user-image"></image>
+          <image :src="userImage" mode="scaleToFill" class="user-image"></image>
         </view>
       </view>
     </view>
@@ -63,6 +77,20 @@
         >位签到的新生</text
       >
     </view>
+    <!-- 临时测试 -->
+    <!-- <button
+      @tap="measureFrame"
+      style="
+        position: fixed;
+        top: 50px;
+        right: 20px;
+        z-index: 9999;
+        background: red;
+        color: white;
+      "
+    >
+      测量相框
+    </button> -->
 
     <!-- 隐藏的canvas -->
     <canvas canvas-id="downloadCanvas" class="hidden-canvas"></canvas>
@@ -70,26 +98,219 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
   import EnrollFont from '@/components/enrollFont/enrollFont.vue'
+  import { baseUrl } from '@/utils/config'
+  import request from '@/utils/request.js'
+  const isTransitioning = ref(false)
 
-  // 相框坐标常量
+  // 贴纸加载完成后结束动画
+  const onStickerLoad = () => {
+    setTimeout(() => {
+      isTransitioning.value = false
+    }, 300)
+  }
+
+  // const measureFrame = () => {
+  //   // 获取设备信息
+  //   uni.getSystemInfo({
+  //     success: (sysInfo) => {
+  //       console.log('设备信息:', sysInfo)
+
+  //       // 计算实际的canvas尺寸
+  //       const devicePixelRatio = sysInfo.pixelRatio || 2
+  //       const screenWidth = sysInfo.screenWidth // 设备屏幕宽度（px）
+  //       const screenHeight = sysInfo.screenHeight // 设备屏幕高度（px）
+
+  //       // 方案一：按屏幕比例缩放
+  //       const canvasWidth = screenWidth
+  //       const canvasHeight = (screenWidth / 750) * 1270 // 保持底图比例
+
+  //       console.log(`Canvas尺寸: ${canvasWidth} x ${canvasHeight}`)
+
+  //       const ctx = uni.createCanvasContext('downloadCanvas')
+
+  //       // 绘制底图，让它填满canvas
+  //       ctx.drawImage(
+  //         '../../static/enrollment/entire-bg.png',
+  //         0,
+  //         0,
+  //         canvasWidth,
+  //         canvasHeight
+  //       )
+
+  //       // 绘制网格 - 按比例缩放
+  //       const scaleX = canvasWidth / 750
+  //       const scaleY = canvasHeight / 1270
+
+  //       ctx.setStrokeStyle('#ff0000')
+  //       ctx.setLineWidth(1)
+
+  //       // 垂直网格线（原750px按比例分25份）
+  //       for (let i = 0; i <= 30; i++) {
+  //         const x = (750 / 30) * i * scaleX // 每25px一条线
+  //         ctx.beginPath()
+  //         ctx.moveTo(x, 0)
+  //         ctx.lineTo(x, canvasHeight)
+
+  //         if (i % 4 === 0) {
+  //           // 每100px一条粗线
+  //           ctx.setLineWidth(2)
+  //           ctx.setStrokeStyle('#ff0000')
+  //         } else {
+  //           ctx.setLineWidth(1)
+  //           ctx.setStrokeStyle('#ffaaaa')
+  //         }
+  //         ctx.stroke()
+
+  //         // 标记坐标（原始750px坐标系）
+  //         if (i % 4 === 0) {
+  //           const originalX = (750 / 30) * i
+  //           ctx.setFillStyle('#ff0000')
+  //           ctx.setFontSize(12 * Math.min(scaleX, scaleY))
+  //           ctx.setTextAlign('center')
+  //           ctx.fillText(originalX.toString(), x, 20 * scaleY)
+  //         }
+  //       }
+
+  //       // 水平网格线
+  //       for (let i = 0; i <= 50; i++) {
+  //         const y = (1270 / 50) * i * scaleY // 每25.4px一条线
+  //         ctx.beginPath()
+  //         ctx.moveTo(0, y)
+  //         ctx.lineTo(canvasWidth, y)
+
+  //         if (i % 4 === 0) {
+  //           ctx.setLineWidth(2)
+  //           ctx.setStrokeStyle('#ff0000')
+  //         } else {
+  //           ctx.setLineWidth(1)
+  //           ctx.setStrokeStyle('#ffaaaa')
+  //         }
+  //         ctx.stroke()
+
+  //         // 标记坐标
+  //         if (i % 4 === 0) {
+  //           const originalY = (1270 / 50) * i
+  //           ctx.setFillStyle('#ff0000')
+  //           ctx.setFontSize(12 * Math.min(scaleX, scaleY))
+  //           ctx.setTextAlign('left')
+  //           ctx.fillText(originalY.toString(), 5 * scaleX, y + 15 * scaleY)
+  //         }
+  //       }
+
+  //       // 绘制测试矩形（按比例缩放）
+  //       ctx.setStrokeStyle('#00ff00')
+  //       ctx.setLineWidth(3)
+  //       ctx.beginPath()
+  //       ctx.rect(100 * scaleX, 200 * scaleY, 200 * scaleX, 150 * scaleY)
+  //       ctx.stroke()
+
+  //       ctx.setFillStyle('#00ff00')
+  //       ctx.setFontSize(14 * Math.min(scaleX, scaleY))
+  //       ctx.fillText('测试矩形(100,200,200,150)', 100 * scaleX, 190 * scaleY)
+
+  //       ctx.draw(false, () => {
+  //         uni.canvasToTempFilePath({
+  //           canvasId: 'downloadCanvas',
+  //           x: 0,
+  //           y: 0,
+  //           width: canvasWidth,
+  //           height: canvasHeight,
+  //           destWidth: canvasWidth * devicePixelRatio,
+  //           destHeight: canvasHeight * devicePixelRatio,
+  //           success: (res) => {
+  //             console.log('测量图生成成功:', res.tempFilePath)
+
+  //             uni.saveImageToPhotosAlbum({
+  //               filePath: res.tempFilePath,
+  //               success: () => {
+  //                 uni.showModal({
+  //                   title: '测量图已保存',
+  //                   content: `图片尺寸: ${canvasWidth}x${canvasHeight}\n网格上的数字是750x1270坐标系的值\n请查看相框位置对应的坐标`,
+  //                   showCancel: false,
+  //                 })
+  //               },
+  //               fail: () => {
+  //                 uni.previewImage({
+  //                   urls: [res.tempFilePath],
+  //                   current: res.tempFilePath,
+  //                 })
+  //               },
+  //             })
+  //           },
+  //           fail: (error) => {
+  //             console.error('生成测量图失败:', error)
+  //           },
+  //         })
+  //       })
+  //     },
+  //   })
+  // }
+  // 装饰图片位置常量
+  const DECORATION_POSITION = {
+    x: 35,
+    y: 215,
+    width: 690,
+    height: 735,
+  }
+
+  // 相框位置常量（用户照片区域，保持不变）
   const FRAME_POSITION = {
-    x: 125,
+    x: 140,
     y: 275,
     width: 500,
-    height: 525,
+    height: 500,
   }
 
-  // 用户数量文字位置常量（右下角）
-  const TEXT_POSITION = {
-    x: 750 * 0.9, // 675
-    y: 1270 * 0.98, // 1244.6
-  }
+  // 贴纸相关数据
+  const currentStickerIndex = ref(0)
+  // const stickerList = ref([
+  //   'stick-1.png',
+  //   'stick-2.png',
+  //   'stick-3.png',
+  //   'stick-4.png',
+  //   'stick-5.png',
+  //   'stick-6.png',
+  //   'stick-7.png',
+  //   'stick-8.png',
+  //   'stick-9.png',
+  //   'stick-10.png',
+  // ])
+  const stickerList = ref([
+    'stick-1.png',
+    'stick-2.png',
+    'stick-3.png',
+    'stick-4.png',
+    'stick-5.png',
+    'stick-6.png',
+    'stick-7.png',
+    'stick-8.png',
+  ])
+
+  // 计算当前贴纸路径
+  // const currentStickerSrc = computed(() => {
+  //   return `../../static/enrollment/${
+  //     stickerList.value[currentStickerIndex.value]
+  //   }`
+  // })
+  const currentStickerSrc = computed(() => {
+    return `../../static/enrollment/decoration/decoration-${[
+      currentStickerIndex.value + 1,
+    ]}.png`
+  })
+
+  // 贴纸滑动相关数据
+  const stickerTouchData = ref({
+    startX: 0,
+    startY: 0,
+    touching: false,
+    threshold: 50, // 滑动阈值
+  })
 
   // 响应式数据
-  const backgroundImage = ref('../../') // 替换为你的背景图片路径
-  const qrCodeImage = ref('../../static/enrollment/qrcode.jpg') // 替换为你的二维码图片路径
+  const backgroundImage = ref('../../')
+  const qrCodeImage = ref('../../static/enrollment/qrcode.jpg')
   const userCount = ref(8888)
   const userImage = ref('')
   const imageX = ref(0)
@@ -97,7 +318,8 @@
   const imageWidth = ref(200)
   const imageHeight = ref(200)
   const imageScale = ref(1)
-
+  const schoolName = ref('xx大学')
+  const currentTime = ref('')
   // 计算图片的边界框
   const frameBounds = ref({
     left: 0,
@@ -114,6 +336,23 @@
     height: 0,
   })
 
+  // 文字位置常量
+  const TEXT_POSITION = {
+    x: 552,
+    y: 1215,
+  }
+
+  // 学校位置常量
+  const SCHOOL_POSITION = {
+    x: 325,
+    y: 805,
+  }
+  // 时间位置常量
+  const TIME_POSITION = {
+    x: 325,
+    y: 775,
+  }
+
   // 触摸相关数据
   const touchData = ref({
     startX: 0,
@@ -127,9 +366,115 @@
     lastTouchTime: 0,
   })
 
+  // 贴纸滑动事件处理
+  const onStickerTouchStart = (e) => {
+    // 如果有用户图片，让图片的触摸事件优先
+    if (
+      userImage.value &&
+      e.target.className &&
+      e.target.className.includes('image-wrapper')
+    ) {
+      return
+    }
+
+    stickerTouchData.value.touching = true
+    stickerTouchData.value.startX = e.touches[0].clientX
+    stickerTouchData.value.startY = e.touches[0].clientY
+  }
+
+  const onStickerTouchMove = (e) => {
+    if (!stickerTouchData.value.touching) return
+
+    // 如果有用户图片且正在操作图片，不处理贴纸滑动
+    if (userImage.value && touchData.value.touching) {
+      return
+    }
+
+    e.preventDefault()
+  }
+
+  const onStickerTouchEnd = (e) => {
+    if (!stickerTouchData.value.touching) return
+
+    // 如果有用户图片且正在操作图片，不处理贴纸滑动
+    if (userImage.value && touchData.value.touching) {
+      stickerTouchData.value.touching = false
+      return
+    }
+
+    const endX = e.changedTouches[0].clientX
+    const endY = e.changedTouches[0].clientY
+    const deltaX = endX - stickerTouchData.value.startX
+    const deltaY = endY - stickerTouchData.value.startY
+
+    // 确保是水平滑动（水平距离大于垂直距离）
+    if (
+      Math.abs(deltaX) > Math.abs(deltaY) &&
+      Math.abs(deltaX) > stickerTouchData.value.threshold
+    ) {
+      if (deltaX > 0) {
+        // 向右滑动，切换到上一个贴纸
+        switchSticker('prev')
+      } else {
+        // 向左滑动，切换到下一个贴纸
+        switchSticker('next')
+      }
+    } else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+      // 如果移动距离很小，认为是点击事件，执行选择图片
+      chooseImage()
+    }
+
+    stickerTouchData.value.touching = false
+  }
+
+  // 切换贴纸函数
+  // 修改切换贴纸函数
+  const switchSticker = (direction) => {
+    // 开始动画
+    isTransitioning.value = true
+
+    const maxIndex = stickerList.value.length - 1
+
+    if (direction === 'next') {
+      currentStickerIndex.value =
+        currentStickerIndex.value >= maxIndex
+          ? 0
+          : currentStickerIndex.value + 1
+    } else if (direction === 'prev') {
+      currentStickerIndex.value =
+        currentStickerIndex.value <= 0
+          ? maxIndex
+          : currentStickerIndex.value - 1
+    }
+  }
+
   // 生命周期
-  onMounted(() => {
-    getUserCount()
+  onMounted(async () => {
+    //当前用户的学校和报道位置
+    const userInfo = await request(`${baseUrl}/user/user_info`, 'GET')
+    if (userInfo.code !== 0) {
+      uni.showToast({
+        title: '获取用户信息失败',
+        icon: 'none',
+      })
+      return
+    } else {
+      userCount.value = userInfo.data.report_idx
+      schoolName.value = userInfo.data.school_name
+      if (schoolName.value === '公开版') {
+        schoolName.value = '注册后显示大学名称'
+      }
+    }
+    console.log('当前用户信息:', userInfo)
+    // 获取当前时间
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hour = String(now.getHours()).padStart(2, '0')
+    const minute = String(now.getMinutes()).padStart(2, '0')
+
+    currentTime.value = `${year}年${month}月${day}日 ${hour}:${minute}`
     getFrameBounds()
   })
 
@@ -142,11 +487,11 @@
       .select('.upload-area')
       .boundingClientRect((uploadRect) => {
         if (uploadRect) {
-          // 相框是75%的宽和68%的高，居中显示
+          // 相框是70%的宽和68%的高，居中显示
           frameBounds.value = {
             width: uploadRect.width,
             height: uploadRect.height,
-            frameWidth: uploadRect.width * 0.75,
+            frameWidth: uploadRect.width * 0.7,
             frameHeight: uploadRect.height * 0.68,
           }
 
@@ -265,8 +610,8 @@
     // 相框边界（相对于upload-area中心）
     const frameLeft = -frameWidth / 2
     const frameRight = frameWidth / 2
-    const frameTop = -frameHeight / 2
-    const frameBottom = frameHeight / 2
+    const frameTop = -frameHeight / 2 - 20 // 上边距15px
+    const frameBottom = frameHeight / 2 // 下边距17px
 
     // 图片边界
     const imgLeft = x - scaledWidth / 2
@@ -384,23 +729,6 @@
     }
   }
 
-  // 获取用户注册数量
-  const getUserCount = async () => {
-    try {
-      // 这里调用你的后端接口
-      // const res = await uni.request({
-      //   url: 'your-api-endpoint',
-      //   method: 'GET'
-      // })
-      // userCount.value = res.data.count
-
-      // 暂时使用固定值
-      userCount.value = 8888
-    } catch (error) {
-      console.error('获取用户数量失败:', error)
-    }
-  }
-
   // 计算图片在canvas中的位置
   const calculateImagePosition = () => {
     if (!frameBounds.value.width || !userImage.value) {
@@ -458,29 +786,28 @@
 
     const ctx = uni.createCanvasContext('downloadCanvas')
 
-    // 1. 绘制底图（包含logo、slogan、相框、二维码等所有固定元素）
+    // 1. 绘制底图（背景、logo、slogan、二维码等）
     ctx.drawImage(
-      '../../static/enrollment/1/entire-bg.png',
+      '../../static/enrollment/base-bg.png',
       0,
       0,
       canvasWidth,
       canvasHeight
     )
 
-    // 2. 绘制用户照片（如果存在）
+    // 2. 绘制用户照片（在原来的相框位置）
     if (userImage.value) {
-      // 计算用户图片在canvas中的位置
       const canvasImagePosition = calculateImagePosition()
 
       if (canvasImagePosition) {
-        // 设置裁剪区域为相框
+        // 裁剪区域仍然使用原来的相框位置
         ctx.save()
         ctx.beginPath()
         ctx.rect(
-          FRAME_POSITION.x,
-          FRAME_POSITION.y,
-          FRAME_POSITION.width,
-          FRAME_POSITION.height
+          FRAME_POSITION.x, // 125
+          FRAME_POSITION.y, // 275
+          FRAME_POSITION.width, // 500
+          FRAME_POSITION.height // 525
         )
         ctx.clip()
 
@@ -497,16 +824,51 @@
       }
     }
 
-    // 3. 绘制用户数量文字（右下角）
-    ctx.setFillStyle('#333333') // 根据你的设计调整颜色
-    ctx.setFontSize(28) // 根据需要调整字体大小
-    ctx.setTextAlign('right')
-    ctx.setTextBaseline('bottom')
+    // 3. 绘制装饰图片（覆盖更大区域）
+    const decorationIndex = currentStickerIndex.value + 1 // 因为decoration是从1开始的
+    ctx.drawImage(
+      `../../static/enrollment/decoration/decoration-${decorationIndex}.png`,
+      DECORATION_POSITION.x, // 35
+      DECORATION_POSITION.y, // 215
+      DECORATION_POSITION.width, // 690
+      DECORATION_POSITION.height // 735
+    )
 
-    const countText = `我是第${userCount.value}位签到的新生`
+    // 4. 绘制用户数量文字
+    ctx.setFillStyle('#cdf91d')
+    ctx.setFontSize(28) // 设置字体大小
+    ctx.setTextAlign('left') // 改为左对齐，因为给的是左上角坐标
+    ctx.setTextBaseline('middle') // 设置文本基线为中间
+
+    const countText = `${userCount.value}`
     ctx.fillText(countText, TEXT_POSITION.x, TEXT_POSITION.y)
 
-    // 4. 执行绘制并保存
+    // . 绘制时间文字
+    ctx.save() // 保存当前状态
+    ctx.translate(TIME_POSITION.x, TIME_POSITION.y) // 移动到文字位置
+    ctx.rotate((5 * Math.PI) / 180) // 旋转5度（弧度 = 角度 * π / 180）
+    ctx.setFillStyle('#aaa')
+    ctx.setFontSize(16) // 设置字体大小
+    ctx.setTextAlign('left') // 改为左对齐，因为给的是左上角坐标
+    ctx.setTextBaseline('middle') // 设置文本基线为中间
+
+    const currentTImeText = `电子认证时间：${currentTime.value}`
+    ctx.fillText(currentTImeText, 0, 0)
+    //
+    //  绘制学校文字（带5度旋转）
+    ctx.save() // 保存当前状态
+    ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y) // 移动到文字位置
+    ctx.rotate((5 * Math.PI) / 180) // 旋转5度（弧度 = 角度 * π / 180）
+    ctx.setFillStyle('#aaa')
+    ctx.setFontSize(28)
+    ctx.setTextAlign('left')
+    ctx.setTextBaseline('middle')
+
+    const schoolText = `${schoolName.value}`
+    ctx.fillText(schoolText, 0, 0) // 在原点绘制，因为已经translate了
+    ctx.restore() // 恢复状态，避免影响后续绘制
+
+    // 5. 执行绘制并保存
     ctx.draw(false, () => {
       uni.canvasToTempFilePath({
         canvasId: 'downloadCanvas',
@@ -517,7 +879,6 @@
         destWidth: canvasWidth,
         destHeight: canvasHeight,
         success: (res) => {
-          // 保存到相册
           uni.saveImageToPhotosAlbum({
             filePath: res.tempFilePath,
             success: () => {

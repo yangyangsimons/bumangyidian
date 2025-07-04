@@ -52,7 +52,6 @@
 }
 
 .count-container {
-    border: 1px solid #ccc;
     position: absolute;
     bottom: 0rpx;
     right: 0rpx;
@@ -86,37 +85,68 @@
 }
 
 .upload-area {
+    border: 1px solid red;
     width: 100%;
     height: 900rpx;
     position: absolute;
     left: 50%;
-    top: 50%;
+    top: 53%;
     transform: translate(-50%, -50%);
 
+    .tips {
+        width: 100%;
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffffff45;
+        font-size: 28rpx;
+        text-align: center;
+    }
+    .school {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        top: 74%;
+        left: 43%;
+        transform: rotate(5deg);
+        color: #aaaaaa;
+        font-size: 18rpx;
+        text-align: center;
+        white-space: nowrap;
+
+        .school-name {
+            font-weight: 600;
+            font-size: 35rpx;
+        }
+    }
     .stick-container {
         width: 100%;
         height: 100%;
         position: relative;
         z-index: 2;
         pointer-events: none; // 照片框不阻挡触摸事件
+        transition: all 0.3s ease-in-out;
     }
 
-    .upload-bg {
-        width: 90%;
-        height: 90%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        position: absolute;
-        pointer-events: none; // 背景图也不阻挡触摸
-    }
+    // .upload-bg {
+    //     width: 90%;
+    //     height: 90%;
+    //     top: 50%;
+    //     left: 50%;
+    //     transform: translate(-50%, -50%);
+    //     position: absolute;
+    //     pointer-events: none; // 背景图也不阻挡触摸
+    // }
 
     .uopload-stick {
+        border: 1px solid #cdf91d;
         width: 100%;
         height: 100%;
         position: absolute;
-        top: -5%;
-        left: 0;
+        top: 0%;
+        left: 0%;
         pointer-events: none; // 贴纸也不阻挡触摸
     }
 }
@@ -130,6 +160,7 @@
     transform: translate(-50%, -50%);
     z-index: 1;
     pointer-events: auto; // 确保用户图片可以响应触摸
+    clip-path: inset(15% 15% 17% 12.5%);
 
     .image-wrapper {
         position: absolute;
@@ -140,13 +171,14 @@
         touch-action: none;
         transition: none;
         pointer-events: auto; // 确保图片包装器可以响应触摸
+        overflow: hidden;
 
         .user-image {
             width: 100%;
             height: 100%;
             border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             pointer-events: none; // 图片本身不需要响应事件，由包装器处理
+            object-fit: cover;
         }
     }
 }

@@ -4,8 +4,11 @@ const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   __name: "enrollFont",
   setup(__props) {
+    common_vendor.onShow(() => {
+      common_vendor.index.__f__("log", "at components/enrollFont/enrollFont.vue:51", "组件已显示");
+    });
     const slogan = common_vendor.ref("月光是我的补光灯");
-    const userName = common_vendor.ref("物业光合作用者");
+    const userName = common_vendor.ref("午夜光合作用者");
     const isEditingSlogan = common_vendor.ref(false);
     const isEditingName = common_vendor.ref(false);
     const tempSlogan = common_vendor.ref("");

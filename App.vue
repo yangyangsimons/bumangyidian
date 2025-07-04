@@ -91,6 +91,19 @@
     // },
     onShow: function () {
       console.log('App Show')
+      //下载字体
+      uni.loadFontFace({
+        global: true,
+        family: 'SmileySans-Oblique',
+        source:
+          'url(https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/font/SmileySans-Oblique.ttf.woff2)',
+        success: (result) => {
+          console.log('字体加载成功', result)
+        },
+        fail: (error) => {
+          console.error('字体加载失败', error)
+        },
+      })
     },
     onHide: function () {
       console.log('App Hide')

@@ -1,6 +1,10 @@
 <template>
   <view class="text-container">
-    <image src="../../static/enrollment/slogon-bg.png" mode="scaleToFill" />
+    <image
+      src="../../static/enrollment/slogon-bg.png"
+      mode="scaleToFill"
+      class="slogon-bg"
+    />
 
     <view class="main-text-container">
       <text class="hash-symbol">#</text>
@@ -39,11 +43,16 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
+  import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
 
+  // 页面显示时
+  onShow(() => {
+    console.log('组件已显示')
+  })
   // 响应式数据
   const slogan = ref('月光是我的补光灯')
-  const userName = ref('物业光合作用者')
+  const userName = ref('午夜光合作用者')
 
   // 编辑状态
   const isEditingSlogan = ref(false)
@@ -81,14 +90,9 @@
 </script>
 
 <style scoped lang="scss">
-  @font-face {
-    font-family: 'SmileySans-Oblique';
-    src: url('https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/font/SmileySans-Oblique.ttf.woff2');
-  }
-
   .text-container {
     font-family: 'SmileySans-Oblique', sans-serif;
-    font-size: 50rpx;
+    font-size: 40rpx;
     font-style: oblique;
     letter-spacing: 0.1em;
     width: 400rpx;
@@ -101,8 +105,9 @@
     // border: 1px solid #cdf91d;
     color: #fff;
     padding-left: 20rpx;
+    white-space: nowrap;
 
-    image {
+    .slogon-bg {
       width: 100%;
       height: 100%;
       position: absolute;
@@ -112,7 +117,8 @@
     }
 
     .myname {
-      font-size: 30rpx;
+      font-size: 25rpx;
+      margin-top: 3rpx;
 
       .name-prefix {
         color: #fff;
@@ -129,7 +135,6 @@
 
     .edit-input {
       background: rgba(255, 255, 255, 0.1);
-      border: 1px solid #cdf91d;
       border-radius: 4rpx;
       padding: 5rpx 10rpx;
       color: #fff;

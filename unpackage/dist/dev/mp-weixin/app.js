@@ -99,9 +99,20 @@ const _sfc_main = {
   // },
   onShow: function() {
     common_vendor.index.__f__("log", "at App.vue:93", "App Show");
+    common_vendor.index.loadFontFace({
+      global: true,
+      family: "SmileySans-Oblique",
+      source: "url(https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/font/SmileySans-Oblique.ttf.woff2)",
+      success: (result) => {
+        common_vendor.index.__f__("log", "at App.vue:101", "字体加载成功", result);
+      },
+      fail: (error) => {
+        common_vendor.index.__f__("error", "at App.vue:104", "字体加载失败", error);
+      }
+    });
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:96", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:109", "App Hide");
   }
 };
 function createApp() {
