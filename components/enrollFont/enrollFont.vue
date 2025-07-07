@@ -7,49 +7,35 @@
     />
 
     <view class="main-text-container">
-      <text class="hash-symbol">#</text>
-      <!-- 主标语的编辑功能 -->
-      <text v-if="!isEditingSlogan" class="main-text" @tap="startEditSlogan">
-        {{ slogan }}
-      </text>
-      <input
-        v-else
-        v-model="tempSlogan"
-        class="main-text edit-input"
-        :focus="isEditingSlogan"
-        @blur="finishEditSlogan"
-        @confirm="finishEditSlogan"
-        maxlength="20"
-      />
-    </view>
+      <view class="control-left" @click="switchSloganPrev">
+        <image
+          src="../../static/enrollment/slogan/left.png"
+          mode="scaleToFill"
+          class="control-icon"
+        />
+      </view>
 
-    <view class="myname">
-      <text class="name-prefix">我是: </text>
-      <!-- 姓名的编辑功能 -->
-      <text v-if="!isEditingName" class="main-text" @tap="startEditName">
-        {{ userName }}
-      </text>
-      <input
-        v-else
-        v-model="tempUserName"
-        class="main-text edit-input"
-        :focus="isEditingName"
-        @blur="finishEditName"
-        @confirm="finishEditName"
-        maxlength="15"
-      />
+      <image class="slogan" :src="currentSloganImage" mode="scaleToFill" />
+      <view class="control-right" @click="switchSloganNext">
+        <image
+          src="../../static/enrollment/slogan/right.png"
+          mode="scaleToFill"
+          class="control-icon"
+        />
+      </view>
     </view>
   </view>
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, computed, onMounted, defineExpose } from 'vue' // 添加 defineExpose
   import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
 
   // 页面显示时
   onShow(() => {
     console.log('组件已显示')
   })
+
   // 响应式数据
   const slogan = ref('月光是我的补光灯')
   const userName = ref('午夜光合作用者')
@@ -62,49 +48,55 @@
   const tempSlogan = ref('')
   const tempUserName = ref('')
 
-  // 编辑标语
-  const startEditSlogan = () => {
-    tempSlogan.value = slogan.value
-    isEditingSlogan.value = true
-  }
+  // slogan图片相关
+  const currentSloganIndex = ref(1) // 当前图片索引，从1开始
+  const maxSloganCount = 9 // 总共9张图片
 
-  const finishEditSlogan = () => {
-    if (tempSlogan.value.trim()) {
-      slogan.value = tempSlogan.value.trim()
+  // 计算当前slogan图片路径
+  const currentSloganImage = computed(() => {
+    return `../../static/enrollment/slogan/slogan-${currentSloganIndex.value}.png`
+  })
+
+  // 切换到上一张图片
+  const switchSloganPrev = () => {
+    if (currentSloganIndex.value > 1) {
+      currentSloganIndex.value--
+    } else {
+      currentSloganIndex.value = maxSloganCount // 循环到最后一张
     }
-    isEditingSlogan.value = false
   }
 
-  // 编辑姓名
-  const startEditName = () => {
-    tempUserName.value = userName.value
-    isEditingName.value = true
-  }
-
-  const finishEditName = () => {
-    if (tempUserName.value.trim()) {
-      userName.value = tempUserName.value.trim()
+  // 切换到下一张图片
+  const switchSloganNext = () => {
+    if (currentSloganIndex.value < maxSloganCount) {
+      currentSloganIndex.value++
+    } else {
+      currentSloganIndex.value = 1 // 循环到第一张
     }
-    isEditingName.value = false
   }
+
+  // 暴露获取当前图片地址的方法
+  const getCurrentSloganImage = () => {
+    return currentSloganImage.value
+  }
+
+  // 暴露方法给父组件
+  defineExpose({
+    getCurrentSloganImage,
+  })
 </script>
 
 <style scoped lang="scss">
+  // 样式代码保持不变
   .text-container {
-    font-family: 'SmileySans-Oblique', sans-serif;
-    font-size: 40rpx;
-    font-style: oblique;
-    letter-spacing: 0.1em;
-    width: 400rpx;
-    height: 150rpx;
+    width: 420rpx;
+    height: 125rpx;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    // border: 1px solid #cdf91d;
     color: #fff;
-    padding-left: 20rpx;
     white-space: nowrap;
 
     .slogon-bg {
@@ -115,42 +107,29 @@
       left: 0;
       z-index: -1;
     }
+    .main-text-container {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.5fr 7fr 1.5fr;
 
-    .myname {
-      font-size: 25rpx;
-      margin-top: 3rpx;
-
-      .name-prefix {
-        color: #fff;
+      .slogan {
+        width: 95%;
+        height: 80%;
+        margin: auto 0;
+      }
+      .control-icon {
+        width: 20rpx;
+        height: 30rpx;
+        margin-top: 30rpx;
+        cursor: pointer;
+      }
+      .control-left {
+        text-align: center;
+      }
+      .control-right {
+        text-align: center;
       }
     }
-
-    .main-text {
-      cursor: pointer;
-
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-
-    .edit-input {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4rpx;
-      padding: 5rpx 10rpx;
-      color: #fff;
-      font-family: inherit;
-      font-size: inherit;
-      font-style: inherit;
-      letter-spacing: inherit;
-      min-width: 200rpx;
-
-      &::placeholder {
-        color: rgba(255, 255, 255, 0.6);
-      }
-    }
-  }
-
-  .hash-symbol {
-    color: #cdf91d;
   }
 </style>

@@ -24,19 +24,14 @@
 /* 透明度 */
 /* 文章场景相关 */
 .text-container.data-v-1f1e3606 {
-  font-family: "SmileySans-Oblique", sans-serif;
-  font-size: 40rpx;
-  font-style: oblique;
-  letter-spacing: 0.1em;
-  width: 400rpx;
-  height: 150rpx;
+  width: 420rpx;
+  height: 125rpx;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   color: #fff;
-  padding-left: 20rpx;
   white-space: nowrap;
 }
 .text-container .slogon-bg.data-v-1f1e3606 {
@@ -47,36 +42,26 @@
   left: 0;
   z-index: -1;
 }
-.text-container .myname.data-v-1f1e3606 {
-  font-size: 25rpx;
-  margin-top: 3rpx;
+.text-container .main-text-container.data-v-1f1e3606 {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1.5fr 7fr 1.5fr;
 }
-.text-container .myname .name-prefix.data-v-1f1e3606 {
-  color: #fff;
+.text-container .main-text-container .slogan.data-v-1f1e3606 {
+  width: 95%;
+  height: 80%;
+  margin: auto 0;
 }
-.text-container .main-text.data-v-1f1e3606 {
+.text-container .main-text-container .control-icon.data-v-1f1e3606 {
+  width: 20rpx;
+  height: 30rpx;
+  margin-top: 30rpx;
   cursor: pointer;
 }
-.text-container .main-text.data-v-1f1e3606:hover {
-  opacity: 0.8;
+.text-container .main-text-container .control-left.data-v-1f1e3606 {
+  text-align: center;
 }
-.text-container .edit-input.data-v-1f1e3606 {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4rpx;
-  padding: 5rpx 10rpx;
-  color: #fff;
-  font-family: inherit;
-  font-size: inherit;
-  font-style: inherit;
-  letter-spacing: inherit;
-  min-width: 200rpx;
-}
-.text-container .edit-input.data-v-1f1e3606::-webkit-input-placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-.text-container .edit-input.data-v-1f1e3606::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-.hash-symbol.data-v-1f1e3606 {
-  color: #cdf91d;
+.text-container .main-text-container .control-right.data-v-1f1e3606 {
+  text-align: center;
 }

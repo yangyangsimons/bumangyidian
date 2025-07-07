@@ -273,7 +273,8 @@ const _sfc_main = {
         common_vendor.index.__f__("error", "at pages/index/index.vue:469", "获取系统配置失败:", error);
       }
     };
-    common_vendor.onShow(async () => {
+    common_vendor.onShow(async (options) => {
+      common_vendor.index.__f__("log", "at pages/index/index.vue:474", "onShow主页面显示----------------", options);
       sptime.value = (/* @__PURE__ */ new Date()).getTime();
       utils_report.dmReport(
         "pv",
@@ -288,26 +289,26 @@ const _sfc_main = {
         }
       );
       try {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:489", "主页面显示");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:490", "主页面显示");
         const adRes = await utils_request.request(
           `${utils_config.baseUrl}/system/get_activity_notify`,
           "GET"
         );
-        common_vendor.index.__f__("log", "at pages/index/index.vue:495", "获取广告", adRes);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:496", "获取广告", adRes);
         if (adRes.code == 0 && adRes.data.length > 0) {
           adList.value = adRes.data;
           showAd.value = true;
         }
         const currentSubject = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
-        common_vendor.index.__f__("log", "at pages/index/index.vue:502", "获取当前主题", currentSubject.data.topic);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:503", "获取当前主题", currentSubject.data.topic);
         sbStore.setSubject(currentSubject.data.topic);
         await fetchSystemConfig();
         if (isRadio.value) {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:511", "电台模式下执行的onShow逻辑", isRadio.value);
-          common_vendor.index.__f__("log", "at pages/index/index.vue:512", "背景音乐是否正在播放", audioPlayerStore.bgIsPlaying);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:512", "电台模式下执行的onShow逻辑", isRadio.value);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:513", "背景音乐是否正在播放", audioPlayerStore.bgIsPlaying);
           if (!wsStore.isConnected) {
             await wsStore.connect();
-            common_vendor.index.__f__("log", "at pages/index/index.vue:517", "socket连接成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:518", "socket连接成功");
             await wsStore.sendMessage({
               system_model: currentModel.value,
               input_type: 3,
@@ -317,17 +318,17 @@ const _sfc_main = {
         } else {
           if (!wsStore.isConnected) {
             await wsStore.connect();
-            common_vendor.index.__f__("log", "at pages/index/index.vue:530", "socket连接成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:531", "socket连接成功");
             await wsStore.sendMessage({
               system_model: currentModel.value,
               input_type: 3,
               text: ""
             });
-            common_vendor.index.__f__("log", "at pages/index/index.vue:538", "发送input_type=3的初始消息成功");
+            common_vendor.index.__f__("log", "at pages/index/index.vue:539", "发送input_type=3的初始消息成功");
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:542", "页面显示时发生错误:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:543", "页面显示时发生错误:", error);
       }
     });
     common_vendor.onHide(async () => {
@@ -341,23 +342,23 @@ const _sfc_main = {
           sptime: duration
         }
       );
-      common_vendor.index.__f__("log", "at pages/index/index.vue:558", "onHide主页面隐藏");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:559", "onHide主页面隐藏");
       audioPlayerStore.reportCurrentProgress();
-      common_vendor.index.__f__("log", "at pages/index/index.vue:562", "音频播放状态已上报");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:563", "音频播放状态已上报");
       if (isRadio.value) {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:567", "电台模式下不停止背景音乐onHide", isRadio.value);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:568", "电台模式下不停止背景音乐onHide", isRadio.value);
         audioPlayerStore.stopTtsAudio();
       } else {
         audioPlayerStore.stopTtsAudio();
         barrageStore.clearMessages();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:573", "停止并清空所有音频队列", "非电台模式下停止背景音乐");
-        common_vendor.index.__f__("log", "at pages/index/index.vue:575", "清空消息列表");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:574", "停止并清空所有音频队列", "非电台模式下停止背景音乐");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:576", "清空消息列表");
       }
       await wsStore.close();
-      common_vendor.index.__f__("log", "at pages/index/index.vue:580", "Hidesocket连接关闭");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:581", "Hidesocket连接关闭");
     });
     common_vendor.onShareAppMessage(() => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:583", "onShareAppMessage......");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:584", "onShareAppMessage......");
       return {
         title: `不芒一点，陪你世界加一点`,
         imageUrl: "../../static/share.png",
@@ -365,7 +366,7 @@ const _sfc_main = {
       };
     });
     common_vendor.onShareTimeline(() => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:591", "onShareTimeline......");
+      common_vendor.index.__f__("log", "at pages/index/index.vue:592", "onShareTimeline......");
       return {
         title: `不芒一点，陪你世界加一点`
       };
@@ -422,7 +423,7 @@ const _sfc_main = {
             b: current.value === index ? 1 : ""
           };
         }),
-        E: common_assets._imports_2$1,
+        E: common_assets._imports_2,
         F: common_vendor.o(handleAdClose)
       } : {});
     };

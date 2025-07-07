@@ -123,6 +123,7 @@
       })
     }
   }
+
   const handleWechatLogin = async (e) => {
     const phoneCode = e.detail.code
     if (phoneCode === undefined) {

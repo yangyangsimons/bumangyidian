@@ -470,7 +470,8 @@
     }
   }
 
-  onShow(async () => {
+  onShow(async (options) => {
+    console.log('onShow主页面显示----------------', options)
     sptime.value = new Date().getTime()
     dmReport(
       'pv',

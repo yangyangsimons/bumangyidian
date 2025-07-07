@@ -59,7 +59,7 @@ const _sfc_main = {
           icon: "none"
         });
       }
-      common_vendor.index.__f__("log", "at pages/login/login.vue:134", "获取到的手机号code", phoneCode);
+      common_vendor.index.__f__("log", "at pages/login/login.vue:135", "获取到的手机号code", phoneCode);
       if (!agreeProtocol.value) {
         return common_vendor.index.showToast({
           title: "请先阅读并同意协议",
@@ -68,23 +68,23 @@ const _sfc_main = {
       }
       try {
         const loginRes = await common_vendor.wx$1.login();
-        common_vendor.index.__f__("log", "at pages/login/login.vue:147", "登录返回", loginRes.code);
+        common_vendor.index.__f__("log", "at pages/login/login.vue:148", "登录返回", loginRes.code);
         const serverRes = await utils_request.request(`${utils_config.baseUrl}/user/code2token`, "POST", {
           code: loginRes.code
         });
-        common_vendor.index.__f__("log", "at pages/login/login.vue:151", "服务器返回", serverRes);
+        common_vendor.index.__f__("log", "at pages/login/login.vue:152", "服务器返回", serverRes);
         token.value = serverRes.data.token;
         userStore.setToken(serverRes.token);
-        common_vendor.index.__f__("log", "at pages/login/login.vue:156", "登录成功", serverRes.data);
-        common_vendor.index.__f__("log", "at pages/login/login.vue:157", "token", serverRes.data.token);
+        common_vendor.index.__f__("log", "at pages/login/login.vue:157", "登录成功", serverRes.data);
+        common_vendor.index.__f__("log", "at pages/login/login.vue:158", "token", serverRes.data.token);
         common_vendor.index.setStorage({
           key: "token",
           data: serverRes.data.token,
           success: (result) => {
-            common_vendor.index.__f__("log", "at pages/login/login.vue:163", "token存储成功", result);
+            common_vendor.index.__f__("log", "at pages/login/login.vue:164", "token存储成功", result);
           },
           fail: (error) => {
-            common_vendor.index.__f__("log", "at pages/login/login.vue:167", "token存储失败", error);
+            common_vendor.index.__f__("log", "at pages/login/login.vue:168", "token存储失败", error);
           }
         });
         const registerResult = await common_vendor.index.request({
@@ -95,15 +95,15 @@ const _sfc_main = {
           },
           method: "GET"
         });
-        common_vendor.index.__f__("log", "at pages/login/login.vue:180", "获取用户注册信息", registerResult);
+        common_vendor.index.__f__("log", "at pages/login/login.vue:181", "获取用户注册信息", registerResult);
         if (registerResult.data.code === 0 && registerResult.data.data.birth) {
-          common_vendor.index.__f__("log", "at pages/login/login.vue:182", "用户已注册生日是：", registerResult.data.data.birth);
+          common_vendor.index.__f__("log", "at pages/login/login.vue:183", "用户已注册生日是：", registerResult.data.data.birth);
           common_vendor.index.reLaunch({
             url: "/pages/index/index"
           });
         } else {
           if (phoneCode) {
-            common_vendor.index.__f__("log", "at pages/login/login.vue:189", "获取到的手机号code", e.detail.code);
+            common_vendor.index.__f__("log", "at pages/login/login.vue:190", "获取到的手机号code", e.detail.code);
             await common_vendor.index.request({
               url: `${utils_config.baseUrl}/user/update_phone`,
               method: "POST",
@@ -117,7 +117,7 @@ const _sfc_main = {
             });
             common_vendor.index.reLaunch({ url: "/pages/hello/hello" });
           } else {
-            common_vendor.index.__f__("log", "at pages/login/login.vue:206", "获取手机号失败", e.detail.errMsg);
+            common_vendor.index.__f__("log", "at pages/login/login.vue:207", "获取手机号失败", e.detail.errMsg);
             return common_vendor.index.showToast({
               title: "获取手机号失败",
               icon: "none",
@@ -126,7 +126,7 @@ const _sfc_main = {
           }
         }
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/login/login.vue:215", "error", error);
+        common_vendor.index.__f__("log", "at pages/login/login.vue:216", "error", error);
         common_vendor.index.showToast({
           title: "登录失败",
           icon: "none"
@@ -139,13 +139,13 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_assets._imports_0$1,
         b: common_assets._imports_1$3,
-        c: common_assets._imports_2$2,
+        c: common_assets._imports_2$1,
         d: !agreeProtocol.value
       }, !agreeProtocol.value ? {
-        e: common_assets._imports_3$1,
+        e: common_assets._imports_3,
         f: common_vendor.o(clickBtn)
       } : {
-        g: common_assets._imports_3$1,
+        g: common_assets._imports_3,
         h: common_vendor.o(handleWechatLogin)
       }, {
         i: common_assets._imports_1$2,

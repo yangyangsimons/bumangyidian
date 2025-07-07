@@ -4,7 +4,7 @@ const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   __name: "guide",
   setup(__props) {
-    const guideShow = common_vendor.ref(false);
+    const guideShow = common_vendor.ref(true);
     common_vendor.onShow(async () => {
       common_vendor.index.__f__("log", "at components/guide/guide.vue:38", "新手引导页页面显示");
       const isFirstOpen = await common_vendor.index.getStorageSync("isFirst");
@@ -24,10 +24,10 @@ const _sfc_main = {
         a: guideShow.value
       }, guideShow.value ? {
         b: common_assets._imports_0$4,
-        c: common_assets._imports_1$6,
+        c: common_assets._imports_1$7,
         d: common_assets._imports_2$5,
         e: common_vendor.o(guideShowClick),
-        f: common_assets._imports_3$4,
+        f: common_assets._imports_3$3,
         g: common_assets._imports_4$2
       } : {});
     };

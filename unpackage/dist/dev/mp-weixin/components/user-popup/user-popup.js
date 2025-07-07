@@ -451,13 +451,13 @@ const _sfc_main = {
         b: avator.value,
         c: common_vendor.o(changeAvator),
         d: common_vendor.t(userName.value),
-        e: common_assets._imports_1$7,
+        e: common_assets._imports_1$8,
         f: common_vendor.o(changeName),
         g: common_vendor.t(userAge.value),
         h: sexSrc.value,
         i: common_vendor.t(userMbti.value),
         j: common_vendor.t(userMbtiShort.value),
-        k: common_assets._imports_1$7,
+        k: common_assets._imports_1$8,
         l: common_vendor.o(changeMbti),
         m: common_vendor.f(tones.value, (item, index, i0) => {
           return {

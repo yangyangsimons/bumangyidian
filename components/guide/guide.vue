@@ -32,7 +32,7 @@
 <script setup>
   import { ref } from 'vue'
   import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
-  const guideShow = ref(false)
+  const guideShow = ref(true)
   onShow(async () => {
     // 页面显示时执行的逻辑
     console.log('新手引导页页面显示')

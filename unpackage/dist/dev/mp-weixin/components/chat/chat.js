@@ -454,7 +454,7 @@ const _sfc_main = {
       } : {}, {
         i: !showText.value && !isRadio.value
       }, !showText.value && !isRadio.value ? common_vendor.e({
-        j: common_assets._imports_1$5,
+        j: common_assets._imports_1$6,
         k: common_vendor.o(changeInputTypeToVoice),
         l: common_vendor.unref(placeholderStore).currentPlaceholder,
         m: inputColor.value,
@@ -476,7 +476,7 @@ const _sfc_main = {
       }) : {}, {
         z: isRadio.value
       }, isRadio.value ? common_vendor.e({
-        A: common_assets._imports_3$3,
+        A: common_assets._imports_3$2,
         B: common_vendor.o(backToQA),
         C: radioText.value,
         D: inputColor.value,
