@@ -28,11 +28,12 @@
     <image class="global-title" src="../../static/global-title.png"></image>
 
     <!-- 用户分享指引图片 -->
-    <!-- <image
+    <image
+      v-if="isGuideVisible"
       src="../../static/enrollment/guide.png"
       mode="scaleToFill"
       class="guide-image"
-    /> -->
+    />
     <!-- 背景图 -->
     <image
       src="https://mang.5gradio.com.cn/static/enrollment/bg.jpg"
@@ -142,6 +143,7 @@
   import { baseUrl } from '@/utils/config'
   import request from '@/utils/request.js'
   const isTransitioning = ref(false)
+  const isGuideVisible = ref(false)
   // 添加组件引用和slogan图片地址
   const enrollFontRef = ref(null)
   const slogonImageUrl = ref('')
@@ -871,6 +873,20 @@
               uni.showToast({
                 title: '保存成功',
                 icon: 'success',
+              })
+              // 提示用户去做分享,同时展示指引，点击之后关闭指引图片
+              isGuideVisible.value = true
+
+              uni.showModal({
+                title: '提示',
+                content: '入学通知书已保存到相册，快去分享给你的朋友吧！',
+                showCancel: false,
+                confirmText: '知道了',
+                success: (modalRes) => {
+                  if (modalRes.confirm) {
+                    isGuideVisible.value = false // 关闭指引图片
+                  }
+                },
               })
             },
             fail: () => {

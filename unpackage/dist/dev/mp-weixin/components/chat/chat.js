@@ -465,7 +465,7 @@ const _sfc_main = {
         r: common_vendor.o(onInputBlur),
         s: sendAble.value
       }, sendAble.value ? {
-        t: common_assets._imports_2$3,
+        t: common_assets._imports_2$4,
         v: common_vendor.o(handleSubmit)
       } : {}, {
         w: !sendAble.value
@@ -496,7 +496,7 @@ const _sfc_main = {
       } : {}, {
         O: radioInput.value
       }, radioInput.value ? {
-        P: common_assets._imports_2$3,
+        P: common_assets._imports_2$4,
         Q: common_vendor.o(handleRadioInputSubmit)
       } : {}, {
         R: common_vendor.s(colorSystem.value)

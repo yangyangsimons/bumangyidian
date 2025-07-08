@@ -44,7 +44,7 @@ const _sfc_main = {
         b: common_assets._imports_1$7,
         c: common_vendor.o(switchSloganPrev),
         d: currentSloganImage.value,
-        e: common_assets._imports_2$5,
+        e: common_assets._imports_2$6,
         f: common_vendor.o(switchSloganNext)
       };
     };

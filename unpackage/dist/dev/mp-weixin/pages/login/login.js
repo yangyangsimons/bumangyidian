@@ -139,7 +139,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_assets._imports_0$1,
         b: common_assets._imports_1$3,
-        c: common_assets._imports_2$1,
+        c: common_assets._imports_2$2,
         d: !agreeProtocol.value
       }, !agreeProtocol.value ? {
         e: common_assets._imports_3,
