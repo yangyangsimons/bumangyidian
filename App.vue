@@ -44,9 +44,9 @@
           data: true,
           success: (result) => {
             console.log('首次使用存储成功:', result)
-            uni.reLaunch({
-              url: '/pages/index/index',
-            })
+            // uni.reLaunch({
+            //   url: '/pages/index/index',
+            // })
           },
           fail: (error) => {
             console.log('首次使用存储失败:', error)
@@ -68,18 +68,19 @@
             console.log('获取用户信息', res)
             if (res.data.code === 0 && res.data.data.birth) {
               console.log('用户已注册生日是：', res.data.data.birth)
-              uni.reLaunch({
-                url: '/pages/index/index',
-              })
+              // uni.reLaunch({
+              //   url: '/pages/index/index',
+              // })
             } else if (res.data.code === 0 && !res.data.data.birth) {
-              console.log('用户未注册')
+              console.log('用户注册了，但是没有选择生日，所以视为未注册')
               uni.reLaunch({
                 url: '/pages/hello/hello',
               })
             } else {
-              uni.reLaunch({
-                url: '/pages/login/login',
-              })
+              console.log('用户没注册')
+              // uni.reLaunch({
+              //   url: '/pages/login/login',
+              // })
             }
           },
           fail: (error) => {},

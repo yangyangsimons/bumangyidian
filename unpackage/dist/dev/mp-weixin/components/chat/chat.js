@@ -444,7 +444,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: showText.value && !isRadio.value
       }, showText.value && !isRadio.value ? {
-        b: common_assets._imports_0$3,
+        b: common_assets._imports_0$2,
         c: common_vendor.o(changeInputTypeToText),
         d: common_vendor.o(startRecord),
         e: common_vendor.o(endRecord),
@@ -454,7 +454,7 @@ const _sfc_main = {
       } : {}, {
         i: !showText.value && !isRadio.value
       }, !showText.value && !isRadio.value ? common_vendor.e({
-        j: common_assets._imports_1$6,
+        j: common_assets._imports_1$5,
         k: common_vendor.o(changeInputTypeToVoice),
         l: common_vendor.unref(placeholderStore).currentPlaceholder,
         m: inputColor.value,
@@ -465,7 +465,7 @@ const _sfc_main = {
         r: common_vendor.o(onInputBlur),
         s: sendAble.value
       }, sendAble.value ? {
-        t: common_assets._imports_2$4,
+        t: common_assets._imports_2$3,
         v: common_vendor.o(handleSubmit)
       } : {}, {
         w: !sendAble.value
@@ -496,7 +496,7 @@ const _sfc_main = {
       } : {}, {
         O: radioInput.value
       }, radioInput.value ? {
-        P: common_assets._imports_2$4,
+        P: common_assets._imports_2$3,
         Q: common_vendor.o(handleRadioInputSubmit)
       } : {}, {
         R: common_vendor.s(colorSystem.value)

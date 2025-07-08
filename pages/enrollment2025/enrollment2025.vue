@@ -1,6 +1,38 @@
 <template>
   <view class="container">
+    <uni-nav-bar
+      :fixed="true"
+      :status-bar="true"
+      :shadow="false"
+      background-color="rgba(255, 255, 255, 0)"
+      color="#333"
+      :border="false"
+      style="position: relative"
+      leftWidth="0"
+    >
+      <view class="nav-right">
+        <uni-icons
+          type="left"
+          size="22"
+          class="nav-icon"
+          @click="goBack"
+        ></uni-icons>
+        <uni-icons
+          type="home"
+          size="22"
+          class="nav-icon"
+          @click="goHome"
+        ></uni-icons>
+      </view>
+    </uni-nav-bar>
     <image class="global-title" src="../../static/global-title.png"></image>
+
+    <!-- 用户分享指引图片 -->
+    <!-- <image
+      src="../../static/enrollment/guide.png"
+      mode="scaleToFill"
+      class="guide-image"
+    /> -->
     <!-- 背景图 -->
     <image
       src="https://mang.5gradio.com.cn/static/enrollment/bg.jpg"
@@ -113,6 +145,21 @@
   // 添加组件引用和slogan图片地址
   const enrollFontRef = ref(null)
   const slogonImageUrl = ref('')
+  // 跳转上一页的方法
+  const goBack = () => {
+    const pages = getCurrentPages()
+    if (pages.length > 1) {
+      uni.navigateBack()
+    } else {
+      goHome()
+    }
+  }
+  //返回首页的方法
+  const goHome = () => {
+    uni.reLaunch({
+      url: '/pages/index/index',
+    })
+  }
   // 获取slogan图片地址的方法
   const getSlogonImageUrl = () => {
     if (enrollFontRef.value) {
@@ -545,6 +592,28 @@
 
   // 修改选择图片函数
   const chooseImage = () => {
+    //鉴权登录
+    if (!uni.getStorageSync('token')) {
+      uni.showModal({
+        title: '',
+        content: '登录后体验完整功能',
+        success: async (res) => {
+          if (res.confirm) {
+            console.log('用户点击确定')
+            // 1秒钟之后跳转登录
+            setTimeout(() => {
+              uni.reLaunch({
+                url: '/pages/login/login',
+              })
+            }, 300)
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        },
+      })
+      return
+      return
+    }
     if (userImage.value) {
       console.log('已经选择过图片，无法再次选择', userImage.value)
       return
@@ -825,12 +894,32 @@
 
   // 长按事件处理
   const handleLongPress = () => {
+    //如果没有上传图片就提示上传图片
+    if (!userImage.value) {
+      uni.showToast({
+        title: '请先上传照片',
+        icon: 'none',
+      })
+      return
+    }
     uni.showModal({
       title: '提示',
       content: '是否立即保存入学通知书？',
       success: (res) => {
         if (res.confirm) {
           downloadImage() // 使用新的downloadImage函数
+          // 生成入学通知书发送请求给后端后端录入
+          request(`${baseUrl}/user/update_new_term_activity`, 'POST', {})
+            .then((response) => {
+              if (response.code === 0) {
+                console.log('入学通知书生成记录成功')
+              } else {
+                console.error('入学通知书生成记录失败:', response.message)
+              }
+            })
+            .catch((error) => {
+              console.error('请求失败:', error)
+            })
         }
       },
     })

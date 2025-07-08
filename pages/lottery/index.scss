@@ -1,0 +1,272 @@
+.activity-page {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    .nav-right {
+        position: absolute;
+        top: 100rpx;
+        left: 50rpx;
+        width: 140rpx;
+        // border: 1px solid #ffffff;
+        margin: auto 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin-left: -30rpx;
+        height: 60rpx;
+        z-index: 10;
+        // align-items: center;
+        // background-color: rgba(255, 255, 255, 0.2);
+        // border-radius: 50rpx;
+        .nav-icon {
+            // border: 1px solid #ffffff;
+        }
+    }
+    .bg-img {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+    }
+}
+
+/* 标题部分 */
+.header-section {
+    position: relative;
+    width: 100%;
+    height: 400rpx;
+    overflow: hidden;
+
+    .bg-image {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .header-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 2;
+
+        .activity-title {
+            display: block;
+            font-size: 48rpx;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2rpx 2rpx 4rpx rgba(0, 0, 0, 0.5);
+            margin-bottom: 20rpx;
+        }
+
+        .activity-desc {
+            display: block;
+            font-size: 28rpx;
+            color: #fff;
+            text-shadow: 1rpx 1rpx 2rpx rgba(0, 0, 0, 0.5);
+        }
+    }
+}
+
+/* 主体部分 */
+.main-section {
+    padding: 60rpx 40rpx;
+    background: rgba(225, 225, 225, 0.5);
+    margin: 0 30rpx;
+    border-radius: 30rpx 30rpx 0 0;
+    margin-top: 10rpx;
+    position: relative;
+    z-index: 3;
+}
+
+.progress-container {
+    .section-titles {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20rpx;
+        gap: 185rpx;
+
+        .left-title,
+        .right-title {
+            font-size: 32rpx;
+            font-weight: bold;
+            color: #333;
+        }
+    }
+
+    .progress-main {
+        display: flex;
+        align-items: flex-start;
+        min-height: 600rpx;
+
+        .people-stages {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 550rpx;
+            margin-top: 100rpx;
+            position: relative;
+
+            .stage-item {
+                display: flex;
+                align-items: center;
+
+                .stage-dot {
+                    width: 24rpx;
+                    height: 24rpx;
+                    border-radius: 50%;
+                    background: #ddd;
+                    margin-left: 20rpx;
+                    transition: all 0.3s;
+                }
+
+                .stage-text {
+                    font-size: 28rpx;
+                    color: #666;
+                    transition: all 0.3s;
+                }
+
+                &.completed {
+                    .stage-dot {
+                        background: #ff6b6b;
+                    }
+
+                    .stage-text {
+                        color: #ff6b6b;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+
+        .progress-bar {
+            flex: 0 0 100rpx;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 40rpx;
+
+            .progress-track {
+                transform: rotate(180deg);
+                width: 18rpx;
+                height: 600rpx;
+                background: #f0f0f0;
+                border-radius: 9rpx;
+                position: relative;
+                overflow: hidden;
+
+                .progress-fill {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    background: linear-gradient(0deg, #feca57 0%, #ff6b6b 100%);
+                    border-radius: 9rpx;
+                    transition: height 0.8s ease;
+                }
+            }
+
+            .current-count {
+                margin-bottom: 10rpx;
+                font-size: 30rpx;
+                color: #ff6b6b;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+        }
+
+        .rewards {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            height: 550rpx;
+            margin-top: 100rpx;
+
+            .reward-item {
+                display: flex;
+                align-items: center;
+                opacity: 0.5;
+                transition: all 0.3s;
+
+                .reward-image {
+                    width: 100rpx;
+                    height: 75rpx;
+                    margin-right: 20rpx;
+                    border-radius: 12rpx;
+                }
+
+                .reward-desc {
+                    font-size: 24rpx;
+                    color: #666;
+                    white-space: pre-line;
+                }
+
+                &.unlocked {
+                    opacity: 1;
+
+                    .reward-desc {
+                        color: #333;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+    }
+
+    .progress-info {
+        text-align: center;
+        margin-top: 40rpx;
+
+        .progress-text {
+            font-size: 26rpx;
+            color: #999;
+        }
+    }
+}
+
+/* 底部部分 */
+.footer-section {
+    padding: 40rpx;
+    background: rgba(255, 255, 255, 0.4);
+    margin: 0 30rpx;
+    border-radius: 0 0 30rpx 30rpx;
+    text-align: center;
+
+    .disclaimer {
+        display: block;
+        font-size: 22rpx;
+        color: #111;
+        margin-bottom: 40rpx;
+    }
+
+    .share-btn {
+        width: 100%;
+        height: 88rpx;
+        background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+        border-radius: 44rpx;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8rpx 20rpx rgba(255, 107, 107, 0.3);
+
+        .share-text {
+            font-size: 32rpx;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        &:active {
+            transform: scale(0.98);
+            transition: transform 0.1s;
+        }
+    }
+}

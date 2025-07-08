@@ -40,11 +40,11 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$2,
-        b: common_assets._imports_1$5,
+        a: common_assets._imports_0$5,
+        b: common_assets._imports_1$7,
         c: common_vendor.o(switchSloganPrev),
         d: currentSloganImage.value,
-        e: common_assets._imports_2$3,
+        e: common_assets._imports_2$5,
         f: common_vendor.o(switchSloganNext)
       };
     };

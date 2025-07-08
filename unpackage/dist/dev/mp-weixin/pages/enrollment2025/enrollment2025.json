@@ -2,6 +2,8 @@
   "navigationBarTitleText": "",
   "navigationStyle": "custom",
   "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
     "enroll-font": "../../components/enrollFont/enrollFont"
   }
 }

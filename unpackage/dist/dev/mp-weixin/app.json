@@ -1,8 +1,9 @@
 {
   "pages": [
-    "pages/loading/loading",
-    "pages/enrollment2025/enrollment2025",
     "pages/index/index",
+    "pages/lottery/lottery",
+    "pages/enrollment2025/enrollment2025",
+    "pages/loading/loading",
     "pages/login/login",
     "pages/hello/hello",
     "pages/questionnaire/questionnaire",

@@ -3,8 +3,15 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_config = require("../../utils/config.js");
 const utils_request = require("../../utils/request.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
+  (_easycom_uni_icons2 + _easycom_uni_nav_bar2)();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 if (!Math) {
-  EnrollFont();
+  (_easycom_uni_icons + _easycom_uni_nav_bar + EnrollFont)();
 }
 const EnrollFont = () => "../../components/enrollFont/enrollFont.js";
 const _sfc_main = {
@@ -13,6 +20,19 @@ const _sfc_main = {
     const isTransitioning = common_vendor.ref(false);
     const enrollFontRef = common_vendor.ref(null);
     common_vendor.ref("");
+    const goBack = () => {
+      const pages = getCurrentPages();
+      if (pages.length > 1) {
+        common_vendor.index.navigateBack();
+      } else {
+        goHome();
+      }
+    };
+    const goHome = () => {
+      common_vendor.index.reLaunch({
+        url: "/pages/index/index"
+      });
+    };
     const getSlogonImageUrl = () => {
       if (enrollFontRef.value) {
         return enrollFontRef.value.getCurrentSloganImage();
@@ -148,7 +168,7 @@ const _sfc_main = {
       }
     };
     common_vendor.onMounted(async () => {
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:315", "Enrollment2025 页面已加载");
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:362", "Enrollment2025 页面已加载");
       const userInfo = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
       if (userInfo.code !== 0) {
         common_vendor.index.showToast({
@@ -164,7 +184,7 @@ const _sfc_main = {
           schoolName.value = userInfo.data.school_name;
         }
       }
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:333", "当前用户信息:", userInfo);
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:380", "当前用户信息:", userInfo);
       const now = /* @__PURE__ */ new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -305,8 +325,27 @@ const _sfc_main = {
       return Math.max(1.5, Math.min(3, maxScale));
     };
     const chooseImage = () => {
+      if (!common_vendor.index.getStorageSync("token")) {
+        common_vendor.index.showModal({
+          title: "",
+          content: "登录后体验完整功能",
+          success: async (res) => {
+            if (res.confirm) {
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:602", "用户点击确定");
+              setTimeout(() => {
+                common_vendor.index.reLaunch({
+                  url: "/pages/login/login"
+                });
+              }, 300);
+            } else if (res.cancel) {
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:610", "用户点击取消");
+            }
+          }
+        });
+        return;
+      }
       if (userImage.value) {
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:549", "已经选择过图片，无法再次选择", userImage.value);
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:618", "已经选择过图片，无法再次选择", userImage.value);
         return;
       }
       common_vendor.index.chooseImage({
@@ -514,7 +553,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:816", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:885", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -524,45 +563,80 @@ const _sfc_main = {
       });
     };
     const handleLongPress = () => {
+      if (!userImage.value) {
+        common_vendor.index.showToast({
+          title: "请先上传照片",
+          icon: "none"
+        });
+        return;
+      }
       common_vendor.index.showModal({
         title: "提示",
         content: "是否立即保存入学通知书？",
         success: (res) => {
           if (res.confirm) {
             downloadImage();
+            utils_request.request(`${utils_config.baseUrl}/user/update_new_term_activity`, "POST", {}).then((response) => {
+              if (response.code === 0) {
+                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:915", "入学通知书生成记录成功");
+              } else {
+                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:917", "入学通知书生成记录失败:", response.message);
+              }
+            }).catch((error) => {
+              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:921", "请求失败:", error);
+            });
           }
         }
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0,
-        b: common_vendor.sr(enrollFontRef, "13dd3b1c-0", {
+        a: common_vendor.o(goBack),
+        b: common_vendor.p({
+          type: "left",
+          size: "22"
+        }),
+        c: common_vendor.o(goHome),
+        d: common_vendor.p({
+          type: "home",
+          size: "22"
+        }),
+        e: common_vendor.p({
+          fixed: true,
+          ["status-bar"]: true,
+          shadow: false,
+          ["background-color"]: "rgba(255, 255, 255, 0)",
+          color: "#333",
+          border: false,
+          leftWidth: "0"
+        }),
+        f: common_assets._imports_0,
+        g: common_vendor.sr(enrollFontRef, "13dd3b1c-3", {
           "k": "enrollFontRef"
         }),
-        c: currentStickerIndex.value,
-        d: currentStickerSrc.value,
-        e: common_vendor.t(currentTime.value),
-        f: common_vendor.t(schoolName.value),
-        g: !userImage.value
+        h: currentStickerIndex.value,
+        i: currentStickerSrc.value,
+        j: common_vendor.t(currentTime.value),
+        k: common_vendor.t(schoolName.value),
+        l: !userImage.value
       }, !userImage.value ? {
-        h: common_vendor.o(chooseImage)
+        m: common_vendor.o(chooseImage)
       } : {}, {
-        i: userImage.value
+        n: userImage.value
       }, userImage.value ? {
-        j: userImage.value,
-        k: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
-        l: imageWidth.value + "px",
-        m: imageHeight.value + "px",
-        n: common_vendor.o(onTouchStart),
-        o: common_vendor.o(onTouchMove),
-        p: common_vendor.o(onTouchEnd)
+        o: userImage.value,
+        p: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
+        q: imageWidth.value + "px",
+        r: imageHeight.value + "px",
+        s: common_vendor.o(onTouchStart),
+        t: common_vendor.o(onTouchMove),
+        v: common_vendor.o(onTouchEnd)
       } : {}, {
-        q: common_vendor.o(onStickerTouchStart),
-        r: common_vendor.o(onStickerTouchMove),
-        s: common_vendor.o(onStickerTouchEnd),
-        t: common_assets._imports_1,
-        v: common_vendor.o(handleLongPress)
+        w: common_vendor.o(onStickerTouchStart),
+        x: common_vendor.o(onStickerTouchMove),
+        y: common_vendor.o(onStickerTouchEnd),
+        z: common_assets._imports_1$1,
+        A: common_vendor.o(handleLongPress)
       });
     };
   }

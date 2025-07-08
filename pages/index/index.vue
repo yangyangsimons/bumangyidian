@@ -137,13 +137,31 @@
     showAd.value = false
   }
   const adNav = (adUrl) => {
-    // 根据类型确定跳转的URL
     console.log('广告链接......:', adUrl)
-    const url = `/pages/ad/ad?address=${adUrl}`
 
-    // 跳转到协议展示页面
-    uni.navigateTo({ url })
+    // 本地地址跳转逻辑
+    if (adUrl.includes('pages')) {
+      // 确保路径以 / 开头
+      const localUrl = adUrl.startsWith('/') ? adUrl : `/${adUrl}`
+      console.log('跳转到本地页面:', localUrl)
+
+      uni.navigateTo({
+        url: localUrl,
+        success: () => {
+          console.log('跳转成功')
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+        },
+      })
+      return
+    } else {
+      const url = `/pages/ad/ad?address=${adUrl}`
+      console.log('跳转到协议展示页面', url)
+      uni.navigateTo({ url })
+    }
   }
+
   const handleAdChange = (e) => {
     current.value = e.detail.current
   }

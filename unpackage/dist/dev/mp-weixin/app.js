@@ -2,9 +2,10 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
 if (!Math) {
-  "./pages/loading/loading.js";
-  "./pages/enrollment2025/enrollment2025.js";
   "./pages/index/index.js";
+  "./pages/lottery/lottery.js";
+  "./pages/enrollment2025/enrollment2025.js";
+  "./pages/loading/loading.js";
   "./pages/login/login.js";
   "./pages/hello/hello.js";
   "./pages/questionnaire/questionnaire.js";
@@ -46,9 +47,6 @@ const _sfc_main = {
         data: true,
         success: (result) => {
           common_vendor.index.__f__("log", "at App.vue:46", "首次使用存储成功:", result);
-          common_vendor.index.reLaunch({
-            url: "/pages/index/index"
-          });
         },
         fail: (error) => {
           common_vendor.index.__f__("log", "at App.vue:52", "首次使用存储失败:", error);
@@ -70,18 +68,13 @@ const _sfc_main = {
           common_vendor.index.__f__("log", "at App.vue:68", "获取用户信息", res);
           if (res.data.code === 0 && res.data.data.birth) {
             common_vendor.index.__f__("log", "at App.vue:70", "用户已注册生日是：", res.data.data.birth);
-            common_vendor.index.reLaunch({
-              url: "/pages/index/index"
-            });
           } else if (res.data.code === 0 && !res.data.data.birth) {
-            common_vendor.index.__f__("log", "at App.vue:75", "用户未注册");
+            common_vendor.index.__f__("log", "at App.vue:75", "用户注册了，但是没有选择生日，所以视为未注册");
             common_vendor.index.reLaunch({
               url: "/pages/hello/hello"
             });
           } else {
-            common_vendor.index.reLaunch({
-              url: "/pages/login/login"
-            });
+            common_vendor.index.__f__("log", "at App.vue:80", "用户没注册");
           }
         },
         fail: (error) => {
@@ -90,21 +83,21 @@ const _sfc_main = {
     }
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:93", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:94", "App Show");
     common_vendor.wx$1.loadFontFace({
       global: true,
       family: "SmileySans-Oblique",
       source: "https://mang.5gradio.com.cn/static/SmileySans-Oblique.ttf",
       success: (result) => {
-        common_vendor.index.__f__("log", "at App.vue:100", "字体加载成功", result);
+        common_vendor.index.__f__("log", "at App.vue:101", "字体加载成功", result);
       },
       fail: (error) => {
-        common_vendor.index.__f__("error", "at App.vue:103", "字体加载失败", error);
+        common_vendor.index.__f__("error", "at App.vue:104", "字体加载失败", error);
       }
     });
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:108", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:109", "App Hide");
   }
 };
 function createApp() {
