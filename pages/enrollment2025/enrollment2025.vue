@@ -45,19 +45,9 @@
     <view class="slogon">
       <enroll-font class="slogon-text" ref="enrollFontRef" />
     </view>
-    <!-- 二维码 -->
-    <!-- <div class="qrcode-container">
-      <image class="qrcode" :src="qrCodeImage" mode="aspectFit"></image>
-      <text class="qrcode-text">扫一扫生成入学通知书</text>
-    </div> -->
 
     <!-- 用户图片上传区域 -->
-    <view
-      class="upload-area"
-      @touchstart="onStickerTouchStart"
-      @touchmove="onStickerTouchMove"
-      @touchend="onStickerTouchEnd"
-    >
+    <view class="upload-area">
       <view class="stick-container">
         <image
           src="https://mang.5gradio.com.cn/static/enrollment/photo.png"
@@ -79,22 +69,36 @@
       <view class="tips" @tap="chooseImage" v-if="!userImage">
         点击上传照片，左右滑动切换相框</view
       >
+
       <!-- 用户图片显示区域 -->
-      <view class="image-container" v-if="userImage">
+      <view class="image-container">
         <view
           class="image-wrapper"
           :style="{
             transform: `translate(${imageX}px, ${imageY}px) scale(${imageScale})`,
-            width: imageWidth + 'px',
-            height: imageHeight + 'px',
           }"
           @touchstart="onTouchStart"
           @touchmove="onTouchMove"
           @touchend="onTouchEnd"
         >
-          <image :src="userImage" mode="scaleToFill" class="user-image"></image>
+          <image :src="userImage" mode="aspectFill" class="user-image"></image>
         </view>
       </view>
+    </view>
+    <!-- 贴画切换控制区域 -->
+    <view
+      class="stick-control"
+      @touchstart="onStickerTouchStart"
+      @touchmove="onStickerTouchMove"
+      @touchend="onStickerTouchEnd"
+    >
+      <!-- tip区域 -->
+      <image
+        src="../../static/enrollment/tip-stick.png"
+        mode="scaleToFill"
+        class="tip-stick"
+        v-if="isTipVisible"
+      />
     </view>
 
     <!-- 立即生成的图标 -->
@@ -105,18 +109,14 @@
         class="download-icon"
       />
     </view>
-    <!-- 注册用户数文字 -->
-    <!-- <view class="count-container">
+    <!-- 重新上传照片的功能按钮 -->
+    <view class="reupload-btn" @tap="reupload">
       <image
-        src="../../static/enrollment/count-bg.png"
-        mode="aspectFill"
-        class="count-bg"
+        src="../../static/enrollment/reupload.png"
+        mode="aspectToFill"
+        class="reupload-icon"
       />
-      <text class="user-count-text"
-        >我是第<text class="number">{{ userCount }}</text
-        >位签到的新生</text
-      >
-    </view> -->
+    </view>
     <!-- 临时测试 -->
     <!-- <button
       @tap="measureFrame"
@@ -144,6 +144,8 @@
   import request from '@/utils/request.js'
   const isTransitioning = ref(false)
   const isGuideVisible = ref(false)
+  //控制tip-stick的显示
+  const isTipVisible = ref(true)
   // 添加组件引用和slogan图片地址
   const enrollFontRef = ref(null)
   const slogonImageUrl = ref('')
@@ -280,6 +282,9 @@
 
   // 贴纸滑动事件处理
   const onStickerTouchStart = (e) => {
+    //tip-stick 不展示
+    isTipVisible.value = false
+
     // 如果有用户图片，让图片的触摸事件优先
     if (
       userImage.value &&
@@ -513,24 +518,34 @@
   }
 
   // 修改约束函数，增加更精确的边界计算
-  // 修改约束函数，确保图片永远不超出相框
   const constrainToFrame = (x, y, scale) => {
     if (!frameBounds.value.width) return { x, y }
 
-    const scaledWidth = imageWidth.value * scale
-    const scaledHeight = imageHeight.value * scale
+    // 使用总缩放比例
+    const totalScale = initialScale.value * scale
+    const scaledWidth = imageWidth.value * totalScale
+    const scaledHeight = imageHeight.value * totalScale
 
-    // 相框的实际显示区域
-    const frameWidth = frameBounds.value.frameWidth
-    const frameHeight = frameBounds.value.frameHeight
+    // 其余计算保持不变...
+    const clipTop = 0.15
+    const clipRight = 0.135
+    const clipBottom = 0.17
+    const clipLeft = 0.125
 
-    // 相框边界（相对于upload-area中心）
-    const frameLeft = -frameWidth / 2
-    const frameRight = frameWidth / 2
-    const frameTop = -frameHeight / 2 // 调整上边距
-    const frameBottom = frameHeight / 2 // 调整下边距
+    const containerWidth = frameBounds.value.width
+    const containerHeight = frameBounds.value.height
 
-    // 图片边界
+    const frameWidth = containerWidth * (1 - clipLeft - clipRight)
+    const frameHeight = containerHeight * (1 - clipTop - clipBottom)
+
+    const frameCenterOffsetX = (containerWidth * (clipLeft - clipRight)) / 2
+    const frameCenterOffsetY = (containerHeight * (clipTop - clipBottom)) / 2
+
+    const frameLeft = frameCenterOffsetX - frameWidth / 2
+    const frameRight = frameCenterOffsetX + frameWidth / 2
+    const frameTop = frameCenterOffsetY - frameHeight / 2
+    const frameBottom = frameCenterOffsetY + frameHeight / 2
+
     const imgLeft = x - scaledWidth / 2
     const imgRight = x + scaledWidth / 2
     const imgTop = y - scaledHeight / 2
@@ -539,7 +554,7 @@
     let constrainedX = x
     let constrainedY = y
 
-    // 如果图片小于相框，确保图片完全在相框内
+    // 约束逻辑保持不变...
     if (scaledWidth <= frameWidth) {
       if (imgLeft < frameLeft) {
         constrainedX = frameLeft + scaledWidth / 2
@@ -547,7 +562,6 @@
         constrainedX = frameRight - scaledWidth / 2
       }
     } else {
-      // 如果图片大于相框，确保相框区域完全被图片覆盖
       if (imgLeft > frameLeft) {
         constrainedX = frameLeft + scaledWidth / 2
       } else if (imgRight < frameRight) {
@@ -555,7 +569,6 @@
       }
     }
 
-    // 垂直约束逻辑相同
     if (scaledHeight <= frameHeight) {
       if (imgTop < frameTop) {
         constrainedY = frameTop + scaledHeight / 2
@@ -574,25 +587,23 @@
   }
 
   // 修改缩放约束，防止缩放时超出相框
-  // 修改缩放约束，设置更合理的缩放范围
   const getMaxScale = () => {
     if (!frameBounds.value.width) return 2.5
 
     const frameWidth = frameBounds.value.frameWidth
     const frameHeight = frameBounds.value.frameHeight
 
-    // 计算基于相框的合理最大缩放
-    const maxScaleX = (frameWidth * 2) / imageWidth.value // 允许图片宽度是相框的2倍
-    const maxScaleY = (frameHeight * 2) / imageHeight.value // 允许图片高度是相框的2倍
+    // 考虑初始缩放的最大缩放计算
+    const maxScaleX = (frameWidth * 2) / (imageWidth.value * initialScale.value)
+    const maxScaleY =
+      (frameHeight * 2) / (imageHeight.value * initialScale.value)
 
-    // 取较大值，但限制在合理范围内
     const maxScale = Math.max(maxScaleX, maxScaleY)
-
-    // 限制最大缩放在1.5-3倍之间
     return Math.max(1.5, Math.min(3, maxScale))
   }
-
   // 修改选择图片函数
+  // 添加新的响应式数据
+  const initialScale = ref(1) // 记录初始的 aspectFill 缩放
   const chooseImage = () => {
     //鉴权登录
     if (!uni.getStorageSync('token')) {
@@ -614,7 +625,6 @@
         },
       })
       return
-      return
     }
     if (userImage.value) {
       console.log('已经选择过图片，无法再次选择', userImage.value)
@@ -626,15 +636,30 @@
       sourceType: ['album', 'camera'],
       success: (res) => {
         userImage.value = res.tempFilePaths[0]
-        // 重置图片位置和缩放
-        imageX.value = 0
-        imageY.value = 0
-        imageScale.value = 1
 
-        // 获取边界信息
-        setTimeout(() => {
-          getFrameBounds()
-        }, 100)
+        // 获取图片真实尺寸
+        uni.getImageInfo({
+          src: res.tempFilePaths[0],
+          success: (imageInfo) => {
+            imageWidth.value = imageInfo.width
+            imageHeight.value = imageInfo.height
+
+            // 计算初始缩放比例（aspectFill 的效果）
+            setTimeout(() => {
+              calculateInitialScale(imageInfo.width, imageInfo.height)
+            }, 200) // 等待DOM更新
+
+            // 重置图片位置和用户缩放
+            imageX.value = 0
+            imageY.value = 0
+            imageScale.value = 1 // 这里是用户的缩放，不包含初始缩放
+
+            // 获取边界信息
+            setTimeout(() => {
+              getFrameBounds()
+            }, 100)
+          },
+        })
       },
       fail: (error) => {
         uni.showToast({
@@ -643,6 +668,33 @@
         })
       },
     })
+  }
+  // 计算初始缩放比例的函数
+  const calculateInitialScale = (imgWidth, imgHeight) => {
+    const query = uni.createSelectorQuery()
+    query
+      .select('.user-image')
+      .boundingClientRect((rect) => {
+        if (rect) {
+          // 容器尺寸（.image-wrapper 的尺寸）
+          const containerWidth = rect.width
+          const containerHeight = rect.height
+
+          // 计算 aspectFill 的缩放比例
+          const scaleX = containerWidth / imgWidth
+          const scaleY = containerHeight / imgHeight
+
+          // aspectFill 使用较大的缩放比例（确保填满容器）
+          initialScale.value = Math.max(scaleX, scaleY)
+
+          console.log('初始缩放计算:', {
+            containerSize: [containerWidth, containerHeight],
+            imageSize: [imgWidth, imgHeight],
+            initialScale: initialScale.value,
+          })
+        }
+      })
+      .exec()
   }
 
   // 计算两点间距离
@@ -701,39 +753,48 @@
       return null
     }
 
-    // 屏幕上相框的实际尺寸
-    const screenFrameWidth = frameBounds.value.frameWidth
-    const screenFrameHeight = frameBounds.value.frameHeight
+    // 获取实际的相框区域
+    const clipTop = 0.15
+    const clipRight = 0.135
+    const clipBottom = 0.17
+    const clipLeft = 0.125
 
-    // 计算屏幕坐标到canvas坐标的缩放比例
-    const scaleX = FRAME_POSITION.width / screenFrameWidth
-    const scaleY = FRAME_POSITION.height / screenFrameHeight
+    const screenContainerWidth = frameBounds.value.width
+    const screenContainerHeight = frameBounds.value.height
 
-    // 用户图片在屏幕上的实际尺寸和位置
-    const screenImageWidth = imageWidth.value * imageScale.value
-    const screenImageHeight = imageHeight.value * imageScale.value
+    const screenFrameWidth = screenContainerWidth * (1 - clipLeft - clipRight)
+    const screenFrameHeight = screenContainerHeight * (1 - clipTop - clipBottom)
+
+    const canvasFrameX = FRAME_POSITION.x
+    const canvasFrameY = FRAME_POSITION.y
+    const canvasFrameWidth = FRAME_POSITION.width
+    const canvasFrameHeight = FRAME_POSITION.height
+
+    const scaleX = canvasFrameWidth / screenFrameWidth
+    const scaleY = canvasFrameHeight / screenFrameHeight
+
+    // 关键修改：计算总的缩放比例（初始缩放 × 用户缩放）
+    const totalScale = initialScale.value * imageScale.value
+
+    // 用户图片在屏幕上的实际尺寸
+    const screenImageWidth = imageWidth.value * totalScale
+    const screenImageHeight = imageHeight.value * totalScale
 
     // 转换为canvas尺寸
     const canvasImageWidth = screenImageWidth * scaleX
     const canvasImageHeight = screenImageHeight * scaleY
 
-    // 用户图片中心在屏幕相框中的偏移量
+    // 位置偏移计算保持不变
     const screenOffsetX = imageX.value
     const screenOffsetY = imageY.value
-
-    // 转换为canvas中的偏移量
     const canvasOffsetX = screenOffsetX * scaleX
     const canvasOffsetY = screenOffsetY * scaleY
 
-    // 计算图片在canvas中的最终位置（左上角）
     const canvasImageX =
-      FRAME_POSITION.x +
-      FRAME_POSITION.width / 2 +
-      canvasOffsetX -
-      canvasImageWidth / 2
+      canvasFrameX + canvasFrameWidth / 2 + canvasOffsetX - canvasImageWidth / 2
     const canvasImageY =
-      FRAME_POSITION.y +
-      FRAME_POSITION.height / 2 +
+      canvasFrameY +
+      canvasFrameHeight / 2 +
       canvasOffsetY -
       canvasImageHeight / 2
 
@@ -936,6 +997,32 @@
             .catch((error) => {
               console.error('请求失败:', error)
             })
+        }
+      },
+    })
+  }
+
+  // 重新上传照片的功能
+  const reupload = () => {
+    // 如果没有上传图片，直接选择图片
+    if (!userImage.value) {
+      //提示上传
+      uni.showToast({
+        title: '请先上传照片',
+        icon: 'none',
+      })
+      return
+    }
+    uni.showModal({
+      title: '提示',
+      content: '是否重新上传照片？',
+      success: (res) => {
+        if (res.confirm) {
+          userImage.value = '' // 清空当前图片
+          imageX.value = 0 // 重置位置
+          imageY.value = 0 // 重置位置
+          imageScale.value = 1 // 重置缩放
+          chooseImage() // 重新选择图片
         }
       },
     })

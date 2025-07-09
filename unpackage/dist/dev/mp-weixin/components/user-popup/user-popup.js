@@ -469,7 +469,7 @@ const _sfc_main = {
             f: common_vendor.o(($event) => toneClick(item.id, index), index)
           };
         }),
-        n: common_assets._imports_2$7,
+        n: common_assets._imports_2$6,
         o: common_vendor.o(updateTone),
         p: common_vendor.sr(userPopupRef, "52d19f64-0", {
           "k": "userPopupRef"

@@ -8,13 +8,14 @@ const _sfc_main = {
     common_vendor.onShow(() => {
       common_vendor.index.__f__("log", "at components/enrollFont/enrollFont.vue:36", "组件已显示");
     });
-    common_vendor.ref("月光是我的补光灯");
-    common_vendor.ref("午夜光合作用者");
-    common_vendor.ref(false);
-    common_vendor.ref(false);
-    common_vendor.ref("");
-    common_vendor.ref("");
     const currentSloganIndex = common_vendor.ref(1);
+    const showTip = common_vendor.ref(true);
+    const touchStartX = common_vendor.ref(0);
+    const touchStartY = common_vendor.ref(0);
+    const touchEndX = common_vendor.ref(0);
+    const touchEndY = common_vendor.ref(0);
+    const minSwipeDistance = common_vendor.ref(50);
+    const maxVerticalDistance = common_vendor.ref(100);
     const currentSloganImage = common_vendor.computed(() => {
       return `../../static/enrollment/slogan/slogan-${currentSloganIndex.value}.png`;
     });
@@ -32,6 +33,30 @@ const _sfc_main = {
         currentSloganIndex.value = 1;
       }
     };
+    const handleTouchStart = (e) => {
+      showTip.value = false;
+      touchStartX.value = e.touches[0].clientX;
+      touchStartY.value = e.touches[0].clientY;
+    };
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+    };
+    const handleTouchEnd = (e) => {
+      touchEndX.value = e.changedTouches[0].clientX;
+      touchEndY.value = e.changedTouches[0].clientY;
+      handleSwipe();
+    };
+    const handleSwipe = () => {
+      const deltaX = touchEndX.value - touchStartX.value;
+      const deltaY = Math.abs(touchEndY.value - touchStartY.value);
+      if (Math.abs(deltaX) > minSwipeDistance.value && deltaY < maxVerticalDistance.value) {
+        if (deltaX > 0) {
+          switchSloganPrev();
+        } else {
+          switchSloganNext();
+        }
+      }
+    };
     const getCurrentSloganImage = () => {
       return currentSloganImage.value;
     };
@@ -39,14 +64,17 @@ const _sfc_main = {
       getCurrentSloganImage
     });
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_assets._imports_0$5,
-        b: common_assets._imports_1$7,
-        c: common_vendor.o(switchSloganPrev),
-        d: currentSloganImage.value,
-        e: common_assets._imports_2$6,
-        f: common_vendor.o(switchSloganNext)
-      };
+        b: currentSloganImage.value,
+        c: showTip.value
+      }, showTip.value ? {
+        d: common_assets._imports_1$7
+      } : {}, {
+        e: common_vendor.o(handleTouchStart),
+        f: common_vendor.o(handleTouchMove),
+        g: common_vendor.o(handleTouchEnd)
+      });
     };
   }
 };

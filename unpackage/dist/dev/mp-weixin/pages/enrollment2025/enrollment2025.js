@@ -19,6 +19,7 @@ const _sfc_main = {
   setup(__props) {
     const isTransitioning = common_vendor.ref(false);
     const isGuideVisible = common_vendor.ref(false);
+    const isTipVisible = common_vendor.ref(true);
     const enrollFontRef = common_vendor.ref(null);
     common_vendor.ref("");
     const goBack = () => {
@@ -124,6 +125,7 @@ const _sfc_main = {
       lastTouchTime: 0
     });
     const onStickerTouchStart = (e) => {
+      isTipVisible.value = false;
       if (userImage.value && e.target.className && e.target.className.includes("image-wrapper")) {
         return;
       }
@@ -169,7 +171,7 @@ const _sfc_main = {
       }
     };
     common_vendor.onMounted(async () => {
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:364", "Enrollment2025 页面已加载");
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:369", "Enrollment2025 页面已加载");
       const userInfo = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
       if (userInfo.code !== 0) {
         common_vendor.index.showToast({
@@ -185,7 +187,7 @@ const _sfc_main = {
           schoolName.value = userInfo.data.school_name;
         }
       }
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:382", "当前用户信息:", userInfo);
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:387", "当前用户信息:", userInfo);
       const now = /* @__PURE__ */ new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -273,14 +275,23 @@ const _sfc_main = {
     const constrainToFrame = (x, y, scale) => {
       if (!frameBounds.value.width)
         return { x, y };
-      const scaledWidth = imageWidth.value * scale;
-      const scaledHeight = imageHeight.value * scale;
-      const frameWidth = frameBounds.value.frameWidth;
-      const frameHeight = frameBounds.value.frameHeight;
-      const frameLeft = -frameWidth / 2;
-      const frameRight = frameWidth / 2;
-      const frameTop = -frameHeight / 2;
-      const frameBottom = frameHeight / 2;
+      const totalScale = initialScale.value * scale;
+      const scaledWidth = imageWidth.value * totalScale;
+      const scaledHeight = imageHeight.value * totalScale;
+      const clipTop = 0.15;
+      const clipRight = 0.135;
+      const clipBottom = 0.17;
+      const clipLeft = 0.125;
+      const containerWidth = frameBounds.value.width;
+      const containerHeight = frameBounds.value.height;
+      const frameWidth = containerWidth * (1 - clipLeft - clipRight);
+      const frameHeight = containerHeight * (1 - clipTop - clipBottom);
+      const frameCenterOffsetX = containerWidth * (clipLeft - clipRight) / 2;
+      const frameCenterOffsetY = containerHeight * (clipTop - clipBottom) / 2;
+      const frameLeft = frameCenterOffsetX - frameWidth / 2;
+      const frameRight = frameCenterOffsetX + frameWidth / 2;
+      const frameTop = frameCenterOffsetY - frameHeight / 2;
+      const frameBottom = frameCenterOffsetY + frameHeight / 2;
       const imgLeft = x - scaledWidth / 2;
       const imgRight = x + scaledWidth / 2;
       const imgTop = y - scaledHeight / 2;
@@ -320,11 +331,12 @@ const _sfc_main = {
         return 2.5;
       const frameWidth = frameBounds.value.frameWidth;
       const frameHeight = frameBounds.value.frameHeight;
-      const maxScaleX = frameWidth * 2 / imageWidth.value;
-      const maxScaleY = frameHeight * 2 / imageHeight.value;
+      const maxScaleX = frameWidth * 2 / (imageWidth.value * initialScale.value);
+      const maxScaleY = frameHeight * 2 / (imageHeight.value * initialScale.value);
       const maxScale = Math.max(maxScaleX, maxScaleY);
       return Math.max(1.5, Math.min(3, maxScale));
     };
+    const initialScale = common_vendor.ref(1);
     const chooseImage = () => {
       if (!common_vendor.index.getStorageSync("token")) {
         common_vendor.index.showModal({
@@ -332,21 +344,21 @@ const _sfc_main = {
           content: "登录后体验完整功能",
           success: async (res) => {
             if (res.confirm) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:604", "用户点击确定");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:615", "用户点击确定");
               setTimeout(() => {
                 common_vendor.index.reLaunch({
                   url: "/pages/login/login"
                 });
               }, 300);
             } else if (res.cancel) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:612", "用户点击取消");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:623", "用户点击取消");
             }
           }
         });
         return;
       }
       if (userImage.value) {
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:620", "已经选择过图片，无法再次选择", userImage.value);
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:630", "已经选择过图片，无法再次选择", userImage.value);
         return;
       }
       common_vendor.index.chooseImage({
@@ -355,12 +367,22 @@ const _sfc_main = {
         sourceType: ["album", "camera"],
         success: (res) => {
           userImage.value = res.tempFilePaths[0];
-          imageX.value = 0;
-          imageY.value = 0;
-          imageScale.value = 1;
-          setTimeout(() => {
-            getFrameBounds();
-          }, 100);
+          common_vendor.index.getImageInfo({
+            src: res.tempFilePaths[0],
+            success: (imageInfo) => {
+              imageWidth.value = imageInfo.width;
+              imageHeight.value = imageInfo.height;
+              setTimeout(() => {
+                calculateInitialScale(imageInfo.width, imageInfo.height);
+              }, 200);
+              imageX.value = 0;
+              imageY.value = 0;
+              imageScale.value = 1;
+              setTimeout(() => {
+                getFrameBounds();
+              }, 100);
+            }
+          });
         },
         fail: (error) => {
           common_vendor.index.showToast({
@@ -369,6 +391,23 @@ const _sfc_main = {
           });
         }
       });
+    };
+    const calculateInitialScale = (imgWidth, imgHeight) => {
+      const query = common_vendor.index.createSelectorQuery();
+      query.select(".user-image").boundingClientRect((rect) => {
+        if (rect) {
+          const containerWidth = rect.width;
+          const containerHeight = rect.height;
+          const scaleX = containerWidth / imgWidth;
+          const scaleY = containerHeight / imgHeight;
+          initialScale.value = Math.max(scaleX, scaleY);
+          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:690", "初始缩放计算:", {
+            containerSize: [containerWidth, containerHeight],
+            imageSize: [imgWidth, imgHeight],
+            initialScale: initialScale.value
+          });
+        }
+      }).exec();
     };
     const getDistance = (touch1, touch2) => {
       const dx = touch1.clientX - touch2.clientX;
@@ -408,20 +447,31 @@ const _sfc_main = {
       if (!frameBounds.value.width || !userImage.value) {
         return null;
       }
-      const screenFrameWidth = frameBounds.value.frameWidth;
-      const screenFrameHeight = frameBounds.value.frameHeight;
-      const scaleX = FRAME_POSITION.width / screenFrameWidth;
-      const scaleY = FRAME_POSITION.height / screenFrameHeight;
-      const screenImageWidth = imageWidth.value * imageScale.value;
-      const screenImageHeight = imageHeight.value * imageScale.value;
+      const clipTop = 0.15;
+      const clipRight = 0.135;
+      const clipBottom = 0.17;
+      const clipLeft = 0.125;
+      const screenContainerWidth = frameBounds.value.width;
+      const screenContainerHeight = frameBounds.value.height;
+      const screenFrameWidth = screenContainerWidth * (1 - clipLeft - clipRight);
+      const screenFrameHeight = screenContainerHeight * (1 - clipTop - clipBottom);
+      const canvasFrameX = FRAME_POSITION.x;
+      const canvasFrameY = FRAME_POSITION.y;
+      const canvasFrameWidth = FRAME_POSITION.width;
+      const canvasFrameHeight = FRAME_POSITION.height;
+      const scaleX = canvasFrameWidth / screenFrameWidth;
+      const scaleY = canvasFrameHeight / screenFrameHeight;
+      const totalScale = initialScale.value * imageScale.value;
+      const screenImageWidth = imageWidth.value * totalScale;
+      const screenImageHeight = imageHeight.value * totalScale;
       const canvasImageWidth = screenImageWidth * scaleX;
       const canvasImageHeight = screenImageHeight * scaleY;
       const screenOffsetX = imageX.value;
       const screenOffsetY = imageY.value;
       const canvasOffsetX = screenOffsetX * scaleX;
       const canvasOffsetY = screenOffsetY * scaleY;
-      const canvasImageX = FRAME_POSITION.x + FRAME_POSITION.width / 2 + canvasOffsetX - canvasImageWidth / 2;
-      const canvasImageY = FRAME_POSITION.y + FRAME_POSITION.height / 2 + canvasOffsetY - canvasImageHeight / 2;
+      const canvasImageX = canvasFrameX + canvasFrameWidth / 2 + canvasOffsetX - canvasImageWidth / 2;
+      const canvasImageY = canvasFrameY + canvasFrameHeight / 2 + canvasOffsetY - canvasImageHeight / 2;
       return {
         x: canvasImageX,
         y: canvasImageY,
@@ -566,7 +616,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:901", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:962", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -591,13 +641,35 @@ const _sfc_main = {
             downloadImage();
             utils_request.request(`${utils_config.baseUrl}/user/update_new_term_activity`, "POST", {}).then((response) => {
               if (response.code === 0) {
-                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:931", "入学通知书生成记录成功");
+                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:992", "入学通知书生成记录成功");
               } else {
-                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:933", "入学通知书生成记录失败:", response.message);
+                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:994", "入学通知书生成记录失败:", response.message);
               }
             }).catch((error) => {
-              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:937", "请求失败:", error);
+              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:998", "请求失败:", error);
             });
+          }
+        }
+      });
+    };
+    const reupload = () => {
+      if (!userImage.value) {
+        common_vendor.index.showToast({
+          title: "请先上传照片",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.showModal({
+        title: "提示",
+        content: "是否重新上传照片？",
+        success: (res) => {
+          if (res.confirm) {
+            userImage.value = "";
+            imageX.value = 0;
+            imageY.value = 0;
+            imageScale.value = 1;
+            chooseImage();
           }
         }
       });
@@ -639,21 +711,22 @@ const _sfc_main = {
       }, !userImage.value ? {
         o: common_vendor.o(chooseImage)
       } : {}, {
-        p: userImage.value
-      }, userImage.value ? {
-        q: userImage.value,
-        r: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
-        s: imageWidth.value + "px",
-        t: imageHeight.value + "px",
-        v: common_vendor.o(onTouchStart),
-        w: common_vendor.o(onTouchMove),
-        x: common_vendor.o(onTouchEnd)
+        p: userImage.value,
+        q: `translate(${imageX.value}px, ${imageY.value}px) scale(${imageScale.value})`,
+        r: common_vendor.o(onTouchStart),
+        s: common_vendor.o(onTouchMove),
+        t: common_vendor.o(onTouchEnd),
+        v: isTipVisible.value
+      }, isTipVisible.value ? {
+        w: common_assets._imports_2$1
       } : {}, {
-        y: common_vendor.o(onStickerTouchStart),
-        z: common_vendor.o(onStickerTouchMove),
-        A: common_vendor.o(onStickerTouchEnd),
-        B: common_assets._imports_2$1,
-        C: common_vendor.o(handleLongPress)
+        x: common_vendor.o(onStickerTouchStart),
+        y: common_vendor.o(onStickerTouchMove),
+        z: common_vendor.o(onStickerTouchEnd),
+        A: common_assets._imports_3,
+        B: common_vendor.o(handleLongPress),
+        C: common_assets._imports_4,
+        D: common_vendor.o(reupload)
       });
     };
   }

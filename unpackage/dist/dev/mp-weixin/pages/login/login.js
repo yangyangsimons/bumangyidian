@@ -142,10 +142,10 @@ const _sfc_main = {
         c: common_assets._imports_2$2,
         d: !agreeProtocol.value
       }, !agreeProtocol.value ? {
-        e: common_assets._imports_3,
+        e: common_assets._imports_3$1,
         f: common_vendor.o(clickBtn)
       } : {
-        g: common_assets._imports_3,
+        g: common_assets._imports_3$1,
         h: common_vendor.o(handleWechatLogin)
       }, {
         i: common_assets._imports_1$2,
