@@ -93,12 +93,13 @@
       @touchend="onStickerTouchEnd"
     >
       <!-- tip区域 -->
-      <image
-        src="../../static/enrollment/tip-stick.png"
-        mode="scaleToFill"
-        class="tip-stick"
-        v-if="isTipVisible"
-      />
+      <view class="tip-stick" v-if="isTipVisible">
+        <image
+          src="../../static/enrollment/tip-stick.png"
+          mode="scaleToFill"
+          class="tip-stick-image"
+        />
+      </view>
     </view>
 
     <!-- 立即生成的图标 -->
@@ -990,6 +991,28 @@
             .then((response) => {
               if (response.code === 0) {
                 console.log('入学通知书生成记录成功')
+                // 订阅消息
+                wx.requestSubscribeMessage({
+                  tmplIds: ['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'], // 需要下发的订阅消息模板id数组
+                  success(res) {
+                    if (
+                      res['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'] ===
+                      'accept'
+                    ) {
+                      console.log('用户同意订阅', res)
+                      // 将用户的 openid 发送给后端，以便后续发送服务通知
+                      const openid =
+                        res['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s']
+                      console.log('用户的 openid:', openid)
+                      // 这里可以将 openid 保存到数据库或者直接发送给后端
+                    } else {
+                      console.log('用户拒绝订阅')
+                    }
+                  },
+                  fail(err) {
+                    console.error(err)
+                  },
+                })
               } else {
                 console.error('入学通知书生成记录失败:', response.message)
               }

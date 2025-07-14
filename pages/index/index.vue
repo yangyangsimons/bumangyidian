@@ -95,12 +95,15 @@
       </view>
       <img class="close" src="../../static/close.png" @tap="handleAdClose" />
     </view>
+
     <guide />
+    <tabbar></tabbar>
   </view>
 </template>
 
 <script setup>
   import { ref, reactive, computed, nextTick, watch } from 'vue'
+
   import { wsUrl, baseUrl } from '../../utils/config'
   import {
     onLoad,
@@ -114,6 +117,7 @@
   import barrage from '@/components/barrage/barrage.vue'
   import chat from '@/components/chat/chat.vue'
   import guide from '@/components/guide/guide.vue'
+  import tabbar from '@/components/tabbar/tabbar.vue'
   import { useWebSocketStore } from '@/stores/websocket'
   import { useBarrageStore } from '../../stores/barrage'
   import { useModelStore } from '../../stores/model'

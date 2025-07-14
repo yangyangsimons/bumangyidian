@@ -73,11 +73,17 @@
         justify-content: center;
         // pointer-events: none; // 确保不阻挡其他元素的触摸事件
         .tip-stick {
-            margin-top: 100rpx;
+            margin-top: 150rpx;
             width: 100%;
             height: 70%;
-            object-fit: cover;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50rpx;
             // pointer-events: none; // 确保贴纸提示不阻挡触摸事件
+            .tip-stick-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
         }
     }
     .reupload-btn {

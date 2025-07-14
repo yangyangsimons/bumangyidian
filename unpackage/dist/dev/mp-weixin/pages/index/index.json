@@ -5,6 +5,7 @@
     "barrage": "../../components/barrage/barrage",
     "chat": "../../components/chat/chat",
     "guide": "../../components/guide/guide",
+    "tabbar": "../../components/tabbar/tabbar",
     "record-animation": "../../components/record-animation/record-animation"
   }
 }

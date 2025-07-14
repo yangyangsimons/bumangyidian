@@ -137,18 +137,18 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$1,
-        b: common_assets._imports_1$3,
-        c: common_assets._imports_2$2,
+        a: common_assets._imports_0$2,
+        b: common_assets._imports_1$5,
+        c: common_assets._imports_2$3,
         d: !agreeProtocol.value
       }, !agreeProtocol.value ? {
-        e: common_assets._imports_3$1,
+        e: common_assets._imports_3$2,
         f: common_vendor.o(clickBtn)
       } : {
-        g: common_assets._imports_3$1,
+        g: common_assets._imports_3$2,
         h: common_vendor.o(handleWechatLogin)
       }, {
-        i: common_assets._imports_1$2,
+        i: common_assets._imports_1$4,
         j: common_vendor.o(unLoginTry),
         k: agreeProtocol.value,
         l: common_vendor.o(($event) => agreeProtocol.value = !agreeProtocol.value),

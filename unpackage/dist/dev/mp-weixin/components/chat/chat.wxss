@@ -24,7 +24,7 @@
 /* 透明度 */
 /* 文章场景相关 */
 .chat-container.data-v-5a9fb32a {
-  bottom: 44rpx;
+  bottom: 144rpx;
   box-sizing: border-box;
   height: 90rpx;
   display: flex;

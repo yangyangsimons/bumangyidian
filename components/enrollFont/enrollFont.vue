@@ -17,12 +17,12 @@
         <image class="slogan" :src="currentSloganImage" mode="scaleToFill" />
       </view>
       <!-- 用户指引的图片-->
-      <image
-        class="tip-slogan"
-        src="../../static/enrollment/tip-slogan.png"
-        mode="scaleToFill"
-        v-if="showTip"
-      />
+      <view class="tip-slogan" v-if="showTip"
+        ><image
+          class="tip-slogan-image"
+          src="../../static/enrollment/tip-slogan.png"
+          mode="scaleToFill"
+      /></view>
     </view>
   </view>
 </template>
@@ -163,6 +163,15 @@
         left: 0;
         width: 100%;
         height: 90%;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 50rpx;
+        .tip-slogan-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          // 添加一些过渡效果
+          transition: opacity 0.3s ease;
+        }
       }
     }
 

@@ -447,17 +447,17 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$6,
+        a: common_assets._imports_0$7,
         b: avator.value,
         c: common_vendor.o(changeAvator),
         d: common_vendor.t(userName.value),
-        e: common_assets._imports_1$8,
+        e: common_assets._imports_1$9,
         f: common_vendor.o(changeName),
         g: common_vendor.t(userAge.value),
         h: sexSrc.value,
         i: common_vendor.t(userMbti.value),
         j: common_vendor.t(userMbtiShort.value),
-        k: common_assets._imports_1$8,
+        k: common_assets._imports_1$9,
         l: common_vendor.o(changeMbti),
         m: common_vendor.f(tones.value, (item, index, i0) => {
           return {

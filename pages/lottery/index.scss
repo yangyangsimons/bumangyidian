@@ -15,9 +15,6 @@
         margin-left: -30rpx;
         height: 60rpx;
         z-index: 10;
-        // align-items: center;
-        // background-color: rgba(255, 255, 255, 0.2);
-        // border-radius: 50rpx;
         .nav-icon {
             // border: 1px solid #ffffff;
         }
@@ -32,114 +29,103 @@
     }
 }
 
-/* 标题部分 */
-.header-section {
+/* 主体部分 */
+
+.main-section {
+    // border: 1px solid red;
+    padding: 0 40rpx;
+    background: #ffffff;
+    margin: 0 30rpx;
+    border-radius: 55rpx;
+    margin-top: 170rpx;
     position: relative;
-    width: 100%;
-    height: 400rpx;
+    z-index: 3;
+    height: 60%;
+    padding-bottom: 30rpx;
     overflow: hidden;
 
-    .bg-image {
+    .header {
+        // border: 1px solid #ddd;
+        margin: 0 auto;
         width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
-
-    .header-content {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        z-index: 2;
-
-        .activity-title {
-            display: block;
-            font-size: 48rpx;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 2rpx 2rpx 4rpx rgba(0, 0, 0, 0.5);
-            margin-bottom: 20rpx;
-        }
-
-        .activity-desc {
-            display: block;
-            font-size: 28rpx;
-            color: #fff;
-            text-shadow: 1rpx 1rpx 2rpx rgba(0, 0, 0, 0.5);
+        height: 35%;
+        padding: 0 20rpx;
+        box-sizing: border-box;
+        .header-image {
+            width: 100%;
+            height: 120%;
+            object-fit: cover;
         }
     }
 }
-
-/* 主体部分 */
-.main-section {
-    padding: 60rpx 40rpx;
-    background: rgba(225, 225, 225, 0.5);
-    margin: 0 30rpx;
-    border-radius: 30rpx 30rpx 0 0;
-    margin-top: 10rpx;
-    position: relative;
-    z-index: 3;
+.main-section::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2rpx;
+    background-image: linear-gradient(to right, #ddd 40%, transparent 40%);
+    background-size: 15px 2px;
+    background-repeat: repeat-x;
 }
 
 .progress-container {
+    background-color: #597a4f;
+    border-radius: 50rpx;
+    padding-top: 70rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     .section-titles {
         display: flex;
         justify-content: center;
-        margin-bottom: 20rpx;
-        gap: 185rpx;
+        // margin-bottom: 20rpx;
+        gap: 285rpx;
+        // border: 1px solid red;
 
         .left-title,
         .right-title {
             font-size: 32rpx;
-            font-weight: bold;
-            color: #333;
+            font-weight: 500;
+            color: #d2f1c8;
         }
     }
 
     .progress-main {
-        display: flex;
-        align-items: flex-start;
-        min-height: 600rpx;
+        display: grid;
+        grid-template-columns: 3fr 1fr 6fr;
+        min-height: 500rpx;
+        overflow-y: auto;
+        // border: 1px solid red;
 
         .people-stages {
+            // border: 1px solid #ddd;
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            align-items: flex-end;
-            height: 550rpx;
-            margin-top: 100rpx;
+            align-items: center;
+            height: 450rpx;
             position: relative;
+            padding-top: 50rpx;
+            box-sizing: border-box;
 
             .stage-item {
                 display: flex;
                 align-items: center;
 
-                .stage-dot {
-                    width: 24rpx;
-                    height: 24rpx;
-                    border-radius: 50%;
-                    background: #ddd;
-                    margin-left: 20rpx;
-                    transition: all 0.3s;
-                }
-
                 .stage-text {
                     font-size: 28rpx;
-                    color: #666;
+                    color: #ffffff;
+                    font-weight: 500;
                     transition: all 0.3s;
                 }
 
                 &.completed {
-                    .stage-dot {
-                        background: #ff6b6b;
-                    }
-
                     .stage-text {
-                        color: #ff6b6b;
+                        color: #8de1cf;
                         font-weight: bold;
                     }
                 }
@@ -152,13 +138,36 @@
             flex-direction: column;
             align-items: center;
             margin: 0 40rpx;
+            position: relative;
+            .dot-container {
+                box-sizing: border-box;
+                padding-bottom: 70rpx;
+                padding-top: 30rpx;
+                position: absolute;
+                top: 0;
+                left: 50%;
+                width: 5rpx;
+                height: 100%;
+                transform: translateX(-50%);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
 
+                .dot {
+                    width: 10rpx;
+                    height: 10rpx;
+                    background-color: #a8b1a5;
+                    border-radius: 50%;
+                    transition: background-color 0.3s;
+                }
+            }
             .progress-track {
                 transform: rotate(180deg);
-                width: 18rpx;
-                height: 600rpx;
-                background: #f0f0f0;
-                border-radius: 9rpx;
+                width: 28rpx;
+                height: 470rpx;
+                background: #4d5a4a;
+                border-radius: 20rpx;
                 position: relative;
                 overflow: hidden;
 
@@ -167,14 +176,25 @@
                     bottom: 0;
                     left: 0;
                     width: 100%;
-                    background: linear-gradient(0deg, #feca57 0%, #ff6b6b 100%);
-                    border-radius: 9rpx;
+                    background: linear-gradient(0deg, #c9f81e 0%, #8de2cf 100%);
+                    border-radius: 20rpx;
                     transition: height 0.8s ease;
                 }
             }
+            .progress-indicator {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 30rpx;
+                height: 30rpx;
+                background-color: #ffffff;
+                border-radius: 50%;
+                box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+                transition: bottom 0.8s ease;
+                z-index: 10;
+            }
 
             .current-count {
-                margin-bottom: 10rpx;
                 font-size: 30rpx;
                 color: #ff6b6b;
                 font-weight: 700;
@@ -183,39 +203,53 @@
         }
 
         .rewards {
+            // border: 1px solid yellow;
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-start;
-            height: 550rpx;
-            margin-top: 100rpx;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            height: 450rpx;
+            padding-top: 50rpx;
+            box-sizing: border-box;
+            .reward-images-container {
+                width: 100rpx; // 根据你的图片宽度调整
+                height: 100%; // 容器高度，显示5个奖励项
+                overflow: hidden;
+                margin-right: 20rpx;
+                .reward-images-wrapper {
+                    &.is-scrolling {
+                        // 固定的动画参数，滚动400rpx（5张图片 * 80rpx = 400rpx）
+                        animation: infinite-scroll-up 10s linear infinite;
+                    }
 
-            .reward-item {
+                    .reward-image-item {
+                        height: 80rpx; // 每个图片项的高度
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        .reward-image {
+                            width: 100rpx;
+                            height: 80rpx;
+                        }
+                    }
+                }
+            }
+            .reward-texts {
                 display: flex;
-                align-items: center;
-                opacity: 0.5;
-                transition: all 0.3s;
+                flex-direction: column;
+                justify-content: space-between;
 
-                .reward-image {
-                    width: 100rpx;
-                    height: 75rpx;
-                    margin-right: 20rpx;
-                    border-radius: 12rpx;
-                }
-
-                .reward-desc {
-                    font-size: 24rpx;
-                    color: #666;
-                    white-space: pre-line;
-                }
-
-                &.unlocked {
-                    opacity: 1;
+                .reward-text-item {
+                    // height: 80rpx; // 与图片项高度保持一致
+                    // border: 1px solid #ddd;
+                    display: flex;
+                    align-items: center;
 
                     .reward-desc {
-                        color: #333;
-                        font-weight: bold;
+                        white-space: nowrap;
+                        font-size: 26rpx;
+                        color: #ffffff;
+                        font-weight: 500;
                     }
                 }
             }
@@ -232,42 +266,44 @@
         }
     }
 }
-
+// 无限滚动动画 - 固定滚动距离
+@keyframes infinite-scroll-up {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        // 滚动5张图片的高度：5 * 80rpx = 400rpx
+        transform: translateY(-400rpx);
+    }
+}
 /* 底部部分 */
 .footer-section {
-    padding: 40rpx;
-    background: rgba(255, 255, 255, 0.4);
+    padding: 40rpx 50rpx 0 50rpx;
+    background: #ffffff;
     margin: 0 30rpx;
     border-radius: 0 0 30rpx 30rpx;
     text-align: center;
+    border-radius: 55rpx;
+    margin-top: -20rpx;
+    min-height: 350rpx;
 
     .disclaimer {
+        overflow-y: scroll;
         display: block;
-        font-size: 22rpx;
-        color: #111;
-        margin-bottom: 40rpx;
+        font-size: 15rpx;
+        color: #50634b;
+        margin-bottom: 20rpx;
+        text-align: left;
     }
 
     .share-btn {
-        width: 100%;
+        margin: 0 auto;
+        width: 60%;
         height: 88rpx;
-        background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
-        border-radius: 44rpx;
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8rpx 20rpx rgba(255, 107, 107, 0.3);
-
-        .share-text {
-            font-size: 32rpx;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        &:active {
-            transform: scale(0.98);
-            transition: transform 0.1s;
+        image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     }
 }

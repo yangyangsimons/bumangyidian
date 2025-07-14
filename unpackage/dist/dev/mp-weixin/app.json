@@ -1,14 +1,15 @@
 {
   "pages": [
-    "pages/index/index",
+    "pages/hello/hello",
     "pages/lottery/lottery",
+    "pages/index/index",
     "pages/enrollment2025/enrollment2025",
     "pages/loading/loading",
     "pages/login/login",
-    "pages/hello/hello",
     "pages/questionnaire/questionnaire",
     "pages/agreement/agreement",
-    "pages/ad/ad"
+    "pages/ad/ad",
+    "pages/my/my"
   ],
   "window": {
     "navigationBarTextStyle": "black",

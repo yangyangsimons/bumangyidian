@@ -2,14 +2,21 @@
 	"pages": [
 		// pages数组中第一项表示应用启动页，参考：https: //uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/index/index",
+			"path": "pages/hello/hello",
+			"style": {
+				"navigationBarTitleText": "不芒一点",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/lottery/lottery",
 			"style": {
 				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/lottery/lottery",
+			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
@@ -43,13 +50,6 @@
 			}
 		},
 		{
-			"path": "pages/hello/hello",
-			"style": {
-				"navigationBarTitleText": "不芒一点",
-				"navigationStyle": "custom"
-			}
-		},
-		{
 			"path": "pages/questionnaire/questionnaire",
 			"style": {
 				"navigationBarTitleText": "",
@@ -67,6 +67,12 @@
 			"style": {
 				"navigationBarTitleText": ""
 			}
+		},
+		{
+			"path": "pages/my/my",
+			"style": {
+				"navigationBarTitleText": ""
+			}
 		}
 	],
 	"globalStyle": {
@@ -76,4 +82,32 @@
 		"backgroundColor": "#F8F8F8"
 	},
 	"uniIdRouter": {}
+	// "tabBar": {
+	// 	"custom": true,
+	// 	"color": "#999999",
+	// 	"selectedColor": "#007aff",
+	// 	"backgroundColor": "#ffffff",
+	// 	"list": [
+	// 		{
+	// 			"pagePath": "pages/hello/hello",
+	// 			"text": "首页"
+	// 		},
+	// 		{
+	// 			"pagePath": "pages/enrollment2025/enrollment2025",
+	// 			"text": "互动"
+	// 		},
+	// 		{
+	// 			"pagePath": "pages/index/index",
+	// 			"text": "主页"
+	// 		},
+	// 		{
+	// 			"pagePath": "pages/lottery/lottery",
+	// 			"text": "活动"
+	// 		},
+	// 		{
+	// 			"pagePath": "pages/loading/loading",
+	// 			"text": "我的"
+	// 		}
+	// 	]
+	// }
 }

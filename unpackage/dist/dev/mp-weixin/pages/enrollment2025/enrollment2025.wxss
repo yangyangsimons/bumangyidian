@@ -91,9 +91,15 @@
   justify-content: center;
 }
 .container .stick-control .tip-stick.data-v-13dd3b1c {
-  margin-top: 100rpx;
+  margin-top: 150rpx;
   width: 100%;
   height: 70%;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50rpx;
+}
+.container .stick-control .tip-stick .tip-stick-image.data-v-13dd3b1c {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 .container .reupload-btn.data-v-13dd3b1c {
