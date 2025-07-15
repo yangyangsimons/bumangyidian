@@ -401,7 +401,7 @@ const _sfc_main = {
         g: bgSrc.value,
         h: shinePointVisible.value
       }, shinePointVisible.value ? {
-        i: common_assets._imports_1$2,
+        i: common_assets._imports_1,
         j: common_vendor.t(shinePointConfig.text),
         k: `${shinePointConfig.x_ratio * 100}%`,
         l: `${shinePointConfig.y_ratio * 100}%`
@@ -440,7 +440,7 @@ const _sfc_main = {
             b: current.value === index ? 1 : ""
           };
         }),
-        E: common_assets._imports_2$1,
+        E: common_assets._imports_2,
         F: common_vendor.o(handleAdClose)
       } : {});
     };

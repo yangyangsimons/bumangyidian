@@ -175,7 +175,7 @@
 
     return Math.max(0, Math.min(97, position + adjustment)) // 限制在0-97%之间，避免溢出
   })
-  const debugMode = ref(true) // 调试完成后设为false
+  const debugMode = ref(false) // 调试完成后设为false
   const testProgress = () => {
     const testValues = [0, 1000, 5000, 10000, 20000, 50000]
     const currentIndex = testValues.indexOf(currentParticipants.value)

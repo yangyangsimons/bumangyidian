@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const utils_config = require("../../utils/config.js");
 const utils_request = require("../../utils/request.js");
+const stores_audioPlayer = require("../../stores/audioPlayer.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
@@ -17,6 +18,30 @@ const EnrollFont = () => "../../components/enrollFont/enrollFont.js";
 const _sfc_main = {
   __name: "enrollment2025",
   setup(__props) {
+    const localQrCodePath = common_vendor.ref("");
+    const downloadQrCode = () => {
+      return new Promise((resolve, reject) => {
+        common_vendor.index.downloadFile({
+          url: "https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E6%A0%A1%E5%9B%AD%E6%B4%BB%E5%8A%A8.png",
+          success: (res) => {
+            if (res.statusCode === 200) {
+              localQrCodePath.value = res.tempFilePath;
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:159", "二维码下载成功:", res.tempFilePath);
+              resolve(res.tempFilePath);
+            } else {
+              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:162", "二维码下载失败:", res.statusCode);
+              reject(new Error("下载失败"));
+            }
+          },
+          fail: (error) => {
+            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:167", "二维码下载失败:", error);
+            reject(error);
+          }
+        });
+      });
+    };
+    const audioPlayerStore = stores_audioPlayer.useAudioPlayerStore();
+    let enrollAudio;
     const isTransitioning = common_vendor.ref(false);
     const isGuideVisible = common_vendor.ref(false);
     const isTipVisible = common_vendor.ref(true);
@@ -30,6 +55,40 @@ const _sfc_main = {
         goHome();
       }
     };
+    common_vendor.onShow(async () => {
+      await downloadQrCode();
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:197", "Enrollment2025 页面显示");
+      audioPlayerStore.stopAllAudio();
+      setTimeout(() => {
+        enrollAudio = common_vendor.index.createInnerAudioContext();
+        enrollAudio.autoplay = true;
+        enrollAudio.src = "https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/bg_music/Glow%20Loop.mp3";
+        enrollAudio.loop = true;
+        enrollAudio.play();
+        enrollAudio.onPlay(() => {
+          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:209", "音频开始播放");
+        });
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:211", "音频已开始播放", enrollAudio);
+      }, 1500);
+    });
+    common_vendor.onHide(() => {
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:217", "Enrollment2025 页面隐藏");
+      if (enrollAudio) {
+        enrollAudio.pause();
+        enrollAudio.destroy();
+        enrollAudio = null;
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:223", "音频已停止播放", enrollAudio);
+      }
+    });
+    common_vendor.onUnmounted(() => {
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:228", "Enrollment2025 页面卸载");
+      if (enrollAudio) {
+        enrollAudio.pause();
+        enrollAudio.destroy();
+        enrollAudio = null;
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:234", "音频已停止播放", enrollAudio);
+      }
+    });
     const goHome = () => {
       common_vendor.index.reLaunch({
         url: "/pages/index/index"
@@ -170,8 +229,8 @@ const _sfc_main = {
         currentStickerIndex.value = currentStickerIndex.value <= 0 ? maxIndex : currentStickerIndex.value - 1;
       }
     };
-    common_vendor.onMounted(async () => {
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:370", "Enrollment2025 页面已加载");
+    common_vendor.onShow(async () => {
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:445", "Enrollment2025 页面已加载");
       const userInfo = await utils_request.request(`${utils_config.baseUrl}/user/user_info`, "GET");
       if (userInfo.code !== 0) {
         common_vendor.index.showToast({
@@ -182,12 +241,12 @@ const _sfc_main = {
       } else {
         userCount.value = userInfo.data.report_idx;
         if (!userInfo.data.school_name || schoolName.value === "公开版") {
-          schoolName.value = "注册登录选择大学";
+          schoolName.value = "";
         } else {
           schoolName.value = userInfo.data.school_name;
         }
       }
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:388", "当前用户信息:", userInfo);
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:463", "当前用户信息:", userInfo);
       const now = /* @__PURE__ */ new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -344,21 +403,21 @@ const _sfc_main = {
           content: "登录后体验完整功能",
           success: async (res) => {
             if (res.confirm) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:616", "用户点击确定");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:691", "用户点击确定");
               setTimeout(() => {
                 common_vendor.index.reLaunch({
                   url: "/pages/login/login"
                 });
               }, 300);
             } else if (res.cancel) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:624", "用户点击取消");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:699", "用户点击取消");
             }
           }
         });
         return;
       }
       if (userImage.value) {
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:631", "已经选择过图片，无法再次选择", userImage.value);
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:706", "已经选择过图片，无法再次选择", userImage.value);
         return;
       }
       common_vendor.index.chooseImage({
@@ -401,7 +460,7 @@ const _sfc_main = {
           const scaleX = containerWidth / imgWidth;
           const scaleY = containerHeight / imgHeight;
           initialScale.value = Math.max(scaleX, scaleY);
-          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:691", "初始缩放计算:", {
+          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:766", "初始缩放计算:", {
             containerSize: [containerWidth, containerHeight],
             imageSize: [imgWidth, imgHeight],
             initialScale: initialScale.value
@@ -552,6 +611,13 @@ const _sfc_main = {
           // 高度
         );
       }
+      if (localQrCodePath.value) {
+        const qrSize = 100;
+        ctx.drawImage(localQrCodePath.value, 65, 1075, qrSize, qrSize);
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:965", "绘制二维码:", localQrCodePath.value, "at position: 75, 1075");
+      } else {
+        common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:967", "二维码图片未下载，跳过绘制");
+      }
       ctx.setFillStyle("#cdf91d");
       ctx.setFontSize(28);
       ctx.setTextAlign("left");
@@ -567,6 +633,7 @@ const _sfc_main = {
       ctx.setTextBaseline("middle");
       const currentTImeText = `电子认证时间：${currentTime.value}`;
       ctx.fillText(currentTImeText, 0, 0);
+      ctx.restore();
       ctx.save();
       ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y);
       ctx.rotate(5 * Math.PI / 180);
@@ -575,6 +642,7 @@ const _sfc_main = {
       ctx.setTextAlign("left");
       ctx.setTextBaseline("middle");
       const schoolText = `${schoolName.value}`;
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1002", "开始画学校了学校名称:", schoolText);
       ctx.fillText(schoolText, 0, 0);
       ctx.restore();
       ctx.draw(false, () => {
@@ -616,7 +684,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:963", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1048", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -641,28 +709,28 @@ const _sfc_main = {
             downloadImage();
             utils_request.request(`${utils_config.baseUrl}/user/update_new_term_activity`, "POST", {}).then((response) => {
               if (response.code === 0) {
-                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:993", "入学通知书生成记录成功");
+                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1078", "入学通知书生成记录成功");
                 common_vendor.wx$1.requestSubscribeMessage({
                   tmplIds: ["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"],
                   // 需要下发的订阅消息模板id数组
                   success(res2) {
                     if (res2["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"] === "accept") {
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1002", "用户同意订阅", res2);
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1087", "用户同意订阅", res2);
                       const openid = res2["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"];
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1006", "用户的 openid:", openid);
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1091", "用户的 openid:", openid);
                     } else {
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1009", "用户拒绝订阅");
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1094", "用户拒绝订阅");
                     }
                   },
                   fail(err) {
-                    common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1013", err);
+                    common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1098", err);
                   }
                 });
               } else {
-                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1017", "入学通知书生成记录失败:", response.message);
+                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1102", "入学通知书生成记录失败:", response.message);
               }
             }).catch((error) => {
-              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1021", "请求失败:", error);
+              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1106", "请求失败:", error);
             });
           }
         }
@@ -670,10 +738,7 @@ const _sfc_main = {
     };
     const reupload = () => {
       if (!userImage.value) {
-        common_vendor.index.showToast({
-          title: "请先上传照片",
-          icon: "none"
-        });
+        chooseImage();
         return;
       }
       common_vendor.index.showModal({

@@ -2,9 +2,9 @@
 	"pages": [
 		// pages数组中第一项表示应用启动页，参考：https: //uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/hello/hello",
+			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "不芒一点",
+				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
 			}
 		},
@@ -16,9 +16,9 @@
 			}
 		},
 		{
-			"path": "pages/index/index",
+			"path": "pages/hello/hello",
 			"style": {
-				"navigationBarTitleText": "",
+				"navigationBarTitleText": "不芒一点",
 				"navigationStyle": "custom"
 			}
 		},

@@ -139,10 +139,41 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, computed } from 'vue'
+  import { ref, onMounted, computed, onUnmounted } from 'vue'
+  import { onShow, onHide } from '@dcloudio/uni-app'
   import EnrollFont from '@/components/enrollFont/enrollFont.vue'
   import { baseUrl } from '@/utils/config'
   import request from '@/utils/request.js'
+  import { useAudioPlayerStore } from '../../stores/audioPlayer'
+
+  const localQrCodePath = ref('')
+
+  // 下载二维码图片的函数
+  const downloadQrCode = () => {
+    return new Promise((resolve, reject) => {
+      uni.downloadFile({
+        url: 'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E6%A0%A1%E5%9B%AD%E6%B4%BB%E5%8A%A8.png',
+        success: (res) => {
+          if (res.statusCode === 200) {
+            localQrCodePath.value = res.tempFilePath
+            console.log('二维码下载成功:', res.tempFilePath)
+            resolve(res.tempFilePath)
+          } else {
+            console.error('二维码下载失败:', res.statusCode)
+            reject(new Error('下载失败'))
+          }
+        },
+        fail: (error) => {
+          console.error('二维码下载失败:', error)
+          reject(error)
+        },
+      })
+    })
+  }
+
+  // 引入音频播放器状态管理
+  const audioPlayerStore = useAudioPlayerStore()
+  let enrollAudio
   const isTransitioning = ref(false)
   const isGuideVisible = ref(false)
   //控制tip-stick的显示
@@ -159,6 +190,50 @@
       goHome()
     }
   }
+  //页面显示的时候
+  onShow(async () => {
+    // isGuideVisible.value = true
+    await downloadQrCode()
+    console.log('Enrollment2025 页面显示')
+    // 如果音频播放器正在播放，暂停它
+    audioPlayerStore.stopAllAudio()
+    // 延迟1.5秒后创建新的音频播放器并且初始化
+    setTimeout(() => {
+      enrollAudio = uni.createInnerAudioContext()
+      enrollAudio.autoplay = true
+      enrollAudio.src =
+        'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/bg_music/Glow%20Loop.mp3'
+      enrollAudio.loop = true
+      enrollAudio.play()
+      enrollAudio.onPlay(() => {
+        console.log('音频开始播放')
+      })
+      console.log('音频已开始播放', enrollAudio)
+    }, 1500)
+  })
+
+  // 页面隐藏时
+  onHide(() => {
+    console.log('Enrollment2025 页面隐藏')
+    // 停止音频播放
+    if (enrollAudio) {
+      enrollAudio.pause()
+      enrollAudio.destroy()
+      enrollAudio = null
+      console.log('音频已停止播放', enrollAudio)
+    }
+  })
+  // 页面卸载时
+  onUnmounted(() => {
+    console.log('Enrollment2025 页面卸载')
+    // 停止音频播放
+    if (enrollAudio) {
+      enrollAudio.pause()
+      enrollAudio.destroy()
+      enrollAudio = null
+      console.log('音频已停止播放', enrollAudio)
+    }
+  })
   //返回首页的方法
   const goHome = () => {
     uni.reLaunch({
@@ -366,7 +441,7 @@
   }
 
   // 生命周期
-  onMounted(async () => {
+  onShow(async () => {
     console.log('Enrollment2025 页面已加载')
     //当前用户的学校和报道位置
     const userInfo = await request(`${baseUrl}/user/user_info`, 'GET')
@@ -380,7 +455,7 @@
       userCount.value = userInfo.data.report_idx
       // schoolName.value = userInfo.data.school_name
       if (!userInfo.data.school_name || schoolName.value === '公开版') {
-        schoolName.value = '注册登录选择大学'
+        schoolName.value = ''
       } else {
         schoolName.value = userInfo.data.school_name
       }
@@ -883,6 +958,14 @@
         120 // 高度
       )
     }
+    // 5. 绘制二维码
+    if (localQrCodePath.value) {
+      const qrSize = 100 // 二维码大小
+      ctx.drawImage(localQrCodePath.value, 65, 1075, qrSize, qrSize)
+      console.log('绘制二维码:', localQrCodePath.value, 'at position: 75, 1075')
+    } else {
+      console.warn('二维码图片未下载，跳过绘制')
+    }
 
     // 4. 绘制用户数量文字
     ctx.setFillStyle('#cdf91d')
@@ -904,6 +987,7 @@
 
     const currentTImeText = `电子认证时间：${currentTime.value}`
     ctx.fillText(currentTImeText, 0, 0)
+    ctx.restore() // 恢复状态，避免影响后续绘制
     //
     //  绘制学校文字（带5度旋转）
     ctx.save() // 保存当前状态
@@ -915,6 +999,7 @@
     ctx.setTextBaseline('middle')
 
     const schoolText = `${schoolName.value}`
+    console.log('开始画学校了学校名称:', schoolText)
     ctx.fillText(schoolText, 0, 0) // 在原点绘制，因为已经translate了
     ctx.restore() // 恢复状态，避免影响后续绘制
 
@@ -1027,15 +1112,12 @@
 
   // 重新上传照片的功能
   const reupload = () => {
-    // 如果没有上传图片，直接选择图片
+    //  如果没有上传图片，直接选择图片
     if (!userImage.value) {
-      //提示上传
-      uni.showToast({
-        title: '请先上传照片',
-        icon: 'none',
-      })
+      chooseImage()
       return
     }
+
     uni.showModal({
       title: '提示',
       content: '是否重新上传照片？',

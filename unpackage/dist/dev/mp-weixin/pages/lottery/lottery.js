@@ -31,7 +31,7 @@ const _sfc_main = {
       const adjustment = 1;
       return Math.max(0, Math.min(97, position + adjustment));
     });
-    const debugMode = common_vendor.ref(true);
+    const debugMode = common_vendor.ref(false);
     const testProgress = () => {
       const testValues = [0, 1e3, 5e3, 1e4, 2e4, 5e4];
       const currentIndex = testValues.indexOf(currentParticipants.value);

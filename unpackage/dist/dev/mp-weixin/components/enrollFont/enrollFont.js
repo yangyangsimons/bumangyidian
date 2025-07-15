@@ -1,7 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
-const maxSloganCount = 9;
+const maxSloganCount = 14;
 const _sfc_main = {
   __name: "enrollFont",
   setup(__props, { expose: __expose }) {

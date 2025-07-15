@@ -38,7 +38,7 @@
 
   // slogan图片相关
   const currentSloganIndex = ref(1) // 当前图片索引，从1开始
-  const maxSloganCount = 9 // 总共9张图片
+  const maxSloganCount = 14 // 总共9张图片
   // tip的展示
   const showTip = ref(true) // 是否显示用户指引图片
   // 滑动相关变量

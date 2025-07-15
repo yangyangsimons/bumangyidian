@@ -1,9 +1,10 @@
 .user-container {
+    // overflow-y: auto;
     box-sizing: border-box;
     // border: 5rpx solid red;
     width: 750rpx;
     position: relative;
-    min-height: 960rpx;
+    min-height: 1060rpx;
     .bg {
         position: absolute;
         height: 100%;
@@ -209,14 +210,18 @@
         }
     }
     .footer {
+        // border: 1px solid red;
+        overflow-y: auto;
+        min-height: 150rpx;
         box-sizing: border-box;
         position: absolute;
-        bottom: 50rpx;
+        bottom: 100rpx;
         // border: 2rpx solid red;
         width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding-bottom: 70rpx;
         wx-button {
             border: none;
         }
@@ -224,7 +229,8 @@
             border: none;
         }
         button {
-            width: 680rpx;
+            overflow-y: auto;
+            width: 380rpx;
             height: 90rpx;
             border-radius: 40rpx;
             font-size: 28rpx;

@@ -64,7 +64,7 @@
 }
 .main-section .header.data-v-619cda96 {
   margin: 0 auto;
-  width: 100%;
+  width: 90%;
   height: 35%;
   padding: 0 20rpx;
   box-sizing: border-box;
@@ -101,7 +101,7 @@
 }
 .progress-container .section-titles .left-title.data-v-619cda96,
 .progress-container .section-titles .right-title.data-v-619cda96 {
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 500;
   color: #d2f1c8;
 }

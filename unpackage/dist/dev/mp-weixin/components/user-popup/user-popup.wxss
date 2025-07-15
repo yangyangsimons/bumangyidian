@@ -27,7 +27,7 @@
   box-sizing: border-box;
   width: 750rpx;
   position: relative;
-  min-height: 960rpx;
+  min-height: 1060rpx;
 }
 .user-container .bg.data-v-52d19f64 {
   position: absolute;
@@ -219,13 +219,16 @@
   visibility: visible;
 }
 .user-container .footer.data-v-52d19f64 {
+  overflow-y: auto;
+  min-height: 150rpx;
   box-sizing: border-box;
   position: absolute;
-  bottom: 50rpx;
+  bottom: 100rpx;
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-bottom: 70rpx;
 }
 .user-container .footer wx-button.data-v-52d19f64 {
   border: none;
@@ -234,7 +237,8 @@
   border: none;
 }
 .user-container .footer button.data-v-52d19f64 {
-  width: 680rpx;
+  overflow-y: auto;
+  width: 380rpx;
   height: 90rpx;
   border-radius: 40rpx;
   font-size: 28rpx;
