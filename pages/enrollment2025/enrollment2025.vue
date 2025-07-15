@@ -329,17 +329,17 @@
   // 文字位置常量
   const TEXT_POSITION = {
     x: 552,
-    y: 1215,
+    y: 1210,
   }
 
   // 学校位置常量
   const SCHOOL_POSITION = {
-    x: 325,
+    x: 340,
     y: 805,
   }
   // 时间位置常量
   const TIME_POSITION = {
-    x: 325,
+    x: 340,
     y: 775,
   }
 
@@ -969,7 +969,7 @@
 
     // 4. 绘制用户数量文字
     ctx.setFillStyle('#cdf91d')
-    ctx.setFontSize(28) // 设置字体大小
+    ctx.setFontSize(25) // 设置字体大小
     ctx.setTextAlign('left') // 改为左对齐，因为给的是左上角坐标
     ctx.setTextBaseline('middle') // 设置文本基线为中间
 
@@ -988,7 +988,7 @@
     const currentTImeText = `电子认证时间：${currentTime.value}`
     ctx.fillText(currentTImeText, 0, 0)
     ctx.restore() // 恢复状态，避免影响后续绘制
-    //
+
     //  绘制学校文字（带5度旋转）
     ctx.save() // 保存当前状态
     ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y) // 移动到文字位置

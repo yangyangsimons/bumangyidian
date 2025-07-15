@@ -14,12 +14,11 @@ const stores_subjectShow = require("../../stores/subjectShow.js");
 const stores_placeholderStore = require("../../stores/placeholderStore.js");
 const stores_toggleModelStore = require("../../stores/toggleModelStore.js");
 if (!Math) {
-  (recordAnimation + barrage + chat + guide + tabbar)();
+  (recordAnimation + barrage + chat + guide)();
 }
 const barrage = () => "../../components/barrage/barrage.js";
 const chat = () => "../../components/chat/chat.js";
 const guide = () => "../../components/guide/guide.js";
-const tabbar = () => "../../components/tabbar/tabbar.js";
 const recordAnimation = () => "../../components/record-animation/record-animation.js";
 const scrollSpeed = 1;
 const scrollDelay = 10;

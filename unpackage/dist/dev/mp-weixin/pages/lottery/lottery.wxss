@@ -66,12 +66,12 @@
   margin: 0 auto;
   width: 90%;
   height: 35%;
-  padding: 0 20rpx;
+  padding: 10rpx 20rpx;
   box-sizing: border-box;
 }
 .main-section .header .header-image.data-v-619cda96 {
   width: 100%;
-  height: 120%;
+  height: 125%;
   object-fit: cover;
 }
 .main-section.data-v-619cda96::after {
@@ -97,7 +97,8 @@
 .progress-container .section-titles.data-v-619cda96 {
   display: flex;
   justify-content: center;
-  gap: 285rpx;
+  gap: 240rpx;
+  margin-right: 50rpx;
 }
 .progress-container .section-titles .left-title.data-v-619cda96,
 .progress-container .section-titles .right-title.data-v-619cda96 {

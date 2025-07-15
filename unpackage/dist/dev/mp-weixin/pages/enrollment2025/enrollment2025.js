@@ -162,14 +162,14 @@ const _sfc_main = {
     });
     const TEXT_POSITION = {
       x: 552,
-      y: 1215
+      y: 1210
     };
     const SCHOOL_POSITION = {
-      x: 325,
+      x: 340,
       y: 805
     };
     const TIME_POSITION = {
-      x: 325,
+      x: 340,
       y: 775
     };
     const touchData = common_vendor.ref({
@@ -619,7 +619,7 @@ const _sfc_main = {
         common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:967", "二维码图片未下载，跳过绘制");
       }
       ctx.setFillStyle("#cdf91d");
-      ctx.setFontSize(28);
+      ctx.setFontSize(25);
       ctx.setTextAlign("left");
       ctx.setTextBaseline("middle");
       const countText = `${userCount.value}`;

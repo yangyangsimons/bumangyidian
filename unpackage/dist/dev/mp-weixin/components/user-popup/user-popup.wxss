@@ -97,17 +97,19 @@
 }
 .user-container .header .user-info .info-container .mbti.data-v-52d19f64 {
   margin-right: 20rpx;
-  width: 120rpx;
+  width: 140rpx;
   border-radius: 6rpx;
   background: linear-gradient(233.19deg, #d3f84f 0%, #a7ee27 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 32rpx;
+  white-space: nowrap;
 }
 .user-container .header .user-info .info-container .mbti .mbti-name.data-v-52d19f64 {
   font-size: 20rpx;
   color: #1a1c1e;
+  white-space: nowrap;
 }
 .user-container .header .user-info .info-container .mbti .mbti-short.data-v-52d19f64 {
   margin-left: 3rpx;
@@ -116,6 +118,7 @@
   letter-spacing: 0px;
   line-height: 13.72px;
   color: rgba(26, 28, 30, 0.41);
+  white-space: nowrap;
 }
 .user-container .header .user-info .info-container .change.data-v-52d19f64 {
   width: 30rpx;
@@ -220,15 +223,13 @@
 }
 .user-container .footer.data-v-52d19f64 {
   overflow-y: auto;
-  min-height: 150rpx;
   box-sizing: border-box;
   position: absolute;
-  bottom: 100rpx;
+  bottom: 50rpx;
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 70rpx;
 }
 .user-container .footer wx-button.data-v-52d19f64 {
   border: none;
