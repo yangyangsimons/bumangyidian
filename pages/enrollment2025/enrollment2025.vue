@@ -152,7 +152,7 @@
   const downloadQrCode = () => {
     return new Promise((resolve, reject) => {
       uni.downloadFile({
-        url: 'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E6%A0%A1%E5%9B%AD%E6%B4%BB%E5%8A%A8.png',
+        url: 'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E6%A0%A1%E5%9B%AD%E6%B4%BB%E5%8A%A8.png',
         success: (res) => {
           if (res.statusCode === 200) {
             localQrCodePath.value = res.tempFilePath
@@ -202,7 +202,7 @@
       enrollAudio = uni.createInnerAudioContext()
       enrollAudio.autoplay = true
       enrollAudio.src =
-        'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/bg_music/Glow%20Loop.mp3'
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/bg_music/Glow%20Loop.mp3'
       enrollAudio.loop = true
       enrollAudio.play()
       enrollAudio.onPlay(() => {
