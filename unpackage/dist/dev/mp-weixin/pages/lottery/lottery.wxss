@@ -59,7 +59,7 @@
   position: relative;
   z-index: 3;
   height: 60%;
-  padding-bottom: 30rpx;
+  padding-bottom: 5rpx;
   overflow: hidden;
 }
 .main-section .header.data-v-619cda96 {
@@ -98,7 +98,7 @@
   display: flex;
   justify-content: center;
   gap: 240rpx;
-  margin-right: 50rpx;
+  margin-right: 52rpx;
 }
 .progress-container .section-titles .left-title.data-v-619cda96,
 .progress-container .section-titles .right-title.data-v-619cda96 {
@@ -138,7 +138,7 @@
   font-weight: bold;
 }
 .progress-container .progress-main .progress-bar.data-v-619cda96 {
-  height: 470rpx;
+  height: 500rpx;
   flex: 0 0 100rpx;
   display: flex;
   flex-direction: column;
@@ -188,15 +188,14 @@
 }
 .progress-container .progress-main .progress-bar .indicator-container.data-v-619cda96 {
   position: absolute;
-  bottom: 0;
+  top: 20rpx;
   left: 0;
   width: 100%;
-  height: 453rpx;
+  height: 450rpx;
   z-index: 100;
 }
 .progress-container .progress-main .progress-bar .indicator-container .progress-indicator.data-v-619cda96 {
   position: absolute;
-  margin-top: 5rpx;
   left: 50%;
   transform: translateX(-50%);
   width: 30rpx;
@@ -272,7 +271,7 @@
 }
 /* 底部部分 */
 .footer-section.data-v-619cda96 {
-  padding: 40rpx 50rpx 0 50rpx;
+  padding: 40rpx 20rpx 20rpx 50rpx;
   background: #ffffff;
   margin: 0 30rpx;
   border-radius: 0 0 30rpx 30rpx;
@@ -284,18 +283,21 @@
 .footer-section .disclaimer.data-v-619cda96 {
   overflow-y: scroll;
   display: block;
-  font-size: 15rpx;
+  font-size: 16rpx;
   color: #50634b;
-  margin-bottom: 20rpx;
+  margin-bottom: 10rpx;
   text-align: left;
+  font-weight: 400;
 }
 .footer-section .share-btn.data-v-619cda96 {
+  width: 100%;
   margin: 0 auto;
-  width: 60%;
-  height: 88rpx;
+  height: 80rpx;
+  padding-right: 25rpx;
+  box-sizing: border-box;
 }
 .footer-section .share-btn image.data-v-619cda96 {
-  width: 100%;
+  width: 60%;
   height: 100%;
   object-fit: cover;
 }

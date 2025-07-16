@@ -14,24 +14,30 @@ if (!Math) {
 const _sfc_main = {
   __name: "lottery",
   setup(__props) {
-    const disclaimerText = common_vendor.ref(
-      `参与“不芒一点”分享活动，赢取惊喜好礼！
-        活动达成指定参与人数，即解锁对应奖池： 
-        • 满1000人，前1000位用户可获得9.9元好礼； 
-        • 满5000人，抽50位送芒果TV半年卡； 
-        • 满1万人，抽50位送芒果TV大会员；
-        • 满2万人，抽20位送芒果综艺录制名额； 
-        • 满5万人，抽5位送芒果跨年演唱会门票！
-        除1000人奖励外，其他奖项均从所有参与者中随机抽取。
-        奖品兑换预计8月下旬开放，请关注服务信息推送，或在不芒一点2.0上线后，前往“我的-积分商城”领取，奖品以实际发放为准，活动最终解释权归主办方所有。`
+    const disclaimerHtml = common_vendor.ref(
+      `&nbsp;参与"不芒一点"分享活动，赢取惊喜好礼！<br/>
+&nbsp;活动达成指定参与人数，即解锁对应奖池：<br/>
+&nbsp;• 满1000人，前1000位用户可获得18元"楂堆"山楂莓莓饮品；<br/>
+&nbsp;• 满5000人，抽50位送芒果tv季卡会员；<br/>
+&nbsp;• 满1万人，抽50位送芒果tv年卡会员；<br/>
+&nbsp;• 满2万人，抽20位送芒果综艺录制名额；<br/>
+&nbsp;• 满5万人，抽5位送芒果跨年演唱会门票！<br/>
+&nbsp;除1000人奖励外，其他奖项均从所有参与者中随机抽取。<br/><br/>
+
+「活动时间」<br/>
+&nbsp;2025年7月30日-9月15日<br/>
+「关于奖品兑换」<br/>
+&nbsp;奖品兑换预计8月下旬开放，请关注服务信息推送，或在<span style="color: #A7EE27;">"不芒一点"后续版本更新后</span>,<br/>
+&nbsp;前往"我的-积分商城"领取，奖品以实际发放为准，关注「不芒一点」微信公众号了<br/>
+&nbsp;解更多相关信息，活动最终解释权归主办方所有。`
     );
     const indicatorPosition = common_vendor.computed(() => {
       const progress = progressHeight.value;
       const position = 100 - progress;
-      const adjustment = 0;
+      const adjustment = 1;
       return Math.max(0, Math.min(97, position + adjustment));
     });
-    const debugMode = common_vendor.ref(true);
+    const debugMode = common_vendor.ref(false);
     const testProgress = () => {
       const testValues = [
         0,
@@ -90,24 +96,28 @@ const _sfc_main = {
     ]);
     const rewards = common_vendor.ref([
       {
-        image: "../../static/enrollment/reward/stage-1.jpg",
+        image: "../../static/enrollment/reward/stage-6.png",
         desc: "18元“楂堆”山楂莓莓饮品 (1000份)"
       },
       {
-        image: "../../static/enrollment/reward/stage-2.jpg",
+        image: "../../static/enrollment/reward/stage-1.jpg",
         desc: "芒果tv季卡会员"
       },
       {
-        image: "../../static/enrollment/reward/stage-3.jpg",
+        image: "../../static/enrollment/reward/stage-2.jpg",
         desc: "芒果tv年卡会员"
       },
       {
-        image: "../../static/enrollment/reward/stage-4.jpg",
+        image: "../../static/enrollment/reward/stage-3.jpg",
         desc: "芒果综艺录制名额"
       },
       {
-        image: "../../static/enrollment/reward/stage-5.jpg",
+        image: "../../static/enrollment/reward/stage-4.jpg",
         desc: "芒果跨年权益"
+      },
+      {
+        image: "../../static/enrollment/reward/stage-5.jpg",
+        desc: "11"
       }
     ]);
     const isScrolling = common_vendor.ref(false);
@@ -157,7 +167,7 @@ const _sfc_main = {
           baseProgress = 100;
         }
       }
-      const peopleStagesPaddingTop = 0;
+      const peopleStagesPaddingTop = 20;
       const progressTrackHeight = 470;
       const offsetPercentage = peopleStagesPaddingTop / progressTrackHeight * 100;
       return Math.max(0, baseProgress - offsetPercentage);
@@ -205,14 +215,14 @@ const _sfc_main = {
           });
         }),
         p: isScrolling.value ? 1 : "",
-        q: common_vendor.f(rewards.value, (reward, index, i0) => {
+        q: common_vendor.f(rewards.value.slice(0, 5), (reward, index, i0) => {
           return {
             a: common_vendor.t(reward.desc),
             b: index,
             c: currentParticipants.value >= stages.value[index].target ? 1 : ""
           };
         }),
-        r: common_vendor.t(disclaimerText.value),
+        r: disclaimerHtml.value,
         s: common_assets._imports_1,
         t: common_vendor.o(handleShare)
       });
