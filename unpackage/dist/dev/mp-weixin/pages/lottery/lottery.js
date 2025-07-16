@@ -28,12 +28,25 @@ const _sfc_main = {
     const indicatorPosition = common_vendor.computed(() => {
       const progress = progressHeight.value;
       const position = 100 - progress;
-      const adjustment = 1;
+      const adjustment = 0;
       return Math.max(0, Math.min(97, position + adjustment));
     });
-    const debugMode = common_vendor.ref(false);
+    const debugMode = common_vendor.ref(true);
     const testProgress = () => {
-      const testValues = [0, 1e3, 5e3, 1e4, 2e4, 5e4];
+      const testValues = [
+        0,
+        300,
+        500,
+        800,
+        1e3,
+        1100,
+        1200,
+        1500,
+        3e3,
+        5e3,
+        1e4,
+        5e4
+      ];
       const currentIndex = testValues.indexOf(currentParticipants.value);
       const nextIndex = (currentIndex + 1) % testValues.length;
       currentParticipants.value = testValues[nextIndex];
@@ -78,7 +91,7 @@ const _sfc_main = {
     const rewards = common_vendor.ref([
       {
         image: "../../static/enrollment/reward/stage-1.jpg",
-        desc: "9.9元好礼"
+        desc: "18元“楂堆”山楂莓莓饮品 (1000份)"
       },
       {
         image: "../../static/enrollment/reward/stage-2.jpg",
@@ -144,7 +157,7 @@ const _sfc_main = {
           baseProgress = 100;
         }
       }
-      const peopleStagesPaddingTop = 15;
+      const peopleStagesPaddingTop = 0;
       const progressTrackHeight = 470;
       const offsetPercentage = peopleStagesPaddingTop / progressTrackHeight * 100;
       return Math.max(0, baseProgress - offsetPercentage);
@@ -172,7 +185,7 @@ const _sfc_main = {
         i: common_vendor.t(offsetPercentageDebug.value.toFixed(2)),
         j: common_vendor.o(testProgress)
       } : {}, {
-        k: common_assets._imports_0$1,
+        k: common_assets._imports_0,
         l: common_vendor.f(stages.value, (stage, index, i0) => {
           return {
             a: common_vendor.t(stage.label),
@@ -200,7 +213,7 @@ const _sfc_main = {
           };
         }),
         r: common_vendor.t(disclaimerText.value),
-        s: common_assets._imports_1$1,
+        s: common_assets._imports_1,
         t: common_vendor.o(handleShare)
       });
     };

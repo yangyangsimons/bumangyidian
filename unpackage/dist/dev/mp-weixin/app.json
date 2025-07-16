@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/index/index",
     "pages/lottery/lottery",
+    "pages/index/index",
     "pages/hello/hello",
     "pages/enrollment2025/enrollment2025",
     "pages/loading/loading",

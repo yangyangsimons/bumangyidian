@@ -138,6 +138,7 @@
   font-weight: bold;
 }
 .progress-container .progress-main .progress-bar.data-v-619cda96 {
+  height: 470rpx;
   flex: 0 0 100rpx;
   display: flex;
   flex-direction: column;
@@ -185,17 +186,25 @@
   border-radius: 20rpx;
   transition: height 0.8s ease;
 }
-.progress-container .progress-main .progress-bar .progress-indicator.data-v-619cda96 {
+.progress-container .progress-main .progress-bar .indicator-container.data-v-619cda96 {
   position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 453rpx;
+  z-index: 100;
+}
+.progress-container .progress-main .progress-bar .indicator-container .progress-indicator.data-v-619cda96 {
+  position: absolute;
+  margin-top: 5rpx;
   left: 50%;
   transform: translateX(-50%);
   width: 30rpx;
   height: 30rpx;
   background-color: #ffffff;
   border-radius: 50%;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
   transition: bottom 0.8s ease;
-  z-index: 10;
+  z-index: 100;
 }
 .progress-container .progress-main .progress-bar .current-count.data-v-619cda96 {
   font-size: 30rpx;
@@ -240,8 +249,8 @@
   align-items: center;
 }
 .progress-container .progress-main .rewards .reward-texts .reward-text-item .reward-desc.data-v-619cda96 {
-  white-space: nowrap;
-  font-size: 26rpx;
+  white-space: wrap;
+  font-size: 24rpx;
   color: #ffffff;
   font-weight: 500;
 }

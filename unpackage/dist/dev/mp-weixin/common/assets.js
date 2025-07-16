@@ -1,9 +1,9 @@
 "use strict";
-const _imports_0$7 = "/static/global-title.png";
-const _imports_1$9 = "/static/shining-point.png";
+const _imports_0$7 = "/static/enrollment/header.png";
+const _imports_1$9 = "/static/enrollment/share-nav-btn.png";
+const _imports_0$6 = "/static/global-title.png";
+const _imports_1$8 = "/static/shining-point.png";
 const _imports_2$6 = "/static/close.png";
-const _imports_0$6 = "/static/enrollment/header.png";
-const _imports_1$8 = "/static/enrollment/share-nav-btn.png";
 const _imports_1$7 = "/static/sex-icon.png";
 const _imports_2$5 = "/static/birth-icon.png";
 const _imports_3$4 = "/static/date-icon.png";

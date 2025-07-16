@@ -88,10 +88,12 @@
               ></view>
               <!-- 新增：当前进度指示器 -->
             </view>
-            <view
-              class="progress-indicator"
-              :style="{ bottom: indicatorPosition + '%' }"
-            ></view>
+            <view class="indicator-container">
+              <view
+                class="progress-indicator"
+                :style="{ bottom: indicatorPosition + '%' }"
+              ></view>
+            </view>
           </view>
 
           <!-- 右侧奖励 -->
@@ -171,13 +173,15 @@
     const position = 100 - progress
 
     // 微调让指示器正好在填充顶部
-    const adjustment = 1 // 根据实际效果调整这个值
+    const adjustment = 0 // 根据实际效果调整这个值
 
     return Math.max(0, Math.min(97, position + adjustment)) // 限制在0-97%之间，避免溢出
   })
-  const debugMode = ref(false) // 调试完成后设为false
+  const debugMode = ref(true) // 调试完成后设为false
   const testProgress = () => {
-    const testValues = [0, 1000, 5000, 10000, 20000, 50000]
+    const testValues = [
+      0, 300, 500, 800, 1000, 1100, 1200, 1500, 3000, 5000, 10000, 50000,
+    ]
     const currentIndex = testValues.indexOf(currentParticipants.value)
     const nextIndex = (currentIndex + 1) % testValues.length
     currentParticipants.value = testValues[nextIndex]
@@ -237,7 +241,7 @@
   const rewards = ref([
     {
       image: '../../static/enrollment/reward/stage-1.jpg',
-      desc: '9.9元好礼',
+      desc: '18元“楂堆”山楂莓莓饮品 (1000份)',
     },
     {
       image: '../../static/enrollment/reward/stage-2.jpg',
@@ -343,7 +347,7 @@
     // people-stages中第一个stage-item距离顶部的距离是50rpx
     // progress-track总高度是470rpx
     // 所以偏移百分比应该是: (50rpx / 470rpx) * 100% = 10.64%
-    const peopleStagesPaddingTop = 15 // rpx
+    const peopleStagesPaddingTop = 0 // rpx
     const progressTrackHeight = 470 // rpx
     const offsetPercentage =
       (peopleStagesPaddingTop / progressTrackHeight) * 100

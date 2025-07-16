@@ -785,7 +785,7 @@ const _sfc_main = {
           border: false,
           leftWidth: "0"
         }),
-        f: common_assets._imports_0,
+        f: common_assets._imports_0$1,
         g: isGuideVisible.value
       }, isGuideVisible.value ? {
         h: common_assets._imports_1$3

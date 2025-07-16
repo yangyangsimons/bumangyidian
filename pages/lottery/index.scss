@@ -137,12 +137,15 @@
         }
 
         .progress-bar {
+            height: 470rpx;
             flex: 0 0 100rpx;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 0 40rpx;
             position: relative;
+            // border: 1px solid red;
+
             .dot-container {
                 box-sizing: border-box;
                 padding-bottom: 70rpx;
@@ -185,17 +188,28 @@
                     transition: height 0.8s ease;
                 }
             }
-            .progress-indicator {
+            .indicator-container {
                 position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 30rpx;
-                height: 30rpx;
-                background-color: #ffffff;
-                border-radius: 50%;
-                box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
-                transition: bottom 0.8s ease;
-                z-index: 10;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 453rpx;
+                // border: 1px solid green;
+                // box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+                z-index: 100;
+                .progress-indicator {
+                    position: absolute;
+                    margin-top: 5rpx;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 30rpx;
+                    height: 30rpx;
+                    background-color: #ffffff;
+                    border-radius: 50%;
+                    // box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+                    transition: bottom 0.8s ease;
+                    z-index: 100;
+                }
             }
 
             .current-count {
@@ -250,8 +264,8 @@
                     align-items: center;
 
                     .reward-desc {
-                        white-space: nowrap;
-                        font-size: 26rpx;
+                        white-space: wrap;
+                        font-size: 24rpx;
                         color: #ffffff;
                         font-weight: 500;
                     }
