@@ -172,7 +172,7 @@ const _sfc_main = {
         i: common_vendor.t(offsetPercentageDebug.value.toFixed(2)),
         j: common_vendor.o(testProgress)
       } : {}, {
-        k: common_assets._imports_0$1,
+        k: common_assets._imports_0$2,
         l: common_vendor.f(stages.value, (stage, index, i0) => {
           return {
             a: common_vendor.t(stage.label),

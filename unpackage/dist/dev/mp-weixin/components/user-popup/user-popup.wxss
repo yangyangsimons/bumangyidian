@@ -223,6 +223,7 @@
 }
 .user-container .footer.data-v-52d19f64 {
   overflow-y: auto;
+  min-height: 150rpx;
   box-sizing: border-box;
   position: absolute;
   bottom: 50rpx;
@@ -230,6 +231,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-bottom: 70rpx;
 }
 .user-container .footer wx-button.data-v-52d19f64 {
   border: none;

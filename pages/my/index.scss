@@ -1,0 +1,89 @@
+.user-container {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 32rpx;
+    background-color: #00000025;
+    // nav bar top style
+    ::v-deep .uni-nav-bar-text {
+        font-size: 34rpx !important;
+        font-weight: 700 !important;
+        color: rgba(51, 51, 51, 1) !important;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    image {
+        width: 50rpx;
+        height: 50rpx;
+        border-radius: 50%;
+    }
+    .header {
+        border: 1px solid red;
+        width: 100%;
+        margin-top: 50rpx;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24rpx;
+        height: 185rpx;
+
+        .avator {
+            border: 4rpx solid rgba(255, 255, 255, 1);
+            width: 120rpx;
+            height: 120rpx;
+            border-radius: 50%;
+        }
+        .info-container {
+            height: 100%;
+            border: 1px solid green;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 26rpx;
+            .user-info-setting {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                width: 100%;
+            }
+            .user-info {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                margin-left: 20rpx;
+                .name {
+                    width: 100%;
+                    text-align: left;
+                    font-size: 32rpx;
+                    font-weight: 700;
+                    color: rgba(16, 18, 19, 1);
+                }
+                .school {
+                    width: 100%;
+                    text-align: left;
+                    font-size: 24rpx;
+                    font-weight: 400;
+                    color: rgba(110, 112, 112, 1);
+                    margin-top: 8rpx;
+                }
+            }
+            .setting {
+                width: 48rpx;
+                height: 48rpx;
+                display: flex;
+
+                image {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
+    }
+}

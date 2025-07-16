@@ -97,7 +97,7 @@
     </view>
 
     <guide />
-    <!-- <tabbar></tabbar> -->
+    <tabbar></tabbar>
   </view>
 </template>
 

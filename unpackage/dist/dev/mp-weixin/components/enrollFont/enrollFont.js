@@ -65,7 +65,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$6,
+        a: common_assets._imports_0$7,
         b: currentSloganImage.value,
         c: showTip.value
       }, showTip.value ? {

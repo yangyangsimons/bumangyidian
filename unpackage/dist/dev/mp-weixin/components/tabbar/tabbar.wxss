@@ -1,0 +1,92 @@
+
+.custom-tabbar.data-v-e9b92a61 {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    height: 140rpx;
+    background-color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+.tab-item.data-v-e9b92a61 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20rpx 0;
+    position: relative; /* 为提示气泡定位 */
+}
+.tab-icon.data-v-e9b92a61 {
+    width: 40rpx;
+    height: 40rpx;
+    margin-bottom: 8rpx;
+}
+.tab-icon-large.data-v-e9b92a61 {
+    width: 108rpx;
+    height: 108rpx;
+    margin-top: -32rpx;
+}
+.tab-text.data-v-e9b92a61 {
+    font-size: 20rpx;
+    color: rgba(185, 187, 188, 1);
+    font-weight: 400;
+    transition: color 0.5s;
+}
+.tab-text-active.data-v-e9b92a61 {
+    color: rgba(43, 57, 58, 1);
+    font-weight: 400;
+}
+
+  /* 临时添加：提示气泡样式 */
+.tip-bubble.data-v-e9b92a61 {
+    position: absolute;
+    bottom: 120rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12rpx 20rpx;
+    border-radius: 8rpx;
+    white-space: nowrap;
+    z-index: 1000;
+    animation: tipFadeIn-e9b92a61 0.3s ease-out;
+}
+.tip-bubble-large.data-v-e9b92a61 {
+    bottom: 160rpx; /* 大图标的气泡位置调整 */
+}
+.tip-text.data-v-e9b92a61 {
+    font-size: 24rpx;
+    line-height: 1.2;
+}
+
+  /* 气泡箭头 */
+.tip-arrow.data-v-e9b92a61 {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12rpx solid transparent;
+    border-right: 12rpx solid transparent;
+    border-top: 12rpx solid rgba(0, 0, 0, 0.8);
+}
+.tip-arrow-large.data-v-e9b92a61 {
+    /* 大图标的箭头样式保持一致 */
+}
+
+  /* 提示动画 */
+@keyframes tipFadeIn-e9b92a61 {
+0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(10rpx);
+}
+100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+}
+}

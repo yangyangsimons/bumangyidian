@@ -2,6 +2,7 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
 if (!Math) {
+  "./pages/my/my.js";
   "./pages/index/index.js";
   "./pages/lottery/lottery.js";
   "./pages/hello/hello.js";
@@ -11,7 +12,6 @@ if (!Math) {
   "./pages/questionnaire/questionnaire.js";
   "./pages/agreement/agreement.js";
   "./pages/ad/ad.js";
-  "./pages/my/my.js";
 }
 const _sfc_main = {
   onLaunch: function() {
@@ -85,7 +85,7 @@ const _sfc_main = {
   },
   onShow: function() {
     common_vendor.index.__f__("log", "at App.vue:94", "App Show");
-    common_vendor.wx$1.loadFontFace({
+    common_vendor.index.loadFontFace({
       global: true,
       family: "SmileySans-Oblique",
       source: "https://mang.5gradio.com.cn/static/SmileySans-Oblique.ttf",

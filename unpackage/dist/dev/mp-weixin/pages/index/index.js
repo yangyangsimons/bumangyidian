@@ -14,11 +14,12 @@ const stores_subjectShow = require("../../stores/subjectShow.js");
 const stores_placeholderStore = require("../../stores/placeholderStore.js");
 const stores_toggleModelStore = require("../../stores/toggleModelStore.js");
 if (!Math) {
-  (recordAnimation + barrage + chat + guide)();
+  (recordAnimation + barrage + chat + guide + tabbar)();
 }
 const barrage = () => "../../components/barrage/barrage.js";
 const chat = () => "../../components/chat/chat.js";
 const guide = () => "../../components/guide/guide.js";
+const tabbar = () => "../../components/tabbar/tabbar.js";
 const recordAnimation = () => "../../components/record-animation/record-animation.js";
 const scrollSpeed = 1;
 const scrollDelay = 10;
@@ -389,7 +390,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0,
+        a: common_assets._imports_0$1,
         b: isGoldModeAvailable.value
       }, isGoldModeAvailable.value ? {
         c: changeModelSrc.value,

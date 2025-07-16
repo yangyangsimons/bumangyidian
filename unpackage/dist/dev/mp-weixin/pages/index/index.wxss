@@ -89,7 +89,7 @@
   height: 1000rpx;
   position: absolute;
   left: 0;
-  bottom: 120rpx;
+  bottom: 250rpx;
 }
 .cover .changeModel.data-v-1cf27b2a {
   position: absolute;

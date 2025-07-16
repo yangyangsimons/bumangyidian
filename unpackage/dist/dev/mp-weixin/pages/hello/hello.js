@@ -300,7 +300,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0,
+        a: common_assets._imports_0$1,
         b: common_assets._imports_1$2,
         c: maleImageSrc.value,
         d: common_vendor.o(($event) => selectSex("male")),
