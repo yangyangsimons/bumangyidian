@@ -452,7 +452,6 @@
       })
       return
     } else {
-      userCount.value = userInfo.data.report_idx
       // schoolName.value = userInfo.data.school_name
       if (!userInfo.data.school_name || schoolName.value === '公开版') {
         schoolName.value = ''
@@ -461,6 +460,16 @@
       }
     }
     console.log('当前用户信息:', userInfo)
+    const rest = await request(`${baseUrl}/user/count_new_term_activity`, 'get')
+    if (rest.code === 0) {
+      userCount.value = rest.data.count
+      console.log('当前参与人数:', userCount.value)
+    } else {
+      uni.showToast({
+        title: '获取参与人数失败',
+        icon: 'none',
+      })
+    }
     // 获取当前时间
     const now = new Date()
     const year = now.getFullYear()

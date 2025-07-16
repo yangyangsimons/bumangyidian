@@ -239,14 +239,23 @@ const _sfc_main = {
         });
         return;
       } else {
-        userCount.value = userInfo.data.report_idx;
         if (!userInfo.data.school_name || schoolName.value === "公开版") {
           schoolName.value = "";
         } else {
           schoolName.value = userInfo.data.school_name;
         }
       }
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:463", "当前用户信息:", userInfo);
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:462", "当前用户信息:", userInfo);
+      const rest = await utils_request.request(`${utils_config.baseUrl}/user/count_new_term_activity`, "get");
+      if (rest.code === 0) {
+        userCount.value = rest.data.count;
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:466", "当前参与人数:", userCount.value);
+      } else {
+        common_vendor.index.showToast({
+          title: "获取参与人数失败",
+          icon: "none"
+        });
+      }
       const now = /* @__PURE__ */ new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -403,21 +412,21 @@ const _sfc_main = {
           content: "登录后体验完整功能",
           success: async (res) => {
             if (res.confirm) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:691", "用户点击确定");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:700", "用户点击确定");
               setTimeout(() => {
                 common_vendor.index.reLaunch({
                   url: "/pages/login/login"
                 });
               }, 300);
             } else if (res.cancel) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:699", "用户点击取消");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:708", "用户点击取消");
             }
           }
         });
         return;
       }
       if (userImage.value) {
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:706", "已经选择过图片，无法再次选择", userImage.value);
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:715", "已经选择过图片，无法再次选择", userImage.value);
         return;
       }
       common_vendor.index.chooseImage({
@@ -460,7 +469,7 @@ const _sfc_main = {
           const scaleX = containerWidth / imgWidth;
           const scaleY = containerHeight / imgHeight;
           initialScale.value = Math.max(scaleX, scaleY);
-          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:766", "初始缩放计算:", {
+          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:775", "初始缩放计算:", {
             containerSize: [containerWidth, containerHeight],
             imageSize: [imgWidth, imgHeight],
             initialScale: initialScale.value
@@ -614,9 +623,9 @@ const _sfc_main = {
       if (localQrCodePath.value) {
         const qrSize = 100;
         ctx.drawImage(localQrCodePath.value, 65, 1075, qrSize, qrSize);
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:965", "绘制二维码:", localQrCodePath.value, "at position: 75, 1075");
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:974", "绘制二维码:", localQrCodePath.value, "at position: 75, 1075");
       } else {
-        common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:967", "二维码图片未下载，跳过绘制");
+        common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:976", "二维码图片未下载，跳过绘制");
       }
       ctx.setFillStyle("#cdf91d");
       ctx.setFontSize(25);
@@ -642,7 +651,7 @@ const _sfc_main = {
       ctx.setTextAlign("left");
       ctx.setTextBaseline("middle");
       const schoolText = `${schoolName.value}`;
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1002", "开始画学校了学校名称:", schoolText);
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1011", "开始画学校了学校名称:", schoolText);
       ctx.fillText(schoolText, 0, 0);
       ctx.restore();
       ctx.draw(false, () => {
@@ -684,7 +693,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1048", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1057", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -709,28 +718,28 @@ const _sfc_main = {
             downloadImage();
             utils_request.request(`${utils_config.baseUrl}/user/update_new_term_activity`, "POST", {}).then((response) => {
               if (response.code === 0) {
-                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1078", "入学通知书生成记录成功");
+                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1087", "入学通知书生成记录成功");
                 common_vendor.wx$1.requestSubscribeMessage({
                   tmplIds: ["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"],
                   // 需要下发的订阅消息模板id数组
                   success(res2) {
                     if (res2["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"] === "accept") {
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1087", "用户同意订阅", res2);
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1096", "用户同意订阅", res2);
                       const openid = res2["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"];
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1091", "用户的 openid:", openid);
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1100", "用户的 openid:", openid);
                     } else {
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1094", "用户拒绝订阅");
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1103", "用户拒绝订阅");
                     }
                   },
                   fail(err) {
-                    common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1098", err);
+                    common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1107", err);
                   }
                 });
               } else {
-                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1102", "入学通知书生成记录失败:", response.message);
+                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1111", "入学通知书生成记录失败:", response.message);
               }
             }).catch((error) => {
-              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1106", "请求失败:", error);
+              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1115", "请求失败:", error);
             });
           }
         }
