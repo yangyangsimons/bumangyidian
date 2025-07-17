@@ -146,15 +146,17 @@
   flex-direction: column;
   align-items: center;
   position: absolute;
-  top: 74%;
-  left: 43%;
+  top: 75%;
+  left: 44%;
   transform: rotate(5deg);
   color: #aaaaaa;
   font-size: 18rpx;
-  text-align: center;
   white-space: nowrap;
+  text-align: right;
 }
 .upload-area .school .school-name.data-v-13dd3b1c {
+  width: 100%;
+  color: #8ae0e8;
   font-weight: 600;
   font-size: 35rpx;
 }

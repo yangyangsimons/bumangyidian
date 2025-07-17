@@ -9,6 +9,13 @@
 			}
 		},
 		{
+			"path": "pages/enrollment2025/enrollment2025",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "",
@@ -19,13 +26,6 @@
 			"path": "pages/hello/hello",
 			"style": {
 				"navigationBarTitleText": "不芒一点",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/enrollment2025/enrollment2025",
-			"style": {
-				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
 			}
 		},

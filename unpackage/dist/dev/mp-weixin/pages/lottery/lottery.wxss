@@ -27,7 +27,8 @@
   position: fixed;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
+  font-family: "AlibabaPuHuiTi";
 }
 .activity-page .nav-right.data-v-619cda96 {
   position: absolute;
@@ -55,7 +56,7 @@
   background: #ffffff;
   margin: 0 30rpx;
   border-radius: 55rpx;
-  margin-top: 170rpx;
+  margin-top: 165rpx;
   position: relative;
   z-index: 3;
   height: 60%;
@@ -97,8 +98,8 @@
 .progress-container .section-titles.data-v-619cda96 {
   display: flex;
   justify-content: center;
-  gap: 240rpx;
-  margin-right: 52rpx;
+  gap: 235rpx;
+  margin-right: 65rpx;
 }
 .progress-container .section-titles .left-title.data-v-619cda96,
 .progress-container .section-titles .right-title.data-v-619cda96 {
@@ -109,7 +110,7 @@
 .progress-container .progress-main.data-v-619cda96 {
   display: grid;
   grid-template-columns: 3fr 1fr 6fr;
-  min-height: 500rpx;
+  min-height: 490rpx;
   overflow-y: auto;
 }
 .progress-container .progress-main .people-stages.data-v-619cda96 {
@@ -188,7 +189,7 @@
 }
 .progress-container .progress-main .progress-bar .indicator-container.data-v-619cda96 {
   position: absolute;
-  top: 20rpx;
+  top: 18rpx;
   left: 0;
   width: 100%;
   height: 450rpx;
@@ -278,16 +279,15 @@
   text-align: center;
   border-radius: 55rpx;
   margin-top: -20rpx;
-  min-height: 350rpx;
 }
 .footer-section .disclaimer.data-v-619cda96 {
   overflow-y: scroll;
   display: block;
   font-size: 16rpx;
   color: #50634b;
-  margin-bottom: 10rpx;
   text-align: left;
   font-weight: 400;
+  height: 330rpx;
 }
 .footer-section .share-btn.data-v-619cda96 {
   width: 100%;

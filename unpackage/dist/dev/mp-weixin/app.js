@@ -3,9 +3,9 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
 if (!Math) {
   "./pages/lottery/lottery.js";
+  "./pages/enrollment2025/enrollment2025.js";
   "./pages/index/index.js";
   "./pages/hello/hello.js";
-  "./pages/enrollment2025/enrollment2025.js";
   "./pages/loading/loading.js";
   "./pages/login/login.js";
   "./pages/questionnaire/questionnaire.js";
@@ -87,18 +87,18 @@ const _sfc_main = {
     common_vendor.index.__f__("log", "at App.vue:94", "App Show");
     common_vendor.wx$1.loadFontFace({
       global: true,
-      family: "SmileySans-Oblique",
-      source: "https://mang.5gradio.com.cn/static/SmileySans-Oblique.ttf",
+      family: "AlibabaPuHuiTi",
+      source: "https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/ttf/AlibabaPuHuiTi-2-55-Regular.ttf",
       success: (result) => {
-        common_vendor.index.__f__("log", "at App.vue:101", "字体加载成功", result);
+        common_vendor.index.__f__("log", "at App.vue:102", "字体加载成功", result);
       },
       fail: (error) => {
-        common_vendor.index.__f__("error", "at App.vue:104", "字体加载失败", error);
+        common_vendor.index.__f__("error", "at App.vue:105", "字体加载失败", error);
       }
     });
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:109", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:110", "App Hide");
   }
 };
 function createApp() {

@@ -67,7 +67,7 @@
         </view>
       </view>
       <view class="tips" @tap="chooseImage" v-if="!userImage">
-        点击上传照片，左右滑动切换相框</view
+        点击上传照片</view
       >
 
       <!-- 用户图片显示区域 -->
@@ -249,18 +249,18 @@
   }
   // 装饰图片位置常量
   const DECORATION_POSITION = {
-    x: 35,
-    y: 215,
-    width: 690,
-    height: 735,
+    x: 0,
+    y: 190,
+    width: 745,
+    height: 800,
   }
 
   // 相框位置常量（用户照片区域，保持不变）
   const FRAME_POSITION = {
-    x: 140,
-    y: 280,
-    width: 505,
-    height: 500,
+    x: 115,
+    y: 260,
+    width: 540,
+    height: 610,
   }
 
   // 贴纸相关数据
@@ -328,19 +328,19 @@
 
   // 文字位置常量
   const TEXT_POSITION = {
-    x: 552,
+    x: 445,
     y: 1210,
   }
 
   // 学校位置常量
   const SCHOOL_POSITION = {
-    x: 340,
-    y: 805,
+    x: 350,
+    y: 840,
   }
   // 时间位置常量
   const TIME_POSITION = {
-    x: 340,
-    y: 775,
+    x: 350,
+    y: 800,
   }
 
   // 触摸相关数据
@@ -612,10 +612,10 @@
     const scaledHeight = imageHeight.value * totalScale
 
     // 其余计算保持不变...
-    const clipTop = 0.15
-    const clipRight = 0.135
-    const clipBottom = 0.17
-    const clipLeft = 0.125
+    const clipTop = 0.13
+    const clipRight = 0.125
+    const clipBottom = 0.15
+    const clipLeft = 0.105
 
     const containerWidth = frameBounds.value.width
     const containerHeight = frameBounds.value.height
@@ -969,21 +969,46 @@
     }
     // 5. 绘制二维码
     if (localQrCodePath.value) {
-      const qrSize = 100 // 二维码大小
-      ctx.drawImage(localQrCodePath.value, 65, 1075, qrSize, qrSize)
+      const qrSize = 120 // 二维码大小
+      ctx.drawImage(localQrCodePath.value, 42, 1035, qrSize, qrSize)
       console.log('绘制二维码:', localQrCodePath.value, 'at position: 75, 1075')
     } else {
       console.warn('二维码图片未下载，跳过绘制')
     }
 
     // 4. 绘制用户数量文字
-    ctx.setFillStyle('#cdf91d')
-    ctx.setFontSize(25) // 设置字体大小
-    ctx.setTextAlign('left') // 改为左对齐，因为给的是左上角坐标
-    ctx.setTextBaseline('middle') // 设置文本基线为中间
+    ctx.setTextAlign('left')
+    ctx.setTextBaseline('middle')
 
-    const countText = `${userCount.value}`
-    ctx.fillText(countText, TEXT_POSITION.x, TEXT_POSITION.y)
+    const beforeText = '我是2025级第'
+    const countValueText = userCount.value.toString()
+    const afterText = '位签到新生'
+
+    // 分别测量不同字体大小的文字宽度
+    ctx.setFontSize(20)
+    const beforeWidth = ctx.measureText(beforeText).width
+
+    ctx.setFontSize(30)
+    const countWidth = ctx.measureText(countValueText).width
+
+    // 绘制前半部分（白色，字体20）
+    ctx.setFillStyle('#ffffff')
+    ctx.setFontSize(20)
+    ctx.fillText(beforeText, TEXT_POSITION.x, TEXT_POSITION.y)
+
+    // 绘制数字部分（绿色，字体30）
+    ctx.setFillStyle('#cdf91d')
+    ctx.setFontSize(30)
+    ctx.fillText(countValueText, TEXT_POSITION.x + beforeWidth, TEXT_POSITION.y)
+
+    // 绘制后半部分（白色，字体20）
+    ctx.setFillStyle('#ffffff')
+    ctx.setFontSize(20)
+    ctx.fillText(
+      afterText,
+      TEXT_POSITION.x + beforeWidth + countWidth,
+      TEXT_POSITION.y
+    )
 
     // . 绘制时间文字
     ctx.save() // 保存当前状态
@@ -1002,7 +1027,7 @@
     ctx.save() // 保存当前状态
     ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y) // 移动到文字位置
     ctx.rotate((5 * Math.PI) / 180) // 旋转5度（弧度 = 角度 * π / 180）
-    ctx.setFillStyle('#aaa')
+    ctx.setFillStyle('#8AE0E8')
     ctx.setFontSize(28)
     ctx.setTextAlign('left')
     ctx.setTextBaseline('middle')
@@ -1076,7 +1101,7 @@
     }
     uni.showModal({
       title: '提示',
-      content: '是否立即保存入学通知书？',
+      content: '是否立即保存你的青春高光时刻？',
       success: (res) => {
         if (res.confirm) {
           downloadImage() // 使用新的downloadImage函数
