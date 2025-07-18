@@ -119,13 +119,17 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 450rpx;
+  height: 470rpx;
   position: relative;
-  padding-top: 50rpx;
+  padding-top: 30rpx;
   box-sizing: border-box;
 }
 .progress-container .progress-main .people-stages .stage-item.data-v-619cda96 {
   display: flex;
+  align-items: center;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 .progress-container .progress-main .people-stages .stage-item .stage-text.data-v-619cda96 {
@@ -216,8 +220,8 @@
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 2fr;
-  height: 450rpx;
-  padding-top: 50rpx;
+  height: 470rpx;
+  padding-top: 30rpx;
   box-sizing: border-box;
 }
 .progress-container .progress-main .rewards .reward-images-container.data-v-619cda96 {
@@ -243,8 +247,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 450rpx;
 }
 .progress-container .progress-main .rewards .reward-texts .reward-text-item.data-v-619cda96 {
+  height: 60rpx;
   display: flex;
   align-items: center;
 }

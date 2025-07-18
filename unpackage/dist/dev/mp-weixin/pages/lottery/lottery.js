@@ -109,11 +109,11 @@ const _sfc_main = {
       },
       {
         image: "../../static/enrollment/reward/stage-3.jpg",
-        desc: `芒果综艺录制名额<br/>(50份)`
+        desc: `芒果综艺录制名额<br/>(20份)`
       },
       {
         image: "../../static/enrollment/reward/stage-4.jpg",
-        desc: `芒果跨年权益<br/>(50份)`
+        desc: `芒果跨年权益<br/>(5份)`
       },
       {
         image: "../../static/enrollment/reward/stage-5.jpg",
