@@ -97,23 +97,23 @@ const _sfc_main = {
     const rewards = common_vendor.ref([
       {
         image: "../../static/enrollment/reward/stage-6.png",
-        desc: "18元“楂堆”山楂莓莓饮品 (1000份)"
+        desc: `18元“楂堆”山楂莓莓饮品 (1000份)`
       },
       {
         image: "../../static/enrollment/reward/stage-1.jpg",
-        desc: "芒果tv季卡会员"
+        desc: `芒果tv季卡会员<br/>(50份)`
       },
       {
         image: "../../static/enrollment/reward/stage-2.jpg",
-        desc: "芒果tv年卡会员"
+        desc: `芒果tv年卡会员<br/>(50份)`
       },
       {
         image: "../../static/enrollment/reward/stage-3.jpg",
-        desc: "芒果综艺录制名额"
+        desc: `芒果综艺录制名额<br/>(50份)`
       },
       {
         image: "../../static/enrollment/reward/stage-4.jpg",
-        desc: "芒果跨年权益"
+        desc: `芒果跨年权益<br/>(50份)`
       },
       {
         image: "../../static/enrollment/reward/stage-5.jpg",
@@ -217,14 +217,15 @@ const _sfc_main = {
         p: isScrolling.value ? 1 : "",
         q: common_vendor.f(rewards.value.slice(0, 5), (reward, index, i0) => {
           return {
-            a: common_vendor.t(reward.desc),
+            a: reward.desc,
             b: index,
             c: currentParticipants.value >= stages.value[index].target ? 1 : ""
           };
         }),
-        r: disclaimerHtml.value,
-        s: common_assets._imports_1,
-        t: common_vendor.o(handleShare)
+        r: common_vendor.t(),
+        s: disclaimerHtml.value,
+        t: common_assets._imports_1,
+        v: common_vendor.o(handleShare)
       });
     };
   }

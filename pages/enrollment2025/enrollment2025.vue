@@ -970,7 +970,7 @@
     // 5. 绘制二维码
     if (localQrCodePath.value) {
       const qrSize = 120 // 二维码大小
-      ctx.drawImage(localQrCodePath.value, 42, 1035, qrSize, qrSize)
+      ctx.drawImage(localQrCodePath.value, 45, 1040, qrSize, qrSize)
       console.log('绘制二维码:', localQrCodePath.value, 'at position: 75, 1075')
     } else {
       console.warn('二维码图片未下载，跳过绘制')
@@ -1060,7 +1060,7 @@
 
               uni.showModal({
                 title: '提示',
-                content: '入学通知书已保存到相册，快去分享给你的朋友吧！',
+                content: '已保存到相册，快去分享给你的朋友吧！',
                 showCancel: false,
                 confirmText: '知道了',
                 success: (modalRes) => {

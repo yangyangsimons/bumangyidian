@@ -622,7 +622,7 @@ const _sfc_main = {
       }
       if (localQrCodePath.value) {
         const qrSize = 120;
-        ctx.drawImage(localQrCodePath.value, 42, 1035, qrSize, qrSize);
+        ctx.drawImage(localQrCodePath.value, 45, 1040, qrSize, qrSize);
         common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:974", "绘制二维码:", localQrCodePath.value, "at position: 75, 1075");
       } else {
         common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:976", "二维码图片未下载，跳过绘制");
@@ -690,7 +690,7 @@ const _sfc_main = {
                 isGuideVisible.value = true;
                 common_vendor.index.showModal({
                   title: "提示",
-                  content: "入学通知书已保存到相册，快去分享给你的朋友吧！",
+                  content: "已保存到相册，快去分享给你的朋友吧！",
                   showCancel: false,
                   confirmText: "知道了",
                   success: (modalRes) => {

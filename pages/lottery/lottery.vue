@@ -130,7 +130,11 @@
                   unlocked: currentParticipants >= stages[index].target,
                 }"
               >
-                <text class="reward-desc">{{ reward.desc }}</text>
+                <rich-text
+                  class="reward-desc"
+                  :nodes="reward.desc"
+                  >{{
+                }}</rich-text>
               </view>
             </view>
           </view>
@@ -247,23 +251,23 @@
   const rewards = ref([
     {
       image: '../../static/enrollment/reward/stage-6.png',
-      desc: '18元“楂堆”山楂莓莓饮品 (1000份)',
+      desc: `18元“楂堆”山楂莓莓饮品 (1000份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-1.jpg',
-      desc: '芒果tv季卡会员',
+      desc: `芒果tv季卡会员<br/>(50份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-2.jpg',
-      desc: '芒果tv年卡会员',
+      desc: `芒果tv年卡会员<br/>(50份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-3.jpg',
-      desc: '芒果综艺录制名额',
+      desc: `芒果综艺录制名额<br/>(50份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-4.jpg',
-      desc: '芒果跨年权益',
+      desc: `芒果跨年权益<br/>(50份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-5.jpg',
