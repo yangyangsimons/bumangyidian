@@ -23,8 +23,8 @@ const _sfc_main = {
       return common_vendor.e({
         a: guideShow.value
       }, guideShow.value ? {
-        b: common_assets._imports_0$5,
-        c: common_assets._imports_1$8,
+        b: common_assets._imports_0$4,
+        c: common_assets._imports_1$7,
         d: common_assets._imports_2$5,
         e: common_vendor.o(guideShowClick),
         f: common_assets._imports_3$4,

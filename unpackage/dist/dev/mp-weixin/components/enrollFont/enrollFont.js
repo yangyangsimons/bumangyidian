@@ -65,11 +65,11 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0$3,
+        a: common_assets._imports_0$6,
         b: currentSloganImage.value,
         c: showTip.value
       }, showTip.value ? {
-        d: common_assets._imports_1$6
+        d: common_assets._imports_1$8
       } : {}, {
         e: common_vendor.o(handleTouchStart),
         f: common_vendor.o(handleTouchMove),

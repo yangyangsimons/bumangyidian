@@ -249,18 +249,18 @@
   }
   // 装饰图片位置常量
   const DECORATION_POSITION = {
-    x: 0,
-    y: 190,
-    width: 745,
-    height: 800,
+    x: 15,
+    y: 215,
+    width: 715,
+    height: 755,
   }
 
   // 相框位置常量（用户照片区域，保持不变）
   const FRAME_POSITION = {
     x: 115,
-    y: 260,
-    width: 540,
-    height: 610,
+    y: 275,
+    width: 543,
+    height: 550,
   }
 
   // 贴纸相关数据
@@ -277,6 +277,18 @@
     'https://mang.5gradio.com.cn/static/enrollment/stick-9.png',
     'https://mang.5gradio.com.cn/static/enrollment/stick-10.png',
   ])
+  // const stickerList = ref([
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-1.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-2.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-3.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-4.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-5.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-6.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-7.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-8.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-9.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-10.png',
+  // ])
 
   // 计算当前贴纸路径
   const currentStickerSrc = computed(() => {
@@ -335,12 +347,12 @@
   // 学校位置常量
   const SCHOOL_POSITION = {
     x: 350,
-    y: 840,
+    y: 830,
   }
   // 时间位置常量
   const TIME_POSITION = {
     x: 350,
-    y: 800,
+    y: 790,
   }
 
   // 触摸相关数据
@@ -612,10 +624,10 @@
     const scaledHeight = imageHeight.value * totalScale
 
     // 其余计算保持不变...
-    const clipTop = 0.13
+    const clipTop = 0.15
     const clipRight = 0.125
-    const clipBottom = 0.15
-    const clipLeft = 0.105
+    const clipBottom = 0.17
+    const clipLeft = 0.12
 
     const containerWidth = frameBounds.value.width
     const containerHeight = frameBounds.value.height
@@ -840,9 +852,9 @@
 
     // 获取实际的相框区域
     const clipTop = 0.15
-    const clipRight = 0.135
+    const clipRight = 0.13
     const clipBottom = 0.17
-    const clipLeft = 0.125
+    const clipLeft = 0.12
 
     const screenContainerWidth = frameBounds.value.width
     const screenContainerHeight = frameBounds.value.height
@@ -970,7 +982,7 @@
     // 5. 绘制二维码
     if (localQrCodePath.value) {
       const qrSize = 120 // 二维码大小
-      ctx.drawImage(localQrCodePath.value, 45, 1040, qrSize, qrSize)
+      ctx.drawImage(localQrCodePath.value, 46, 1050, qrSize, qrSize)
       console.log('绘制二维码:', localQrCodePath.value, 'at position: 75, 1075')
     } else {
       console.warn('二维码图片未下载，跳过绘制')
@@ -1023,18 +1035,39 @@
     ctx.fillText(currentTImeText, 0, 0)
     ctx.restore() // 恢复状态，避免影响后续绘制
 
-    //  绘制学校文字（带5度旋转）
+    //  绘制学校文字（带5度旋转，支持换行）
     ctx.save() // 保存当前状态
     ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y) // 移动到文字位置
     ctx.rotate((5 * Math.PI) / 180) // 旋转5度（弧度 = 角度 * π / 180）
     ctx.setFillStyle('#8AE0E8')
-    ctx.setFontSize(28)
     ctx.setTextAlign('left')
     ctx.setTextBaseline('middle')
 
     const schoolText = `${schoolName.value}`
     console.log('开始画学校了学校名称:', schoolText)
-    ctx.fillText(schoolText, 0, 0) // 在原点绘制，因为已经translate了
+
+    // 判断学校名称长度，决定是否换行和字体大小
+    if (schoolText.length > 10) {
+      // 超过10个字，使用24号字体并换行
+      ctx.setFontSize(24)
+
+      // 将文字分成两行，前10个字一行，剩余的字第二行
+      const firstLine = schoolText.substring(0, 10)
+      const secondLine = schoolText.substring(10)
+
+      // 绘制第一行
+      ctx.fillText(firstLine, 0, -12) // 向上偏移12px
+
+      // 绘制第二行
+      if (secondLine.length > 0) {
+        ctx.fillText(secondLine, 0, 12) // 向下偏移12px
+      }
+    } else {
+      // 10个字以内，使用原来的28号字体，单行显示
+      ctx.setFontSize(28)
+      ctx.fillText(schoolText, 0, 0) // 在原点绘制，因为已经translate了
+    }
+
     ctx.restore() // 恢复状态，避免影响后续绘制
 
     // 5. 执行绘制并保存
