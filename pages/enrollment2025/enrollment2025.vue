@@ -472,16 +472,6 @@
       }
     }
     console.log('当前用户信息:', userInfo)
-    const rest = await request(`${baseUrl}/user/count_new_term_activity`, 'get')
-    if (rest.code === 0) {
-      userCount.value = rest.data.count
-      console.log('当前参与人数:', userCount.value)
-    } else {
-      uni.showToast({
-        title: '获取参与人数失败',
-        icon: 'none',
-      })
-    }
     // 获取当前时间
     const now = new Date()
     const year = now.getFullYear()
@@ -905,6 +895,7 @@
 
   // 新的下载图片函数
   const downloadImage = () => {
+    console.log('开始下载图片')
     if (userImage.value === '') {
       uni.showToast({
         title: '请选择照片',
@@ -1135,14 +1126,33 @@
     uni.showModal({
       title: '提示',
       content: '是否立即保存你的青春高光时刻？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          downloadImage() // 使用新的downloadImage函数
+          // 使用新的downloadImage函数
           // 生成入学通知书发送请求给后端后端录入
           request(`${baseUrl}/user/update_new_term_activity`, 'POST', {})
-            .then((response) => {
+            .then(async (response) => {
               if (response.code === 0) {
                 console.log('入学通知书生成记录成功')
+                //只有当入学通知书生成记录成功后才获取报道数
+                const userInfo = await request(
+                  `${baseUrl}/user/user_info`,
+                  'GET'
+                )
+                if (userInfo.code !== 0) {
+                  uni.showToast({
+                    title: '获取用户信息失败',
+                    icon: 'none',
+                  })
+                  return
+                } else {
+                  // 获取报道数
+                  userCount.value = userInfo.data.report_idx || 8888
+                }
+                console.log('当前用户信息:', userInfo)
+
+                downloadImage()
+
                 // 订阅消息
                 wx.requestSubscribeMessage({
                   tmplIds: ['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'], // 需要下发的订阅消息模板id数组

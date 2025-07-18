@@ -246,16 +246,6 @@ const _sfc_main = {
         }
       }
       common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:474", "当前用户信息:", userInfo);
-      const rest = await utils_request.request(`${utils_config.baseUrl}/user/count_new_term_activity`, "get");
-      if (rest.code === 0) {
-        userCount.value = rest.data.count;
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:478", "当前参与人数:", userCount.value);
-      } else {
-        common_vendor.index.showToast({
-          title: "获取参与人数失败",
-          icon: "none"
-        });
-      }
       const now = /* @__PURE__ */ new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -412,21 +402,21 @@ const _sfc_main = {
           content: "登录后体验完整功能",
           success: async (res) => {
             if (res.confirm) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:712", "用户点击确定");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:702", "用户点击确定");
               setTimeout(() => {
                 common_vendor.index.reLaunch({
                   url: "/pages/login/login"
                 });
               }, 300);
             } else if (res.cancel) {
-              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:720", "用户点击取消");
+              common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:710", "用户点击取消");
             }
           }
         });
         return;
       }
       if (userImage.value) {
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:727", "已经选择过图片，无法再次选择", userImage.value);
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:717", "已经选择过图片，无法再次选择", userImage.value);
         return;
       }
       common_vendor.index.chooseImage({
@@ -469,7 +459,7 @@ const _sfc_main = {
           const scaleX = containerWidth / imgWidth;
           const scaleY = containerHeight / imgHeight;
           initialScale.value = Math.max(scaleX, scaleY);
-          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:787", "初始缩放计算:", {
+          common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:777", "初始缩放计算:", {
             containerSize: [containerWidth, containerHeight],
             imageSize: [imgWidth, imgHeight],
             initialScale: initialScale.value
@@ -548,6 +538,7 @@ const _sfc_main = {
       };
     };
     const downloadImage = () => {
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:898", "开始下载图片");
       if (userImage.value === "") {
         common_vendor.index.showToast({
           title: "请选择照片",
@@ -623,9 +614,9 @@ const _sfc_main = {
       if (localQrCodePath.value) {
         const qrSize = 120;
         ctx.drawImage(localQrCodePath.value, 46, 1050, qrSize, qrSize);
-        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:986", "绘制二维码:", localQrCodePath.value, "at position: 75, 1075");
+        common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:977", "绘制二维码:", localQrCodePath.value, "at position: 75, 1075");
       } else {
-        common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:988", "二维码图片未下载，跳过绘制");
+        common_vendor.index.__f__("warn", "at pages/enrollment2025/enrollment2025.vue:979", "二维码图片未下载，跳过绘制");
       }
       ctx.setTextAlign("left");
       ctx.setTextBaseline("middle");
@@ -666,7 +657,7 @@ const _sfc_main = {
       ctx.setTextAlign("left");
       ctx.setTextBaseline("middle");
       const schoolText = `${schoolName.value}`;
-      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1047", "开始画学校了学校名称:", schoolText);
+      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1038", "开始画学校了学校名称:", schoolText);
       if (schoolText.length > 10) {
         ctx.setFontSize(24);
         const firstLine = schoolText.substring(0, 10);
@@ -719,7 +710,7 @@ const _sfc_main = {
             });
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1115", "生成图片失败:", error);
+            common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1106", "生成图片失败:", error);
             common_vendor.index.showToast({
               title: "生成图片失败",
               icon: "none"
@@ -739,33 +730,47 @@ const _sfc_main = {
       common_vendor.index.showModal({
         title: "提示",
         content: "是否立即保存你的青春高光时刻？",
-        success: (res) => {
+        success: async (res) => {
           if (res.confirm) {
-            downloadImage();
-            utils_request.request(`${utils_config.baseUrl}/user/update_new_term_activity`, "POST", {}).then((response) => {
+            utils_request.request(`${utils_config.baseUrl}/user/update_new_term_activity`, "POST", {}).then(async (response) => {
               if (response.code === 0) {
-                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1145", "入学通知书生成记录成功");
+                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1136", "入学通知书生成记录成功");
+                const userInfo = await utils_request.request(
+                  `${utils_config.baseUrl}/user/user_info`,
+                  "GET"
+                );
+                if (userInfo.code !== 0) {
+                  common_vendor.index.showToast({
+                    title: "获取用户信息失败",
+                    icon: "none"
+                  });
+                  return;
+                } else {
+                  userCount.value = userInfo.data.report_idx || 8888;
+                }
+                common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1152", "当前用户信息:", userInfo);
+                downloadImage();
                 common_vendor.wx$1.requestSubscribeMessage({
                   tmplIds: ["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"],
                   // 需要下发的订阅消息模板id数组
                   success(res2) {
                     if (res2["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"] === "accept") {
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1154", "用户同意订阅", res2);
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1164", "用户同意订阅", res2);
                       const openid = res2["HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s"];
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1158", "用户的 openid:", openid);
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1168", "用户的 openid:", openid);
                     } else {
-                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1161", "用户拒绝订阅");
+                      common_vendor.index.__f__("log", "at pages/enrollment2025/enrollment2025.vue:1171", "用户拒绝订阅");
                     }
                   },
                   fail(err) {
-                    common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1165", err);
+                    common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1175", err);
                   }
                 });
               } else {
-                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1169", "入学通知书生成记录失败:", response.message);
+                common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1179", "入学通知书生成记录失败:", response.message);
               }
             }).catch((error) => {
-              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1173", "请求失败:", error);
+              common_vendor.index.__f__("error", "at pages/enrollment2025/enrollment2025.vue:1183", "请求失败:", error);
             });
           }
         }
