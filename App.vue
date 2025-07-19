@@ -95,8 +95,9 @@
       //下载字体
       uni.loadFontFace({
         global: true,
-        family: 'SmileySans-Oblique',
-        source: 'https://mang.5gradio.com.cn/static/SmileySans-Oblique.ttf',
+        family: 'AlibabaPuHuiTi',
+        source:
+          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/ttf/AlibabaPuHuiTi-2-55-Regular.ttf',
         success: (result) => {
           console.log('字体加载成功', result)
         },

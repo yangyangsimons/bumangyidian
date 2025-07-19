@@ -88,10 +88,12 @@
               ></view>
               <!-- 新增：当前进度指示器 -->
             </view>
-            <view
-              class="progress-indicator"
-              :style="{ bottom: indicatorPosition + '%' }"
-            ></view>
+            <view class="indicator-container">
+              <view
+                class="progress-indicator"
+                :style="{ bottom: indicatorPosition + '%' }"
+              ></view>
+            </view>
           </view>
 
           <!-- 右侧奖励 -->
@@ -121,14 +123,18 @@
             <!-- 文字描述区域（固定不动） -->
             <view class="reward-texts">
               <view
-                v-for="(reward, index) in rewards"
+                v-for="(reward, index) in rewards.slice(0, 5)"
                 :key="index"
                 class="reward-text-item"
                 :class="{
                   unlocked: currentParticipants >= stages[index].target,
                 }"
               >
-                <text class="reward-desc">{{ reward.desc }}</text>
+                <rich-text
+                  class="reward-desc"
+                  :nodes="reward.desc"
+                  >{{
+                }}</rich-text>
               </view>
             </view>
           </view>
@@ -138,7 +144,7 @@
 
     <!-- 底部部分 -->
     <view class="footer-section">
-      <text class="disclaimer">{{ disclaimerText }}</text>
+      <rich-text class="disclaimer" :nodes="disclaimerHtml"></rich-text>
       <view class="share-btn" @click="handleShare">
         <image src="../../static/enrollment/share-nav-btn.png"></image>
       </view>
@@ -152,16 +158,22 @@
   import { baseUrl } from '@/utils/config.js'
   import request from '@/utils/request.js'
 
-  const disclaimerText = ref(
-    `参与“不芒一点”分享活动，赢取惊喜好礼！
-        活动达成指定参与人数，即解锁对应奖池： 
-        • 满1000人，前1000位用户可获得9.9元好礼； 
-        • 满5000人，抽50位送芒果TV半年卡； 
-        • 满1万人，抽50位送芒果TV大会员；
-        • 满2万人，抽20位送芒果综艺录制名额； 
-        • 满5万人，抽5位送芒果跨年演唱会门票！
-        除1000人奖励外，其他奖项均从所有参与者中随机抽取。
-        奖品兑换预计8月下旬开放，请关注服务信息推送，或在不芒一点2.0上线后，前往“我的-积分商城”领取，奖品以实际发放为准，活动最终解释权归主办方所有。`
+  const disclaimerHtml = ref(
+    `&nbsp;参与"不芒一点"分享活动，赢取惊喜好礼！<br/>
+&nbsp;活动达成指定参与人数，即解锁对应奖池：<br/>
+&nbsp;• 满1000人，前1000位用户可获得18元"楂堆"山楂莓莓饮品；<br/>
+&nbsp;• 满5000人，抽50位送芒果tv季卡会员；<br/>
+&nbsp;• 满1万人，抽50位送芒果tv年卡会员；<br/>
+&nbsp;• 满2万人，抽20位送芒果综艺录制名额；<br/>
+&nbsp;• 满5万人，抽5位送芒果跨年演唱会门票！<br/>
+&nbsp;除1000人奖励外，其他奖项均从所有参与者中随机抽取。<br/><br/>
+
+「活动时间」<br/>
+&nbsp;2025年7月30日-9月15日<br/>
+「关于奖品兑换」<br/>
+&nbsp;奖品兑换预计8月下旬开放，请关注服务信息推送，或在<span style="color: #A7EE27;">"不芒一点"后续版本更新后</span>,<br/>
+&nbsp;前往"我的-积分商城"领取，奖品以实际发放为准，关注「不芒一点」微信公众号了<br/>
+&nbsp;解更多相关信息，活动最终解释权归主办方所有。`
   )
   const indicatorPosition = computed(() => {
     const progress = progressHeight.value
@@ -177,7 +189,9 @@
   })
   const debugMode = ref(false) // 调试完成后设为false
   const testProgress = () => {
-    const testValues = [0, 1000, 5000, 10000, 20000, 50000]
+    const testValues = [
+      0, 300, 500, 800, 1000, 1100, 1200, 1500, 3000, 5000, 10000, 50000,
+    ]
     const currentIndex = testValues.indexOf(currentParticipants.value)
     const nextIndex = (currentIndex + 1) % testValues.length
     currentParticipants.value = testValues[nextIndex]
@@ -236,24 +250,28 @@
   // 奖励配置
   const rewards = ref([
     {
+      image: '../../static/enrollment/reward/stage-6.png',
+      desc: `18元“楂堆”山楂莓莓饮品 (1000份)`,
+    },
+    {
       image: '../../static/enrollment/reward/stage-1.jpg',
-      desc: '9.9元好礼',
+      desc: `芒果tv季卡会员<br/>(50份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-2.jpg',
-      desc: '芒果tv季卡会员',
+      desc: `芒果tv年卡会员<br/>(50份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-3.jpg',
-      desc: '芒果tv年卡会员',
+      desc: `芒果综艺录制名额<br/>(20份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-4.jpg',
-      desc: '芒果综艺录制名额',
+      desc: `芒果跨年权益<br/>(5份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-5.jpg',
-      desc: '芒果跨年权益',
+      desc: '11',
     },
   ])
 
@@ -343,7 +361,7 @@
     // people-stages中第一个stage-item距离顶部的距离是50rpx
     // progress-track总高度是470rpx
     // 所以偏移百分比应该是: (50rpx / 470rpx) * 100% = 10.64%
-    const peopleStagesPaddingTop = 15 // rpx
+    const peopleStagesPaddingTop = 20 // rpx
     const progressTrackHeight = 470 // rpx
     const offsetPercentage =
       (peopleStagesPaddingTop / progressTrackHeight) * 100

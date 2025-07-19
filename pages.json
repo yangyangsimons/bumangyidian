@@ -23,16 +23,16 @@
 			}
 		},
 		{
-			"path": "pages/hello/hello",
+			"path": "pages/enrollment2025/enrollment2025",
 			"style": {
-				"navigationBarTitleText": "不芒一点",
+				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/enrollment2025/enrollment2025",
+			"path": "pages/hello/hello",
 			"style": {
-				"navigationBarTitleText": "",
+				"navigationBarTitleText": "不芒一点",
 				"navigationStyle": "custom"
 			}
 		},
@@ -42,13 +42,6 @@
 				"navigationBarTitleText": ""
 			}
 		},
-		// {
-		// 	"path": "pages/enrollment/enrollment",
-		// 	"style": {
-		// 		"navigationBarTitleText": "",
-		// 		"navigationStyle": "custom"
-		// 	}
-		// },
 		{
 			"path": "pages/login/login",
 			"style": {

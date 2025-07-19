@@ -67,7 +67,7 @@
         </view>
       </view>
       <view class="tips" @tap="chooseImage" v-if="!userImage">
-        点击上传照片，左右滑动切换相框</view
+        点击上传照片</view
       >
 
       <!-- 用户图片显示区域 -->
@@ -249,18 +249,18 @@
   }
   // 装饰图片位置常量
   const DECORATION_POSITION = {
-    x: 35,
+    x: 15,
     y: 215,
-    width: 690,
-    height: 735,
+    width: 715,
+    height: 755,
   }
 
   // 相框位置常量（用户照片区域，保持不变）
   const FRAME_POSITION = {
-    x: 140,
-    y: 280,
-    width: 505,
-    height: 500,
+    x: 115,
+    y: 275,
+    width: 543,
+    height: 550,
   }
 
   // 贴纸相关数据
@@ -277,6 +277,18 @@
     'https://mang.5gradio.com.cn/static/enrollment/stick-9.png',
     'https://mang.5gradio.com.cn/static/enrollment/stick-10.png',
   ])
+  // const stickerList = ref([
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-1.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-2.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-3.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-4.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-5.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-6.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-7.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-8.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-9.png',
+  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-10.png',
+  // ])
 
   // 计算当前贴纸路径
   const currentStickerSrc = computed(() => {
@@ -328,19 +340,19 @@
 
   // 文字位置常量
   const TEXT_POSITION = {
-    x: 552,
+    x: 445,
     y: 1210,
   }
 
   // 学校位置常量
   const SCHOOL_POSITION = {
-    x: 340,
-    y: 805,
+    x: 350,
+    y: 830,
   }
   // 时间位置常量
   const TIME_POSITION = {
-    x: 340,
-    y: 775,
+    x: 350,
+    y: 790,
   }
 
   // 触摸相关数据
@@ -460,16 +472,6 @@
       }
     }
     console.log('当前用户信息:', userInfo)
-    const rest = await request(`${baseUrl}/user/count_new_term_activity`, 'get')
-    if (rest.code === 0) {
-      userCount.value = rest.data.count
-      console.log('当前参与人数:', userCount.value)
-    } else {
-      uni.showToast({
-        title: '获取参与人数失败',
-        icon: 'none',
-      })
-    }
     // 获取当前时间
     const now = new Date()
     const year = now.getFullYear()
@@ -613,9 +615,9 @@
 
     // 其余计算保持不变...
     const clipTop = 0.15
-    const clipRight = 0.135
+    const clipRight = 0.125
     const clipBottom = 0.17
-    const clipLeft = 0.125
+    const clipLeft = 0.12
 
     const containerWidth = frameBounds.value.width
     const containerHeight = frameBounds.value.height
@@ -840,9 +842,9 @@
 
     // 获取实际的相框区域
     const clipTop = 0.15
-    const clipRight = 0.135
+    const clipRight = 0.13
     const clipBottom = 0.17
-    const clipLeft = 0.125
+    const clipLeft = 0.12
 
     const screenContainerWidth = frameBounds.value.width
     const screenContainerHeight = frameBounds.value.height
@@ -893,6 +895,7 @@
 
   // 新的下载图片函数
   const downloadImage = () => {
+    console.log('开始下载图片')
     if (userImage.value === '') {
       uni.showToast({
         title: '请选择照片',
@@ -969,21 +972,46 @@
     }
     // 5. 绘制二维码
     if (localQrCodePath.value) {
-      const qrSize = 100 // 二维码大小
-      ctx.drawImage(localQrCodePath.value, 65, 1075, qrSize, qrSize)
+      const qrSize = 120 // 二维码大小
+      ctx.drawImage(localQrCodePath.value, 46, 1050, qrSize, qrSize)
       console.log('绘制二维码:', localQrCodePath.value, 'at position: 75, 1075')
     } else {
       console.warn('二维码图片未下载，跳过绘制')
     }
 
     // 4. 绘制用户数量文字
-    ctx.setFillStyle('#cdf91d')
-    ctx.setFontSize(25) // 设置字体大小
-    ctx.setTextAlign('left') // 改为左对齐，因为给的是左上角坐标
-    ctx.setTextBaseline('middle') // 设置文本基线为中间
+    ctx.setTextAlign('left')
+    ctx.setTextBaseline('middle')
 
-    const countText = `${userCount.value}`
-    ctx.fillText(countText, TEXT_POSITION.x, TEXT_POSITION.y)
+    const beforeText = '我是2025级第'
+    const countValueText = userCount.value.toString()
+    const afterText = '位签到新生'
+
+    // 分别测量不同字体大小的文字宽度
+    ctx.setFontSize(20)
+    const beforeWidth = ctx.measureText(beforeText).width
+
+    ctx.setFontSize(30)
+    const countWidth = ctx.measureText(countValueText).width
+
+    // 绘制前半部分（白色，字体20）
+    ctx.setFillStyle('#ffffff')
+    ctx.setFontSize(20)
+    ctx.fillText(beforeText, TEXT_POSITION.x, TEXT_POSITION.y)
+
+    // 绘制数字部分（绿色，字体30）
+    ctx.setFillStyle('#cdf91d')
+    ctx.setFontSize(30)
+    ctx.fillText(countValueText, TEXT_POSITION.x + beforeWidth, TEXT_POSITION.y)
+
+    // 绘制后半部分（白色，字体20）
+    ctx.setFillStyle('#ffffff')
+    ctx.setFontSize(20)
+    ctx.fillText(
+      afterText,
+      TEXT_POSITION.x + beforeWidth + countWidth,
+      TEXT_POSITION.y
+    )
 
     // . 绘制时间文字
     ctx.save() // 保存当前状态
@@ -998,18 +1026,39 @@
     ctx.fillText(currentTImeText, 0, 0)
     ctx.restore() // 恢复状态，避免影响后续绘制
 
-    //  绘制学校文字（带5度旋转）
+    //  绘制学校文字（带5度旋转，支持换行）
     ctx.save() // 保存当前状态
     ctx.translate(SCHOOL_POSITION.x, SCHOOL_POSITION.y) // 移动到文字位置
     ctx.rotate((5 * Math.PI) / 180) // 旋转5度（弧度 = 角度 * π / 180）
-    ctx.setFillStyle('#aaa')
-    ctx.setFontSize(28)
+    ctx.setFillStyle('#8AE0E8')
     ctx.setTextAlign('left')
     ctx.setTextBaseline('middle')
 
     const schoolText = `${schoolName.value}`
     console.log('开始画学校了学校名称:', schoolText)
-    ctx.fillText(schoolText, 0, 0) // 在原点绘制，因为已经translate了
+
+    // 判断学校名称长度，决定是否换行和字体大小
+    if (schoolText.length > 10) {
+      // 超过10个字，使用24号字体并换行
+      ctx.setFontSize(24)
+
+      // 将文字分成两行，前10个字一行，剩余的字第二行
+      const firstLine = schoolText.substring(0, 10)
+      const secondLine = schoolText.substring(10)
+
+      // 绘制第一行
+      ctx.fillText(firstLine, 0, -12) // 向上偏移12px
+
+      // 绘制第二行
+      if (secondLine.length > 0) {
+        ctx.fillText(secondLine, 0, 12) // 向下偏移12px
+      }
+    } else {
+      // 10个字以内，使用原来的28号字体，单行显示
+      ctx.setFontSize(28)
+      ctx.fillText(schoolText, 0, 0) // 在原点绘制，因为已经translate了
+    }
+
     ctx.restore() // 恢复状态，避免影响后续绘制
 
     // 5. 执行绘制并保存
@@ -1035,7 +1084,7 @@
 
               uni.showModal({
                 title: '提示',
-                content: '入学通知书已保存到相册，快去分享给你的朋友吧！',
+                content: '已保存到相册，快去分享给你的朋友吧！',
                 showCancel: false,
                 confirmText: '知道了',
                 success: (modalRes) => {
@@ -1076,15 +1125,34 @@
     }
     uni.showModal({
       title: '提示',
-      content: '是否立即保存入学通知书？',
-      success: (res) => {
+      content: '是否立即保存你的青春高光时刻？',
+      success: async (res) => {
         if (res.confirm) {
-          downloadImage() // 使用新的downloadImage函数
+          // 使用新的downloadImage函数
           // 生成入学通知书发送请求给后端后端录入
           request(`${baseUrl}/user/update_new_term_activity`, 'POST', {})
-            .then((response) => {
+            .then(async (response) => {
               if (response.code === 0) {
                 console.log('入学通知书生成记录成功')
+                //只有当入学通知书生成记录成功后才获取报道数
+                const userInfo = await request(
+                  `${baseUrl}/user/user_info`,
+                  'GET'
+                )
+                if (userInfo.code !== 0) {
+                  uni.showToast({
+                    title: '获取用户信息失败',
+                    icon: 'none',
+                  })
+                  return
+                } else {
+                  // 获取报道数
+                  userCount.value = userInfo.data.report_idx || 8888
+                }
+                console.log('当前用户信息:', userInfo)
+
+                downloadImage()
+
                 // 订阅消息
                 wx.requestSubscribeMessage({
                   tmplIds: ['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'], // 需要下发的订阅消息模板id数组

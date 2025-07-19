@@ -130,21 +130,24 @@
         z-index: 3;
     }
     .school {
+        // border: 1px solid red;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
         position: absolute;
-        top: 74%;
-        left: 43%;
+        top: 72%;
+        left: 44%;
         transform: rotate(5deg);
         color: #aaaaaa;
         font-size: 18rpx;
-        text-align: center;
-        white-space: nowrap;
 
         .school-name {
+            text-wrap: wrap;
+            width: 80%;
+            color: #8ae0e8;
             font-weight: 600;
-            font-size: 35rpx;
+            font-size: 30rpx;
+            text-align: left;
         }
     }
 
