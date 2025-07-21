@@ -29,9 +29,12 @@
           <view class="checkin">
             <!-- <image class="checkin-icon"></image> -->
             <view class="checkin-text">已签到{{ 26 }}天</view>
+            <view class="checkin-points">积分：{{ 26 }}</view>
           </view>
+
           <view class="checkin-btn">
             <image class="checkin-btn-bg"></image>
+            <text>签到</text>
           </view>
         </view>
       </view>

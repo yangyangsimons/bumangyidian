@@ -9,14 +9,14 @@
 			}
 		},
 		{
-			"path": "pages/index/index",
+			"path": "pages/lottery/lottery",
 			"style": {
 				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/lottery/lottery",
+			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
@@ -59,13 +59,36 @@
 		{
 			"path": "pages/agreement/agreement",
 			"style": {
-				"navigationBarTitleText": ""
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/ad/ad",
 			"style": {
-				"navigationBarTitleText": ""
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/activity/activity",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/interaction/interaction",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
 			}
 		}
 	],
@@ -83,11 +106,11 @@
 		"backgroundColor": "#ffffff",
 		"list": [
 			{
-				"pagePath": "pages/hello/hello",
+				"pagePath": "pages/home/home",
 				"text": "首页"
 			},
 			{
-				"pagePath": "pages/enrollment2025/enrollment2025",
+				"pagePath": "pages/interaction/interaction",
 				"text": "互动"
 			},
 			{
@@ -95,11 +118,11 @@
 				"text": "主页"
 			},
 			{
-				"pagePath": "pages/lottery/lottery",
+				"pagePath": "pages/activity/activity",
 				"text": "活动"
 			},
 			{
-				"pagePath": "pages/loading/loading",
+				"pagePath": "pages/my/my",
 				"text": "我的"
 			}
 		]
