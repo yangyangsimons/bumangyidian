@@ -153,7 +153,12 @@
 </template>
 
 <script setup>
-  import { onShow, onHide } from '@dcloudio/uni-app'
+  import {
+    onShow,
+    onHide,
+    onShareAppMessage,
+    onShareTimeline,
+  } from '@dcloudio/uni-app'
   import { ref, computed, onMounted, onUnmounted } from 'vue'
   import { baseUrl } from '@/utils/config.js'
   import request from '@/utils/request.js'
@@ -373,6 +378,24 @@
   const handleShare = () => {
     uni.navigateTo({ url: '/pages/enrollment2025/enrollment2025' })
   }
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `湖南见面礼已派件！晒高光时刻赢芒果跨年`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/lottery/lottery',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `湖南见面礼已派件！晒高光时刻赢芒果跨年`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/lottery/lottery',
+    }
+  })
 </script>
 
 <style lang="scss" scoped>

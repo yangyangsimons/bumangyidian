@@ -140,7 +140,12 @@
 
 <script setup>
   import { ref, onMounted, computed, onUnmounted } from 'vue'
-  import { onShow, onHide } from '@dcloudio/uni-app'
+  import {
+    onShow,
+    onHide,
+    onShareAppMessage,
+    onShareTimeline,
+  } from '@dcloudio/uni-app'
   import EnrollFont from '@/components/enrollFont/enrollFont.vue'
   import { baseUrl } from '@/utils/config'
   import request from '@/utils/request.js'
@@ -277,18 +282,6 @@
     'https://mang.5gradio.com.cn/static/enrollment/stick-9.png',
     'https://mang.5gradio.com.cn/static/enrollment/stick-10.png',
   ])
-  // const stickerList = ref([
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-1.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-2.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-3.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-4.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-5.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-6.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-7.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-8.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-9.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-10.png',
-  // ])
 
   // 计算当前贴纸路径
   const currentStickerSrc = computed(() => {
@@ -1209,6 +1202,25 @@
       },
     })
   }
+
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `湖南见面礼已派件！晒高光时刻赢芒果跨年`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/lottery/lottery',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `湖南见面礼已派件！晒高光时刻赢芒果跨年`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/lottery/lottery',
+    }
+  })
 </script>
 
 <style lang="scss" scoped>
