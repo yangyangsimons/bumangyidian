@@ -66,7 +66,7 @@
       <view class="img-container">
         <swiper
           class="ad-swiper"
-          :indicator-dots="showDots"
+          :indicator-dots="false"
           :autoplay="autoplay"
           :interval="interval"
           :duration="duration"
@@ -133,6 +133,12 @@
   import { useToggleModelStore } from '../../stores/toggleModelStore'
   const showAd = ref(false)
   const adList = ref([])
+  // 轮播相关配置
+  const autoplay = computed(() => adList.value.length > 1) // 只有多于1个广告时才自动播放
+  const interval = ref(3000) // 轮播间隔时间（毫秒）
+  const duration = ref(300) // 滑动动画时长（毫秒）
+  const circular = computed(() => adList.value.length > 1) // 只有多于1个广告时才循环播放
+
   const showDots = ref(false)
   const toggleModelStore = useToggleModelStore()
   const sptime = ref(0)
@@ -519,6 +525,9 @@
       if (adRes.code == 0 && adRes.data.length > 0) {
         adList.value = adRes.data
         showAd.value = true
+        console.log(
+          `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+        )
       }
       // 获取当前主题
       const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')
