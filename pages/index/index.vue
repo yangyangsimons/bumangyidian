@@ -67,6 +67,7 @@
         <swiper
           class="ad-swiper"
           :indicator-dots="false"
+          :indicator-dots="false"
           :autoplay="autoplay"
           :interval="interval"
           :duration="duration"
@@ -133,12 +134,12 @@
   import { useToggleModelStore } from '../../stores/toggleModelStore'
   const showAd = ref(false)
   const adList = ref([])
+
   // 轮播相关配置
   const autoplay = computed(() => adList.value.length > 1) // 只有多于1个广告时才自动播放
   const interval = ref(3000) // 轮播间隔时间（毫秒）
   const duration = ref(300) // 滑动动画时长（毫秒）
   const circular = computed(() => adList.value.length > 1) // 只有多于1个广告时才循环播放
-
   const showDots = ref(false)
   const toggleModelStore = useToggleModelStore()
   const sptime = ref(0)
@@ -516,6 +517,28 @@
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
+
+      // // 模拟广告数据 - 临时使用，后端接口好了之后删除这部分
+      // const mockAdData = [
+      //   {
+      //     pic_url: '../../static/sex/female-select.png', // 随机图片1
+      //     activity_url: 'pages/lottery/lottery',
+      //   },
+      //   {
+      //     pic_url: '../../static/sex/female-unselect.png', // 随机图片2
+      //     activity_url: 'pages/enrollment2025/enrollment2025',
+      //   },
+      // ]
+
+      // // 临时使用模拟数据
+      // if (mockAdData.length > 0) {
+      //   adList.value = mockAdData
+      //   showAd.value = true
+      //   console.log(
+      //     `模拟广告数据 - 广告数量: ${mockAdData.length}, 自动轮播: ${autoplay.value}`
+      //   )
+      // }
+
       //从后端获取是否有广告
       const adRes = await request(
         `${baseUrl}/system/get_activity_notify`,
@@ -525,6 +548,9 @@
       if (adRes.code == 0 && adRes.data.length > 0) {
         adList.value = adRes.data
         showAd.value = true
+        console.log(
+          `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+        )
         console.log(
           `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
         )
