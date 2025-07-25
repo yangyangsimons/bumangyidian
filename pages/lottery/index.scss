@@ -41,15 +41,16 @@
     margin-top: 165rpx;
     position: relative;
     z-index: 3;
-    height: 60%;
+    height: 65%;
     padding-bottom: 5rpx;
     overflow: hidden;
+    padding-bottom: 20rpx;
 
     .header {
         // border: 1px solid #ddd;
         margin: 0 auto;
         width: 90%;
-        height: 35%;
+        height: 30%;
         padding: 10rpx 20rpx;
         box-sizing: border-box;
         .header-image {
@@ -74,7 +75,7 @@
 .progress-container {
     background-color: #597a4f;
     border-radius: 50rpx;
-    padding-top: 70rpx;
+    padding-top: 60rpx;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -83,9 +84,9 @@
         display: flex;
         justify-content: center;
         // margin-bottom: 20rpx;
-        gap: 235rpx;
+        gap: 245rpx;
         // border: 1px solid red;
-        margin-right: 65rpx;
+        margin-right: 60rpx;
 
         .left-title,
         .right-title {
@@ -101,7 +102,7 @@
     .progress-main {
         display: grid;
         grid-template-columns: 3fr 1fr 6fr;
-        min-height: 490rpx;
+        min-height: 600rpx;
         overflow-y: auto;
         // border: 1px solid red;
 
@@ -112,38 +113,42 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            height: 470rpx;
+            height: 550rpx;
             position: relative;
-            padding-top: 30rpx;
+            padding-top: 40rpx;
+            box-sizing: border-box;
+
             box-sizing: border-box;
 
             .stage-item {
-                // border: 1px solid #ddd;
+                width: 130rpx;
                 display: flex;
                 align-items: center;
                 height: 60rpx;
                 display: flex;
-                justify-content: center;
-                align-items: center;
+                justify-content: flex-end;
+                align-items: flex-start;
+                text-align: right;
+                // border: 1px solid #4d5a4a;
 
                 .stage-text {
-                    font-size: 28rpx;
+                    font-size: 26rpx;
                     color: #ffffff;
                     font-weight: 500;
                     transition: all 0.3s;
+                    text-align: right;
                 }
 
                 &.completed {
                     .stage-text {
                         color: #8de1cf;
-                        font-weight: bold;
                     }
                 }
             }
         }
 
         .progress-bar {
-            height: 500rpx;
+            height: 600rpx;
             flex: 0 0 100rpx;
             display: flex;
             flex-direction: column;
@@ -153,32 +158,57 @@
             // border: 1px solid red;
 
             .dot-container {
+                // border: 1px solid #ddd;
                 box-sizing: border-box;
-                padding-bottom: 70rpx;
-                padding-top: 30rpx;
+                // padding-top: 50rpx;
+                // margin-top: 20rpx;
                 position: absolute;
-                top: 0;
+                top: 10rpx;
                 left: 50%;
                 width: 5rpx;
-                height: 100%;
+                height: 570rpx;
                 transform: translateX(-50%);
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
                 align-items: center;
 
-                .dot {
+                .dot-outer {
+                    // border: 1px solid red;
                     width: 10rpx;
                     height: 10rpx;
-                    background-color: #a8b1a5;
                     border-radius: 50%;
-                    transition: background-color 0.3s;
+                    background-color: #ddd;
+                    &:nth-child(1) {
+                        position: absolute;
+                        top: 35rpx;
+                    }
+                    &:nth-child(2) {
+                        position: absolute;
+                        top: 120rpx;
+                    }
+                    &:nth-child(3) {
+                        position: absolute;
+                        top: 215rpx;
+                    }
+                    &:nth-child(4) {
+                        position: absolute;
+                        top: 300rpx;
+                    }
+                    &:nth-child(5) {
+                        position: absolute;
+                        top: 385rpx;
+                    }
+                    &:nth-child(6) {
+                        position: absolute;
+                        top: 500rpx;
+                    }
                 }
             }
             .progress-track {
                 transform: rotate(180deg);
                 width: 28rpx;
-                height: 470rpx;
+                height: 550rpx;
                 background: #4d5a4a;
                 border-radius: 20rpx;
                 position: relative;
@@ -199,7 +229,7 @@
                 top: 18rpx;
                 left: 0;
                 width: 100%;
-                height: 450rpx;
+                height: 550rpx;
                 // border: 1px solid red;
                 // box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
                 z-index: 100;
@@ -212,7 +242,6 @@
                     height: 30rpx;
                     background-color: #ffffff;
                     border-radius: 50%;
-                    // box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
                     transition: bottom 0.8s ease;
                     z-index: 100;
                 }
@@ -231,8 +260,8 @@
             flex: 1;
             display: grid;
             grid-template-columns: 1fr 2fr;
-            height: 470rpx;
-            padding-top: 30rpx;
+            height: 550rpx;
+            padding-top: 40rpx;
             box-sizing: border-box;
             .reward-images-container {
                 width: 100rpx; // 根据你的图片宽度调整
@@ -263,16 +292,16 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                height: 450rpx;
+                height: 100%;
                 .reward-text-item {
                     height: 60rpx; // 与图片项高度保持一致
-                    // border: 1px solid #ddd;
+
                     display: flex;
                     align-items: center;
 
                     .reward-desc {
                         white-space: wrap;
-                        font-size: 24rpx;
+                        font-size: 22rpx;
                         color: #ffffff;
                         font-weight: 500;
                     }
@@ -318,7 +347,7 @@
         color: #50634b;
         text-align: left;
         font-weight: 400;
-        height: 330rpx;
+        height: 230rpx;
     }
 
     .share-btn {
@@ -326,6 +355,7 @@
         width: 100%;
         margin: 0 auto;
         height: 80rpx;
+        margin-top: 10rpx;
         // border: 1px solid red;
         padding-right: 25rpx;
         box-sizing: border-box;

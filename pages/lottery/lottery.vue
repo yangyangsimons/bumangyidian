@@ -76,11 +76,24 @@
           <view class="progress-bar">
             <view class="progress-track">
               <view class="dot-container">
-                <view class="dot"></view>
-                <view class="dot"></view>
-                <view class="dot"></view>
-                <view class="dot"></view>
-                <view class="dot"></view>
+                <view class="dot-outer">
+                  <view class="dot"></view>
+                </view>
+                <view class="dot-outer">
+                  <view class="dot"></view>
+                </view>
+                <view class="dot-outer">
+                  <view class="dot"></view>
+                </view>
+                <view class="dot-outer">
+                  <view class="dot"></view>
+                </view>
+                <view class="dot-outer">
+                  <view class="dot"></view>
+                </view>
+                <view class="dot-outer">
+                  <view class="dot"></view>
+                </view>
               </view>
               <view
                 class="progress-fill"
@@ -123,7 +136,7 @@
             <!-- 文字描述区域（固定不动） -->
             <view class="reward-texts">
               <view
-                v-for="(reward, index) in rewards.slice(0, 5)"
+                v-for="(reward, index) in rewards.slice(0, 6)"
                 :key="index"
                 class="reward-text-item"
                 :class="{
@@ -166,18 +179,19 @@
   const disclaimerHtml = ref(
     `&nbsp;参与"不芒一点"分享活动，赢取惊喜好礼！<br/>
 &nbsp;活动达成指定参与人数，即解锁对应奖池：<br/>
+&nbsp;• 参与即享，所有参与的学生用户，可获得中国移动“超星校园卡”7月及8月免费使用权，后期每月28元。每月均含240G流量、300分钟通话、25元咪咕视频会员、音视频会员、吃喝玩乐代金券等特权福利。（后续将有专人联系确认使用）<br/>
 &nbsp;• 满1000人，前1000位用户可获得18元"楂堆"山楂莓莓饮品；<br/>
 &nbsp;• 满5000人，抽50位送芒果tv季卡会员；<br/>
 &nbsp;• 满1万人，抽50位送芒果tv年卡会员；<br/>
 &nbsp;• 满2万人，抽20位送芒果综艺录制名额；<br/>
-&nbsp;• 满5万人，抽5位送芒果跨年演唱会门票！<br/>
+&nbsp;• 满5万人，抽5位送芒果跨年晚会门票！<br/>
 &nbsp;除1000人奖励外，其他奖项均从所有参与者中随机抽取。<br/><br/>
 
 「活动时间」<br/>
 &nbsp;2025年7月30日-9月15日<br/>
 「关于奖品兑换」<br/>
-&nbsp;奖品兑换预计8月下旬开放，请关注服务信息推送，或在<span style="color: #A7EE27;">"不芒一点"后续版本更新后</span>,<br/>
-&nbsp;前往"我的-积分商城"领取，奖品以实际发放为准，关注「不芒一点」微信公众号了<br/>
+&nbsp;奖品兑换预计8月下旬开放，请关注服务信息推送，或在<span style="color: rgba(194,28,19);">"不芒一点"后续版本更新后</span>,<br/>
+&nbsp;前往"我的-积分商城"领取，奖品以实际发放为准，部分奖品将由工作人员电话联系确认兑奖信息，参与即表示您同意在兑奖环节接收相关联络。关注「不芒一点」微信公众号了<br/>
 &nbsp;解更多相关信息，活动最终解释权归主办方所有。`
   )
   const indicatorPosition = computed(() => {
@@ -245,6 +259,7 @@
 
   // 人数阶段配置
   const stages = ref([
+    { target: 0, label: '参与即享' },
     { target: 1000, label: '满1千' },
     { target: 5000, label: '满5千' },
     { target: 10000, label: '满1万' },
@@ -255,8 +270,12 @@
   // 奖励配置
   const rewards = ref([
     {
+      image: '../../static/enrollment/reward/stage-7.png',
+      desc: `暑期0元240G流量会员全家桶`,
+    },
+    {
       image: '../../static/enrollment/reward/stage-6.png',
-      desc: `18元“楂堆”山楂莓莓饮品 (1000份)`,
+      desc: `“楂堆”山楂莓莓饮品<br/>(1000份)`,
     },
     {
       image: '../../static/enrollment/reward/stage-1.jpg',
@@ -366,8 +385,8 @@
     // people-stages中第一个stage-item距离顶部的距离是50rpx
     // progress-track总高度是470rpx
     // 所以偏移百分比应该是: (50rpx / 470rpx) * 100% = 10.64%
-    const peopleStagesPaddingTop = 20 // rpx
-    const progressTrackHeight = 470 // rpx
+    const peopleStagesPaddingTop = 40 // rpx
+    const progressTrackHeight = 570 // rpx
     const offsetPercentage =
       (peopleStagesPaddingTop / progressTrackHeight) * 100
 

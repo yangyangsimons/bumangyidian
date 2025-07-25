@@ -151,6 +151,7 @@
   import request from '@/utils/request.js'
   import { useAudioPlayerStore } from '../../stores/audioPlayer'
 
+  const notiTemplateId = ref('')
   const localQrCodePath = ref('')
 
   // 下载二维码图片的函数
@@ -448,6 +449,17 @@
   // 生命周期
   onShow(async () => {
     console.log('Enrollment2025 页面已加载')
+    //获取微信通知模板id
+    const result = await request(
+      `${baseUrl}/user/get_wx_service_notify_template`,
+      'GET'
+    )
+    if (result.code === 0) {
+      notiTemplateId.value = result.data
+      console.log('获取微信通知模板ID成功:', notiTemplateId.value)
+    } else {
+      console.error('获取微信通知模板ID失败:', result.message)
+    }
     //当前用户的学校和报道位置
     const userInfo = await request(`${baseUrl}/user/user_info`, 'GET')
     if (userInfo.code !== 0) {
@@ -1148,16 +1160,12 @@
 
                 // 订阅消息
                 wx.requestSubscribeMessage({
-                  tmplIds: ['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'], // 需要下发的订阅消息模板id数组
+                  tmplIds: [notiTemplateId.value], // 需要下发的订阅消息模板id数组
                   success(res) {
-                    if (
-                      res['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'] ===
-                      'accept'
-                    ) {
+                    if (res[notiTemplateId.value] === 'accept') {
                       console.log('用户同意订阅', res)
                       // 将用户的 openid 发送给后端，以便后续发送服务通知
-                      const openid =
-                        res['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s']
+                      const openid = res[notiTemplateId.value]
                       console.log('用户的 openid:', openid)
                       // 这里可以将 openid 保存到数据库或者直接发送给后端
                     } else {

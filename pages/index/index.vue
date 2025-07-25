@@ -146,6 +146,27 @@
   const handleAdClose = () => {
     showAd.value = false
   }
+  onLoad(async (query) => {
+    console.log('onLoad主页面加载')
+    if (query && query.q) {
+      // 如果有query参数，表示从外部链接打开
+      console.log('从外部链接打开，query.q:', query.q)
+      const source = decodeURIComponent(query.q)
+      console.log('decode 之后的souceid:', source)
+      // 上报来源
+      const sourceReport = await request(
+        `${baseUrl}/track/source_total`,
+        'POST',
+        {
+          source_id: source,
+        }
+      )
+      console.log('上报来源结果:', sourceReport)
+    } else {
+      // 如果没有query参数，表示正常加载
+      console.log('正常加载主页面')
+    }
+  })
   const adNav = (adUrl) => {
     console.log('广告链接......:', adUrl)
 
@@ -516,27 +537,6 @@
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
-
-      // // 模拟广告数据 - 临时使用，后端接口好了之后删除这部分
-      // const mockAdData = [
-      //   {
-      //     pic_url: '../../static/sex/female-select.png', // 随机图片1
-      //     activity_url: 'pages/lottery/lottery',
-      //   },
-      //   {
-      //     pic_url: '../../static/sex/female-unselect.png', // 随机图片2
-      //     activity_url: 'pages/enrollment2025/enrollment2025',
-      //   },
-      // ]
-
-      // // 临时使用模拟数据
-      // if (mockAdData.length > 0) {
-      //   adList.value = mockAdData
-      //   showAd.value = true
-      //   console.log(
-      //     `模拟广告数据 - 广告数量: ${mockAdData.length}, 自动轮播: ${autoplay.value}`
-      //   )
-      // }
 
       //从后端获取是否有广告
       const adRes = await request(
