@@ -67,7 +67,6 @@
         <swiper
           class="ad-swiper"
           :indicator-dots="false"
-          :indicator-dots="false"
           :autoplay="autoplay"
           :interval="interval"
           :duration="duration"
