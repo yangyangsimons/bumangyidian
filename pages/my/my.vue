@@ -11,6 +11,11 @@
       title="我的"
     >
     </uni-nav-bar>
+    <image
+      class="bg"
+      src="../../static/hello-bg.png"
+      mode="scaleToFill"
+    ></image>
     <view class="header">
       <image class="avator" :src="avator" @click="changeAvator"></image>
 
@@ -21,25 +26,70 @@
             <view class="school">{{ school }}</view></view
           >
           <view class="setting">
-            <image src="../../static/setting.png" mode="scaleToFill" />
+            <image src="../../static/my/setting.png" mode="scaleToFill" />
           </view>
         </view>
 
         <view class="checkin-container">
           <view class="checkin">
-            <!-- <image class="checkin-icon"></image> -->
+            <image
+              class="checkin-icon"
+              src="../../static/my/checkin.png"
+              mode="scaleToFill"
+            ></image>
             <view class="checkin-text">已签到{{ 26 }}天</view>
-            <view class="checkin-points">积分：{{ 26 }}</view>
           </view>
-
+          <!-- points container -->
+          <view class="points">
+            <image
+              class="points-icon"
+              src="../../static/my/points.png"
+              mode="scaleToFill"
+            ></image>
+            <view class="checkin-points">积分 {{ 26 }}</view>
+          </view>
           <view class="checkin-btn">
-            <image class="checkin-btn-bg"></image>
+            <image
+              class="checkin-btn-icon"
+              src="../../static/my/checkin.png"
+            ></image>
             <text>签到</text>
           </view>
         </view>
       </view>
     </view>
-    <view class="main"></view>
+    <view class="main">
+      <view class="goods-head"
+        ><view class="title"
+          >积分好礼
+          <view class="bar"></view>
+        </view>
+        <view class="more"
+          ><view class="more-text">更多</view>
+          <image
+            class="more-icon"
+            src="../../static/my/more.png"
+            mode="scaleToFill"
+          ></image>
+        </view>
+      </view>
+      <view class="goods-main">
+        <!-- 这里显示商品列表 -->
+        <view
+          v-for="product in productsList"
+          :key="product.id"
+          class="product-item"
+        >
+          <image
+            :src="product.main_image"
+            mode="aspectFill"
+            class="product-pic"
+          ></image>
+          <view class="product-name">{{ product.name }}</view>
+          <view class="product-points">{{ product.points }}积分</view>
+        </view>
+      </view>
+    </view>
     <view class="footer"></view>
   </view>
 </template>
@@ -49,42 +99,172 @@
   import { onLoad, onUnload, onShow, onHide } from '@dcloudio/uni-app'
   import request from '@/utils/request'
   import { baseUrl } from '../../utils/config'
-  import { useWebSocketStore } from '@/stores/websocket'
-  import { useBarrageStore } from '../../stores/barrage'
-  import { useModelStore } from '../../stores/model'
-  // 导入音频播放器状态管理
-  import { useAudioPlayerStore } from '@/stores/audioPlayer'
-  import { useToggleModelStore } from '../../stores/toggleModelStore'
   import { dmReport } from '../../utils/report'
 
-  const modelStore = useModelStore()
-  const toggleModelStore = useToggleModelStore()
-  const wsStore = useWebSocketStore()
-  // 初始化音频播放器状态管理
-  const audioPlayerStore = useAudioPlayerStore()
-  // 初始化弹幕状态管理
-  const barrageStore = useBarrageStore()
-
-  const currentTone = ref(null)
-  const tones = ref([])
   const toneId = ref(null)
-  // 添加音频播放器引用
-  const audioPlayer = ref(null)
-  // 记录当前选中的音色ID
-  const selectedToneId = ref(null)
-  const currentTonePath = ref(null)
 
   //用户信息
   const user = ref(null)
   const userName = ref('') // 用户名
   const userSex = ref('') // 用户性别
-  const userAge = ref('') // 用户年龄
   const userMbti = ref('') // 用户MBTI类型
   const userMbtiShort = ref('') // 用户MBTI类型简称
   const avator = ref('') // 用户头像
   const sexSrc = ref('') // 用户性别图标路径
   const school = ref('湖南工商大学') // 用户学校
   const sptime = ref(0)
+
+  //商城信息相关
+  const productsList = ref([])
+  const allActiveProducts = ref([]) // 存储所有 is_active 为 true 的商品
+  const currentPage = ref(1) // 当前页码
+  const totalPages = ref(0) // 总页数
+  const isLoading = ref(false) // 是否正在加载
+
+  // 获取所有商品数据
+  const getAllProducts = async () => {
+    console.log('开始获取所有商品数据')
+    allActiveProducts.value = []
+    currentPage.value = 1
+
+    while (true) {
+      try {
+        console.log(`开始请求第${currentPage.value}页数据`)
+
+        const shopInfoRes = await request(
+          `${baseUrl}/shop_backend/api/products?page=${currentPage.value}`,
+          'get'
+        )
+
+        if (shopInfoRes.code == 200) {
+          console.log(`第${currentPage.value}页获取成功`)
+
+          const products = shopInfoRes.data?.products || []
+          const pagination = shopInfoRes.pagination || {}
+
+          totalPages.value = pagination.pages || 1
+
+          console.log(
+            '当前页:',
+            currentPage.value,
+            '总页数:',
+            totalPages.value,
+            '商品数量:',
+            products.length
+          )
+
+          // 收集所有 is_active 为 true 的商品
+          const activeProducts = products.filter(
+            (product) => product.is_active === true
+          )
+          allActiveProducts.value.push(...activeProducts)
+
+          console.log(
+            `第${currentPage.value}页活跃商品数量:`,
+            activeProducts.length
+          )
+
+          // 如果已经是最后一页，退出循环
+          if (currentPage.value >= totalPages.value) {
+            break
+          }
+
+          currentPage.value++
+        } else {
+          console.error('获取商城信息失败', shopInfoRes.message || '未知错误')
+          break
+        }
+      } catch (error) {
+        console.error('获取商城信息异常', error)
+        break
+      }
+    }
+
+    console.log('所有活跃商品收集完成，总数:', allActiveProducts.value.length)
+  }
+
+  // 筛选商品
+  const selectProducts = () => {
+    console.log('开始筛选商品')
+    productsList.value = []
+
+    // 第一步：筛选同时满足 is_active 和 is_recommended 为 true 的商品
+    const recommendedProducts = allActiveProducts.value.filter(
+      (product) => product.is_active === true && product.is_recommended === true
+    )
+
+    console.log('符合推荐条件的商品数量:', recommendedProducts.length)
+
+    // 添加推荐商品，最多8个
+    for (const product of recommendedProducts) {
+      if (productsList.value.length < 8) {
+        productsList.value.push(product)
+      } else {
+        break
+      }
+    }
+
+    console.log('添加推荐商品后，当前商品列表长度:', productsList.value.length)
+
+    // 第二步：如果推荐商品不足8个，补充其他活跃商品
+    if (productsList.value.length < 8) {
+      console.log('推荐商品不足8个，开始补充其他活跃商品')
+
+      // 获取已添加商品的ID列表，避免重复
+      const addedProductIds = productsList.value.map((p) => p.id)
+
+      // 筛选出还未添加的活跃商品
+      const remainingActiveProducts = allActiveProducts.value.filter(
+        (product) => !addedProductIds.includes(product.id)
+      )
+
+      console.log('剩余可补充的活跃商品数量:', remainingActiveProducts.length)
+
+      // 补充商品直到达到8个
+      for (const product of remainingActiveProducts) {
+        if (productsList.value.length < 8) {
+          productsList.value.push(product)
+        } else {
+          break
+        }
+      }
+    }
+
+    console.log('最终商品列表长度:', productsList.value.length)
+    console.log(
+      '最终商品列表:',
+      productsList.value.map((p) => ({
+        id: p.id,
+        name: p.name,
+        is_active: p.is_active,
+        is_recommended: p.is_recommended,
+        main_image: p.main_image,
+      }))
+    )
+  }
+
+  // 获取商城商品数据（主函数）
+  const getProducts = async () => {
+    if (isLoading.value) {
+      console.log('正在加载中，跳过重复请求')
+      return
+    }
+
+    try {
+      isLoading.value = true
+
+      // 先获取所有商品数据
+      await getAllProducts()
+
+      // 然后筛选商品
+      selectProducts()
+    } catch (error) {
+      console.error('获取商品数据失败', error)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // 更换头像
   const changeAvator = async () => {
     dmReport(
@@ -153,19 +333,8 @@
   }
 
   onShow(async () => {
-    // sptime.value = new Date().getTime()
-    // dmReport(
-    //   'pv',
-    //   {},
-    //   {
-    //     contents: [
-    //       {
-    //         page: 'userInfo',
-    //       },
-    //     ],
-    //   }
-    // )
     try {
+      // 获取用户信息
       const userInfoRes = await request(`${baseUrl}/user/user_info`, 'get')
       if (userInfoRes.code === 0) {
         console.log('获取用户信息成功', userInfoRes.data)
@@ -188,8 +357,18 @@
       } else {
         console.error('获取用户信息失败', userInfoRes.message)
       }
+
+      // 重置商品相关数据
+      productsList.value = []
+      allActiveProducts.value = []
+      currentPage.value = 1
+      totalPages.value = 0
+      isLoading.value = false
+
+      // 获取商城信息
+      await getProducts()
     } catch (error) {
-      console.error('打开弹窗失败', error)
+      console.error('页面初始化失败', error)
     }
   })
 </script>
