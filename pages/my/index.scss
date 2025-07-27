@@ -6,18 +6,20 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-
+    text {
+        z-index: 1;
+    }
     .bar {
         width: 130rpx;
         height: 12rpx;
         background: linear-gradient(90deg, rgba(211, 248, 79, 1) 0%, rgba(167, 238, 39, 1) 100%);
         border-radius: 6rpx;
         margin-top: -14rpx;
-        z-index: -1;
     }
 }
 
 .user-container {
+    box-sizing: border-box;
     position: fixed;
     height: 100%;
     display: flex;
@@ -28,13 +30,15 @@
     background-color: #00000025;
     font-family: "AlibabaPuHuiTi";
     padding-right: 0;
+    padding-bottom: 200rpx;
     .bg {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         z-index: -1;
+        background-size: cover;
     }
     // nav bar top style
     ::v-deep .uni-nav-bar-text {
@@ -174,16 +178,18 @@
     }
     .main {
         width: 100%;
-        padding: 30rpx 24rpx;
+        padding: 30rpx 24rpx 40rpx 24rpx;
         border: 1px solid red;
         background: rgba(255, 255, 255, 1);
         border-radius: 28rpx;
+
         .goods-head {
-            border: 1px solid blue;
+            // border: 1px solid blue;
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 40rpx;
             .title {
                 @include title-style;
             }
@@ -202,12 +208,14 @@
             }
         }
         .goods-main {
-            border: 1px solid green;
+            // border: 1px solid green;
             width: 100%;
-            height: 500rpx;
             display: grid;
-            grid-template-rows: 1fr 1fr;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(140rpx, 1fr));
+            grid-template-rows: repeat(auto-fill, 180rpx);
+            align-items: center;
+            justify-items: center;
+            row-gap: 40rpx;
             .product-item {
                 width: 140rpx;
                 height: 180rpx;
@@ -216,14 +224,64 @@
                 justify-content: center;
                 align-items: center;
                 position: relative;
-                .product-name {
-                    position: absolute;
+                font-size: 24rpx;
+                font-weight: 500;
+                .image-wrap {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    .product-name {
+                        position: absolute;
+                        width: 90%;
+                        bottom: 5rpx;
+                        // border: 1px solid blue;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .product-pic {
+                        border-radius: 24rpx;
+                        width: 140rpx;
+                        height: 140rpx;
+                    }
                 }
-                .product-pic {
-                    width: 140rpx;
-                    height: 140rpx;
+                .product-points {
+                    font-size: 24rpx;
+                    font-weight: 500;
+                    color: rgba(16, 18, 19, 1);
                 }
             }
+        }
+    }
+    .footer {
+        width: 100%;
+        padding: 30rpx 24rpx 40rpx 24rpx;
+        border: 1px solid red;
+        background: rgba(255, 255, 255, 1);
+        border-radius: 28rpx;
+        .footer-head {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40rpx;
+            .title {
+                @include title-style;
+            }
+        }
+        .footer-main {
+            width: 100%;
+            height: 200rpx;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24rpx;
+            font-weight: 500;
+            color: rgba(16, 18, 19, 1);
+            text-align: center;
         }
     }
 }

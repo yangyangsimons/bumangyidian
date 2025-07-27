@@ -11,11 +11,7 @@
       title="我的"
     >
     </uni-nav-bar>
-    <image
-      class="bg"
-      src="../../static/hello-bg.png"
-      mode="scaleToFill"
-    ></image>
+    <image class="bg" src="../../static/my/bg.png" mode="scaleToFill"></image>
     <view class="header">
       <image class="avator" :src="avator" @click="changeAvator"></image>
 
@@ -60,8 +56,8 @@
     </view>
     <view class="main">
       <view class="goods-head"
-        ><view class="title"
-          >积分好礼
+        ><view class="title">
+          <text>积分好礼</text>
           <view class="bar"></view>
         </view>
         <view class="more"
@@ -80,17 +76,29 @@
           :key="product.id"
           class="product-item"
         >
-          <image
-            :src="product.main_image"
-            mode="aspectFill"
-            class="product-pic"
-          ></image>
-          <view class="product-name">{{ product.name }}</view>
+          <view class="image-wrap">
+            <image
+              :src="product.main_image"
+              mode="aspectFill"
+              class="product-pic"
+            ></image>
+            <view class="product-name">{{ product.name }}</view>
+          </view>
+
           <view class="product-points">{{ product.points }}积分</view>
         </view>
       </view>
     </view>
-    <view class="footer"></view>
+    <view class="footer">
+      <view class="footer-head"
+        ><view class="title">
+          <text>我的互动</text>
+          <view class="bar"></view>
+        </view>
+      </view>
+      <view class="footer-main"> </view>
+    </view>
+    <tabbar :current="2" />
   </view>
 </template>
 
@@ -100,7 +108,7 @@
   import request from '@/utils/request'
   import { baseUrl } from '../../utils/config'
   import { dmReport } from '../../utils/report'
-
+  import tabbar from '@/components/tabbar/tabbar.vue'
   const toneId = ref(null)
 
   //用户信息
