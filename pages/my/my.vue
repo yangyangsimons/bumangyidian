@@ -44,7 +44,7 @@
             ></image>
             <view class="checkin-points">积分 {{ 26 }}</view>
           </view>
-          <view class="checkin-btn">
+          <view class="checkin-btn" @click="checkin">
             <image
               class="checkin-btn-icon"
               src="../../static/my/checkin.png"
@@ -96,7 +96,24 @@
           <view class="bar"></view>
         </view>
       </view>
-      <view class="footer-main"> </view>
+      <view class="footer-main">
+        <view class="icon-container">
+          <image
+            class="icon"
+            src="../../static/my/leave-message.png"
+            mode="scaleToFill"
+          ></image>
+          <view class="icon-text">留言</view>
+        </view>
+        <view class="icon-container">
+          <image
+            class="icon"
+            src="../../static/my/collect.png"
+            mode="scaleToFill"
+          ></image>
+          <view class="icon-text">收藏</view>
+        </view>
+      </view>
     </view>
     <tabbar :current="2" />
   </view>
@@ -128,7 +145,25 @@
   const currentPage = ref(1) // 当前页码
   const totalPages = ref(0) // 总页数
   const isLoading = ref(false) // 是否正在加载
-
+  // 签到 checkin
+  const checkin = async () => {
+    const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
+    console.log('签到结果', checkinRes)
+    if (checkinRes.code === 0) {
+      uni.showToast({
+        title: '签到成功',
+        icon: 'success',
+      })
+      // 查询用户的签到日历
+      const checkinLog = await request(`${baseUrl}/user/get_sign_log`, 'get')
+      console.log('签到日历', checkinLog)
+    } else {
+      uni.showToast({
+        title: checkinRes.message || '签到失败',
+        icon: 'none',
+      })
+    }
+  }
   // 获取所有商品数据
   const getAllProducts = async () => {
     console.log('开始获取所有商品数据')

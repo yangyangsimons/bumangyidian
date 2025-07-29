@@ -41,6 +41,13 @@
         background-size: cover;
     }
     // nav bar top style
+    ::v-deep .uni-navbar__header-container {
+        // border: 1px solid red;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
     ::v-deep .uni-nav-bar-text {
         font-size: 34rpx !important;
         font-weight: 700 !important;
@@ -53,7 +60,7 @@
     }
 
     .header {
-        border: 1px solid red;
+        // border: 1px solid red;
         width: 100%;
         margin-top: 50rpx;
         display: flex;
@@ -70,7 +77,7 @@
         }
         .info-container {
             height: 100%;
-            border: 1px solid green;
+            // border: 1px solid green;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -179,7 +186,7 @@
     .main {
         width: 100%;
         padding: 30rpx 24rpx 40rpx 24rpx;
-        border: 1px solid red;
+        // border: 1px solid red;
         background: rgba(255, 255, 255, 1);
         border-radius: 28rpx;
 
@@ -259,7 +266,7 @@
     .footer {
         width: 100%;
         padding: 30rpx 24rpx 40rpx 24rpx;
-        border: 1px solid red;
+        // border: 1px solid red;
         background: rgba(255, 255, 255, 1);
         border-radius: 28rpx;
         .footer-head {
@@ -273,15 +280,37 @@
             }
         }
         .footer-main {
+            padding: 0 60rpx;
             width: 100%;
-            height: 200rpx;
+            height: 150rpx;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
+            gap: 100rpx;
             font-size: 24rpx;
             font-weight: 500;
-            color: rgba(16, 18, 19, 1);
+            color: rgba(51, 51, 51, 1);
+            font-weight: 500;
             text-align: center;
+            .icon-container {
+                // border: 1px solid blue;
+                height: 100rpx;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 15rpx;
+                .icon {
+                    width: 56rpx;
+                    height: 46rpx;
+                }
+                &:nth-child(2) {
+                    .icon {
+                        width: 46rpx;
+                        height: 46rpx;
+                    }
+                }
+            }
         }
     }
 }
