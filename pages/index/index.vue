@@ -66,7 +66,7 @@
       <view class="img-container">
         <swiper
           class="ad-swiper"
-          :indicator-dots="showDots"
+          :indicator-dots="false"
           :autoplay="autoplay"
           :interval="interval"
           :duration="duration"
@@ -133,6 +133,12 @@
   import { useToggleModelStore } from '../../stores/toggleModelStore'
   const showAd = ref(false)
   const adList = ref([])
+
+  // 轮播相关配置
+  const autoplay = computed(() => adList.value.length > 1) // 只有多于1个广告时才自动播放
+  const interval = ref(3000) // 轮播间隔时间（毫秒）
+  const duration = ref(300) // 滑动动画时长（毫秒）
+  const circular = computed(() => adList.value.length > 1) // 只有多于1个广告时才循环播放
   const showDots = ref(false)
   const toggleModelStore = useToggleModelStore()
   const sptime = ref(0)
@@ -140,6 +146,27 @@
   const handleAdClose = () => {
     showAd.value = false
   }
+  onLoad(async (query) => {
+    console.log('onLoad主页面加载')
+    if (query && query.q) {
+      // 如果有query参数，表示从外部链接打开
+      console.log('从外部链接打开，query.q:', query.q)
+      const source = decodeURIComponent(query.q)
+      console.log('decode 之后的souceid:', source)
+      // 上报来源
+      const sourceReport = await request(
+        `${baseUrl}/track/source_total`,
+        'POST',
+        {
+          source_id: source,
+        }
+      )
+      console.log('上报来源结果:', sourceReport)
+    } else {
+      // 如果没有query参数，表示正常加载
+      console.log('正常加载主页面')
+    }
+  })
   const adNav = (adUrl) => {
     console.log('广告链接......:', adUrl)
 
@@ -510,6 +537,7 @@
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
+
       //从后端获取是否有广告
       const adRes = await request(
         `${baseUrl}/system/get_activity_notify`,
@@ -519,6 +547,9 @@
       if (adRes.code == 0 && adRes.data.length > 0) {
         adList.value = adRes.data
         showAd.value = true
+        console.log(
+          `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+        )
       }
       // 获取当前主题
       const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')

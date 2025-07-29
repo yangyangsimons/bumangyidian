@@ -140,12 +140,18 @@
 
 <script setup>
   import { ref, onMounted, computed, onUnmounted } from 'vue'
-  import { onShow, onHide } from '@dcloudio/uni-app'
+  import {
+    onShow,
+    onHide,
+    onShareAppMessage,
+    onShareTimeline,
+  } from '@dcloudio/uni-app'
   import EnrollFont from '@/components/enrollFont/enrollFont.vue'
   import { baseUrl } from '@/utils/config'
   import request from '@/utils/request.js'
   import { useAudioPlayerStore } from '../../stores/audioPlayer'
 
+  const notiTemplateId = ref('')
   const localQrCodePath = ref('')
 
   // 下载二维码图片的函数
@@ -277,18 +283,6 @@
     'https://mang.5gradio.com.cn/static/enrollment/stick-9.png',
     'https://mang.5gradio.com.cn/static/enrollment/stick-10.png',
   ])
-  // const stickerList = ref([
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-1.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-2.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-3.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-4.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-5.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-6.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-7.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-8.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-9.png',
-  //   'https://mang.5gradio.com.cn/static/enrollment/decoration/decoration-10.png',
-  // ])
 
   // 计算当前贴纸路径
   const currentStickerSrc = computed(() => {
@@ -455,6 +449,17 @@
   // 生命周期
   onShow(async () => {
     console.log('Enrollment2025 页面已加载')
+    //获取微信通知模板id
+    const result = await request(
+      `${baseUrl}/user/get_wx_service_notify_template`,
+      'GET'
+    )
+    if (result.code === 0) {
+      notiTemplateId.value = result.data
+      console.log('获取微信通知模板ID成功:', notiTemplateId.value)
+    } else {
+      console.error('获取微信通知模板ID失败:', result.message)
+    }
     //当前用户的学校和报道位置
     const userInfo = await request(`${baseUrl}/user/user_info`, 'GET')
     if (userInfo.code !== 0) {
@@ -1155,16 +1160,12 @@
 
                 // 订阅消息
                 wx.requestSubscribeMessage({
-                  tmplIds: ['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'], // 需要下发的订阅消息模板id数组
+                  tmplIds: [notiTemplateId.value], // 需要下发的订阅消息模板id数组
                   success(res) {
-                    if (
-                      res['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s'] ===
-                      'accept'
-                    ) {
+                    if (res[notiTemplateId.value] === 'accept') {
                       console.log('用户同意订阅', res)
                       // 将用户的 openid 发送给后端，以便后续发送服务通知
-                      const openid =
-                        res['HWBLfUmzWZB_UqhQ8gKd25fK67OyJfp2Iw8qQvLhp3s']
+                      const openid = res[notiTemplateId.value]
                       console.log('用户的 openid:', openid)
                       // 这里可以将 openid 保存到数据库或者直接发送给后端
                     } else {
@@ -1209,6 +1210,25 @@
       },
     })
   }
+
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `湖南见面礼已派件！晒高光时刻赢芒果跨年`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/lottery/lottery',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `湖南见面礼已派件！晒高光时刻赢芒果跨年`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/lottery/lottery',
+    }
+  })
 </script>
 
 <style lang="scss" scoped>
