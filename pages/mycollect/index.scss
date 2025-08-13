@@ -1,0 +1,142 @@
+.mycollect {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+
+    ::v-deep .uni-navbar__header-container {
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    ::v-deep .nav-title {
+        margin-left: 260rpx !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34rpx !important;
+        font-weight: 600 !important;
+        color: rgba(0, 0, 0, 1);
+        font-family: AlibabaPuHuiTi !important;
+    }
+
+    .bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-size: cover;
+    }
+
+    .header {
+        margin-top: 30rpx;
+        font-size: 36rpx;
+        font-weight: 600;
+        color: rgba(110, 112, 112, 1);
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 60rpx;
+        padding: 0 36rpx;
+
+        .tab-item {
+            position: relative;
+            cursor: pointer;
+
+            text {
+                &.active {
+                    color: rgba(16, 18, 19, 1);
+                    font-weight: 700;
+                }
+            }
+
+            image {
+                position: absolute;
+                left: -1%;
+                bottom: 0;
+                width: 105%;
+                height: 75%;
+                z-index: -1;
+            }
+        }
+    }
+
+    .main {
+        margin-top: 30rpx;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        overflow-y: auto;
+        background: rgba(255, 255, 255, 1);
+        border-radius: 30rpx 30rpx 0px 0px;
+
+        .main-box {
+            width: 100%;
+            height: 100%;
+            padding: 40rpx 36rpx;
+            box-sizing: border-box;
+
+            .empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 60%;
+                text-align: center;
+
+                .empty-message {
+                    width: 340rpx;
+                    height: 336rpx;
+                }
+            }
+
+            .content-list {
+                .program-item,
+                .news-item {
+                    margin-bottom: 35rpx;
+                    font-size: 28rpx;
+                    color: #333;
+                    image {
+                        width: 76rpx;
+                        height: 56rpx;
+                    }
+                }
+                .program-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+                    padding-bottom: 35rpx;
+                    box-sizing: border-box;
+                    .content {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: flex-start;
+                        gap: 8rpx;
+                        .title {
+                            font-size: 28rpx;
+                            color: rgba(16, 18, 19, 1);
+                            font-weight: 500;
+                        }
+                        .desc {
+                            font-size: 24rpx;
+                            font-weight: 400;
+                            color: rgba(152, 153, 153, 1);
+                        }
+                    }
+                    .actions {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 24rpx;
+                    }
+                }
+            }
+        }
+    }
+}

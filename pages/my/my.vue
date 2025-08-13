@@ -13,7 +13,7 @@
     </uni-nav-bar>
     <image class="bg" src="../../static/my/bg.png" mode="scaleToFill"></image>
     <view class="header">
-      <image class="avator" :src="avator" @click="changeAvator"></image>
+      <image class="avator" :src="avator"></image>
 
       <view class="info-container">
         <view class="user-info-setting">
@@ -21,7 +21,7 @@
             <view class="name">{{ userName }} </view>
             <view class="school">{{ school }}</view></view
           >
-          <view class="setting">
+          <view class="setting" @click="goSetting">
             <image src="../../static/my/setting.png" mode="scaleToFill" />
           </view>
         </view>
@@ -97,7 +97,7 @@
         </view>
       </view>
       <view class="footer-main">
-        <view class="icon-container">
+        <view class="icon-container" @click="goMessage">
           <image
             class="icon"
             src="../../static/my/leave-message.png"
@@ -105,7 +105,7 @@
           ></image>
           <view class="icon-text">留言</view>
         </view>
-        <view class="icon-container">
+        <view class="icon-container" @click="goCollect">
           <image
             class="icon"
             src="../../static/my/collect.png"
@@ -308,73 +308,6 @@
     }
   }
 
-  // 更换头像
-  const changeAvator = async () => {
-    dmReport(
-      'click',
-      {},
-      {
-        page: 'userInfo',
-        contents: [
-          {
-            element_id: 'content',
-            element_content: `修改头像`,
-          },
-        ],
-      }
-    )
-    uni.chooseImage({
-      count: 1,
-      success: async (res) => {
-        console.log('选择的头像', res.tempFilePaths[0])
-        const avatorFile = res.tempFilePaths[0]
-
-        // 读取文件内容并转换为base64
-        uni.getFileSystemManager().readFile({
-          filePath: avatorFile,
-          encoding: 'base64',
-          success: async (readRes) => {
-            // 获取base64数据
-            const base64String = readRes.data
-
-            // 上传头像
-            try {
-              const uploadResult = await request(
-                `${baseUrl}/user/upload_avatar`,
-                'POST',
-                {
-                  pic_base64: base64String,
-                }
-              )
-              console.log('头像上传成功', uploadResult)
-              uni.showToast({
-                title: '头像更新成功',
-                icon: 'success',
-              })
-              avator.value = uploadResult.data.avator_url
-            } catch (error) {
-              console.error('头像上传失败', error)
-              uni.showToast({
-                title: '头像更新成功',
-                icon: 'success',
-              })
-            }
-          },
-          fail: (error) => {
-            console.error('读取文件失败', error)
-            uni.showToast({
-              title: '头像更新成功',
-              icon: 'success',
-            })
-          },
-        })
-      },
-      fail: (error) => {
-        console.error('选择头像失败', error)
-      },
-    })
-  }
-
   onShow(async () => {
     try {
       // 获取用户信息
@@ -414,6 +347,25 @@
       console.error('页面初始化失败', error)
     }
   })
+
+  // 去留言页面
+  const goMessage = () => {
+    uni.navigateTo({
+      url: '/pages/mymessage/mymessage',
+    })
+  }
+  //去设置页面
+  const goSetting = () => {
+    uni.navigateTo({
+      url: '/pages/mysetting/mysetting',
+    })
+  }
+  // 去收藏页面
+  const goCollect = () => {
+    uni.navigateTo({
+      url: '/pages/mycollect/mycollect',
+    })
+  }
 </script>
 
 <style lang="scss" scoped>

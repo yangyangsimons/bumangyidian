@@ -1,0 +1,356 @@
+@mixin itemStyle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 18rpx 32rpx;
+    position: relative;
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 32rpx;
+        right: 32rpx;
+        height: 1px;
+        background-color: #eee;
+    }
+}
+
+.mysetting {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+
+    ::v-deep .uni-navbar__header-container {
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    ::v-deep .nav-title {
+        margin-left: 260rpx !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34rpx !important;
+        font-weight: 600 !important;
+        color: rgba(0, 0, 0, 1);
+        font-family: AlibabaPuHuiTi !important;
+    }
+
+    .bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-size: cover;
+    }
+
+    .container {
+        overflow-y: auto;
+        margin-top: 10%;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 0 32rpx;
+        font-family: AlibabaPuHuiTi !important;
+        display: flex;
+        flex-direction: column;
+        gap: 32rpx;
+
+        .header {
+            .avator {
+                width: 100%;
+                height: 124rpx;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-sizing: border-box;
+                padding: 26rpx 32rpx 26rpx 32rpx;
+                background: rgba(255, 255, 255, 1);
+                border-radius: 20rpx;
+                font-size: 28rpx;
+                color: rgba(51, 51, 51, 1);
+                font-weight: 500;
+
+                image {
+                    border: 1px solid #ccc;
+                    width: 84rpx;
+                    height: 84rpx;
+                    border-radius: 50%;
+                }
+            }
+        }
+
+        .main {
+            border-radius: 20rpx;
+            background: rgba(255, 255, 255, 1);
+            display: flex;
+            flex-direction: column;
+            font-size: 28rpx;
+            color: rgba(51, 51, 51, 1);
+            font-weight: 500;
+            padding: 10rpx 0;
+
+            .value {
+                color: rgba(110, 112, 112, 1);
+                font-weight: 400;
+            }
+
+            .username {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-sizing: border-box;
+                padding: 16rpx 32rpx;
+                position: relative;
+                &::after {
+                    content: "";
+                    position: absolute;
+                    bottom: 0;
+                    left: 32rpx;
+                    right: 32rpx;
+                    height: 1px;
+                    background-color: #eee;
+                }
+            }
+
+            .sex {
+                @include itemStyle;
+            }
+
+            .age {
+                @include itemStyle;
+            }
+
+            .school {
+                @include itemStyle;
+                cursor: pointer;
+                //不用伪元素的效果
+                &::after {
+                    content: "";
+                    width: 0;
+                }
+                .value {
+                    // 这里的 value 是学校名称样式靠右
+                    flex-grow: 1;
+                    text-align: right;
+                    margin-right: 20rpx;
+                }
+                .arrow {
+                    image {
+                        width: 12rpx;
+                        height: 18rpx;
+                    }
+                }
+            }
+        }
+        .mbti {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 24rpx 32rpx;
+            background: rgba(255, 255, 255, 1);
+            border-radius: 20rpx;
+            font-size: 28rpx;
+            color: rgba(51, 51, 51, 1);
+            font-weight: 500;
+            .value {
+                display: flex;
+                align-items: center;
+                color: rgba(110, 112, 112, 1);
+                font-weight: 400;
+                .arrow {
+                    margin-left: 20rpx;
+                    image {
+                        width: 12rpx;
+                        height: 18rpx;
+                    }
+                }
+            }
+        }
+        .agreements {
+            border-radius: 20rpx;
+            background: rgba(255, 255, 255, 1);
+            display: flex;
+            flex-direction: column;
+            font-size: 28rpx;
+            color: rgba(51, 51, 51, 1);
+            font-weight: 500;
+            padding: 10rpx 0;
+            .user-agreement {
+                @include itemStyle;
+                padding: 20rpx 32rpx;
+                cursor: pointer;
+                .arrow {
+                    image {
+                        width: 12rpx;
+                        height: 18rpx;
+                    }
+                }
+            }
+            .privacy-policy {
+                @include itemStyle;
+                padding: 20rpx 32rpx;
+                cursor: pointer;
+                .arrow {
+                    image {
+                        width: 12rpx;
+                        height: 18rpx;
+                    }
+                }
+            }
+            .about-us {
+                @include itemStyle;
+                padding: 20rpx 32rpx;
+                cursor: pointer;
+                &::after {
+                    content: "";
+                    width: 0;
+                }
+                .arrow {
+                    image {
+                        width: 12rpx;
+                        height: 18rpx;
+                    }
+                }
+            }
+        }
+        .logout {
+            margin-top: 100rpx;
+            width: 100%;
+            height: 88rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 20rpx 32rpx;
+            border-radius: 42rpx;
+            background: rgba(250, 116, 104, 1);
+            font-size: 28rpx;
+            color: rgba(255, 255, 255, 1);
+            font-weight: 500;
+            cursor: pointer;
+        }
+    }
+
+    // 学校选择弹窗样式 - 移到这里，作为 .mysetting 的直接子级
+    .school-picker-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .school-picker-content {
+        width: 100%;
+        max-height: 60%;
+        background-color: #fff;
+        border-radius: 20rpx 20rpx 0 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .picker-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 30rpx 30rpx 20rpx;
+        border-bottom: 1rpx solid #eee;
+        flex-shrink: 0;
+
+        .cancel-btn,
+        .confirm-btn {
+            color: #007aff;
+            font-size: 32rpx;
+            padding: 10rpx;
+        }
+
+        .title {
+            font-size: 36rpx;
+            font-weight: bold;
+            color: #333;
+        }
+    }
+
+    .search-container {
+        padding: 20rpx 30rpx;
+        border-bottom: 1rpx solid #eee;
+        flex-shrink: 0;
+
+        .search-input {
+            width: 100%;
+            height: 80rpx;
+            background-color: #f5f5f5;
+            border-radius: 40rpx;
+            padding: 0 30rpx;
+            font-size: 28rpx;
+            box-sizing: border-box;
+        }
+    }
+
+    .school-list {
+        flex: 1;
+        padding: 0 30rpx;
+        min-height: 400rpx;
+        max-height: 60vh;
+        height: 60vh;
+    }
+
+    .school-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 30rpx 0;
+        border-bottom: 1rpx solid #eee;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &.selected {
+            background-color: #f0f9ff;
+
+            .school-item-name {
+                color: #007aff;
+            }
+        }
+
+        .school-item-name {
+            font-size: 32rpx;
+            color: #333;
+            flex: 1;
+        }
+
+        .check-icon {
+            color: #007aff;
+            font-size: 32rpx;
+            font-weight: bold;
+        }
+    }
+
+    .load-more,
+    .loading,
+    .no-data,
+    .no-more {
+        text-align: center;
+        padding: 40rpx 0;
+        color: #999;
+        font-size: 28rpx;
+    }
+
+    .no-more {
+        color: #ccc;
+    }
+}

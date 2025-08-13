@@ -373,7 +373,7 @@
       // audioPlayerStore.resetBgMusic()
       // audioPlayerStore.resetTtsAudio()
       console.log('停止并清空所有音频队列')
-      barrageStore.clearMessages()
+      // barrageStore.clearMessages()
       console.log('清空消息列表')
       // 更新状态管理
       if (currentModel.value === '金种子杯模式') {
@@ -626,7 +626,7 @@
     } else {
       // audioPlayerStore.stopAllAudio()
       audioPlayerStore.stopTtsAudio()
-      barrageStore.clearMessages()
+      // barrageStore.clearMessages()
       console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
       // 清空消息列表
       console.log('清空消息列表')
