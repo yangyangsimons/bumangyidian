@@ -146,17 +146,25 @@
   const totalPages = ref(0) // 总页数
   const isLoading = ref(false) // 是否正在加载
 
-  //商城相关操作
+  // 获取更多商品
   const goMore = () => {
+    // 检查是否已登录
     const token = uni.getStorageSync('token')
-    const shopUrl = `${baseUrl}/shop/`
 
+    if (!token) {
+      uni.showToast({
+        title: '请先登录',
+        icon: 'none',
+      })
+      return
+    }
+
+    // 直接跳转到shop页面，不需要传递URL参数
     uni.navigateTo({
-      url: `/pages/shop/shop?url=${encodeURIComponent(
-        shopUrl
-      )}&token=${encodeURIComponent(token)}`,
+      url: '/pages/shop/shop',
     })
   }
+
   // 签到 checkin
   const checkin = async () => {
     const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
