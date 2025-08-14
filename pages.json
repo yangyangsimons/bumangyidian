@@ -94,6 +94,7 @@
 			"path": "pages/home/home",
 			"style": {
 				"navigationBarTitleText": "",
+				"disableScroll": true,
 				"navigationStyle": "custom"
 			}
 		},
@@ -101,6 +102,15 @@
 			"path": "pages/mycollect/mycollect",
 			"style": {
 				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/news/news",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"enablePullDownRefresh": true,
+				"navigationStyle": "custom"
 			}
 		}
 	],
