@@ -60,7 +60,7 @@
           <text>积分好礼</text>
           <view class="bar"></view>
         </view>
-        <view class="more"
+        <view class="more" @click="goMore"
           ><view class="more-text">更多</view>
           <image
             class="more-icon"
@@ -79,7 +79,7 @@
           <view class="image-wrap">
             <image
               :src="product.main_image"
-              mode="aspectFill"
+              mode="scaleToFill"
               class="product-pic"
             ></image>
             <view class="product-name">{{ product.name }}</view>
@@ -145,6 +145,18 @@
   const currentPage = ref(1) // 当前页码
   const totalPages = ref(0) // 总页数
   const isLoading = ref(false) // 是否正在加载
+
+  //商城相关操作
+  const goMore = () => {
+    const token = uni.getStorageSync('token')
+    const shopUrl = `${baseUrl}/shop/`
+
+    uni.navigateTo({
+      url: `/pages/shop/shop?url=${encodeURIComponent(
+        shopUrl
+      )}&token=${encodeURIComponent(token)}`,
+    })
+  }
   // 签到 checkin
   const checkin = async () => {
     const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
