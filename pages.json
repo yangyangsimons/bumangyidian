@@ -135,15 +135,6 @@
 				"enablePullDownRefresh": true,
 				"navigationStyle": "custom"
 			}
-		},
-		{
-			"path": "pages/news/news",
-			"style": {
-				"navigationBarTitleText": "",
-				"disableScroll": true,
-				"enablePullDownRefresh": true,
-				"navigationStyle": "custom"
-			}
 		}
 	],
 	"globalStyle": {
