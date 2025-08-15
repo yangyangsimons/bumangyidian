@@ -1,5 +1,6 @@
 <template>
   <view class="container" :style="{ paddingTop: menuButtonRect.top + 'px' }">
+    <image src="/static/my/bg.png" mode="scaleToFill" class="bg" />
     <div :style="{ height: menuButtonRect.height + 'px' }" class="header">
       <div
         v-for="(value, index) in nav"
@@ -14,9 +15,10 @@
       </div>
     </div>
     <div class="content">
-      <Programme />
+      <!-- 改为 v-if -->
+      <Programme v-if="navActive === 0" />
+      <Messages v-if="navActive === 1" />
     </div>
-    <!-- <tabbar /> -->
     <tabbar />
   </view>
 </template>
@@ -24,6 +26,7 @@
 <script setup>
   import { ref, onMounted } from 'vue'
   import Programme from './components/programme.vue'
+  import Messages from '@/components/messages/messages.vue'
   import tabbar from '@/components/tabbar/tabbar.vue'
   const statusBarHeight = uni.getSystemInfoSync().statusBarHeight
   const menuButtonRect = uni.getMenuButtonBoundingClientRect()
@@ -37,13 +40,19 @@
   .container {
     width: 100%;
     height: 100vh;
-    background-image: url('/static/hello-bg.png');
-    background-size: 100% 100%;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-
+    .bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-size: cover;
+    }
     .header {
       display: flex;
       align-items: center;
