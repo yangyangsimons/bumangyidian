@@ -50,15 +50,6 @@
                     color: rgba(152, 153, 153, 1);
                 }
             }
-            .audit-text {
-                box-sizing: border-box;
-                padding: 4rpx 8rpx;
-                font-size: 20rpx;
-                color: rgba(255, 255, 255, 1);
-                text-align: center;
-                vertical-align: middle;
-                border-radius: 4rpx;
-            }
         }
         .avator {
             width: 64rpx;
@@ -71,12 +62,28 @@
                 border-radius: 50%;
             }
         }
-        .like {
-            width: 26rpx;
-            height: 24rpx;
-            image {
-                width: 100%;
-                height: 100%;
+        .like-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            .text {
+                text-align: center;
+                line-height: 24rpx;
+                height: 24rpx;
+                font-size: 24rpx;
+                color: rgba(152, 153, 153, 1);
+                margin-right: 10rpx;
+            }
+            .like {
+                width: 28rpx;
+                height: 24rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                image {
+                    width: 100%;
+                    height: 100%;
+                }
             }
         }
     }
@@ -97,7 +104,7 @@
 
     .empty {
         position: absolute;
-        top: 45%;
+        top: 35%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 340rpx;
@@ -112,7 +119,7 @@
         padding: 0 16rpx;
         border: 1px solid red;
         position: fixed;
-        bottom: 200rpx;
+        bottom: 170rpx;
         width: calc(100% - 64rpx);
         display: flex;
         justify-content: space-between;

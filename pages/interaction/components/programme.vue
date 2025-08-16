@@ -78,11 +78,11 @@
       <div class="item" v-for="item in list" :key="item.id">
         <div>
           <div class="title">{{ item.title }}</div>
-          <div class="info">{{ item.info }}</div>
+          <div class="info">{{ item.desc }}</div>
         </div>
         <div class="row">
-          <div class="star">
-            <image src="/static/star.png" mode="widthFix" />
+          <div class="star" @click="toggleFavorite(item.id)">
+            <image :src="getLikeImageSrc(item)" mode="widthFix" />
           </div>
           <div class="play">
             <image src="/static/triangle.png" mode="widthFix" />
@@ -93,36 +93,23 @@
   </div>
 </template>
 <script setup>
-  import { ref, computed, onUnmounted, getCurrentInstance } from 'vue'
+  import {
+    ref,
+    computed,
+    onUnmounted,
+    getCurrentInstance,
+    onMounted,
+  } from 'vue'
+  import request from '@/utils/request'
+  import { baseUrl } from '@/utils/config'
 
-  const list = ref([
-    {
-      id: 1,
-      title: '校园之声标题名称',
-      info: '节目信息介绍',
-    },
-    {
-      id: 2,
-      title: '校园之声标题名称',
-      info: '节目信息介绍',
-    },
-    {
-      id: 3,
-      title: '校园之声标题名称',
-      info: '节目信息介绍',
-    },
-    {
-      id: 4,
-      title: '校园之声标题名称',
-      info: '节目信息介绍',
-    },
-  ])
+  const list = ref([])
 
   // 获取组件实例用于emit
   const { emit } = getCurrentInstance()
 
   // 响应式数据
-  const categories = ref(['娱乐', '知识类', '音乐类', '访谈类', '新闻'])
+  const categories = ref([])
   const activeCategory = ref(1) // 默认选中"知识类"
   const audioInfo = ref({
     title: '校园之声',
@@ -134,15 +121,82 @@
   const isFavorite = ref(false)
   const audioContext = ref(null)
 
+  // 根据收藏状态返回对应的图片地址
+  const getLikeImageSrc = (item) => {
+    console.log('是不是被收藏了', item.liked)
+    return item.liked ? '/static/my/music-collect.png' : '/static/my/star.png'
+  }
   // 计算属性
   const indicatorLeft = computed(() => {
     // 计算指示器位置，每个标签约150rpx宽度
     return activeCategory.value * 150 + 75 - 15 // 减去指示器宽度的一半
   })
 
+  // 加载节目列表的方法
+  const loadProgramList = async (categoryIndex = null) => {
+    try {
+      // 如果没有传入分类索引，使用当前激活的分类
+      const targetCategoryIndex =
+        categoryIndex !== null ? categoryIndex : activeCategory.value
+
+      // 获取对应分类名称
+      const categoryName = categories.value[targetCategoryIndex]
+
+      if (!categoryName) {
+        console.error('分类不存在')
+        return
+      }
+
+      // 调用API获取指定分类下的节目数据
+      const response = await request(
+        `${baseUrl}/school_music/list?category=${categoryName}`,
+        'GET'
+      )
+      console.log('节目数据:', response)
+
+      if (response.code === 0 && response.data) {
+        list.value = response.data
+      }
+    } catch (error) {
+      console.error('获取节目列表失败:', error)
+    }
+  }
+
+  // 生命周期钩子
+  onMounted(async () => {
+    try {
+      //获取所有分类
+      const responseCategories = await request(
+        `${baseUrl}/school_music/categories`,
+        'GET'
+      )
+      console.log('节目组件加载', responseCategories)
+      if (responseCategories.code === 0 && responseCategories.data) {
+        categories.value = responseCategories.data
+      }
+      console.log('categories', categories.value)
+
+      //获取分类下面的节目列表
+      const responsePrograms = await request(
+        `${baseUrl}/school_music/list?category=${
+          categories.value[activeCategory.value]
+        }`,
+        'GET'
+      )
+      console.log('节目列表', responsePrograms)
+      if (responsePrograms.code === 0 && responsePrograms.data) {
+        list.value = responsePrograms.data
+      }
+    } catch (error) {
+      console.error('初始化数据失败:', error)
+    }
+  })
+
   // 方法定义
   const selectCategory = (index) => {
     activeCategory.value = index
+    // 切换分类时加载对应的节目列表
+    loadProgramList(index)
     // 这里可以添加切换分类的逻辑
     emit('categoryChange', index)
   }
@@ -175,10 +229,32 @@
     }
   }
 
-  const toggleFavorite = () => {
-    isFavorite.value = !isFavorite.value
-    // 添加到收藏或取消收藏
-    emit('favoriteChange', isFavorite.value)
+  const toggleFavorite = async (id) => {
+    try {
+      const response = await request(`${baseUrl}/school_music/like`, 'POST', {
+        shcool_music_id: id,
+      })
+      console.log('取消收藏节目:', response)
+      if (response.data.liked) {
+        uni.showToast({
+          title: '收藏成功',
+          icon: 'success',
+        })
+      } else {
+        uni.showToast({
+          title: '已取消收藏',
+          icon: 'none',
+        })
+      }
+      // 重新加载节目列表
+      loadProgramList()
+    } catch (error) {
+      console.error('取消收藏节目失败:', error)
+      uni.showToast({
+        title: '取消收藏失败',
+        icon: 'none',
+      })
+    }
   }
 
   const shareAudio = () => {
@@ -212,257 +288,7 @@
     }
   })
 </script>
-<style lang="scss" scoped>
-  .container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    .card {
-      width: calc(100% - 64rpx);
-      height: 716rpx;
-      margin: 32rpx;
-      overflow: hidden;
-      border-radius: 32rpx;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10rpx);
-      box-shadow: inset 0rpx 0rpx 18rpx rgba(255, 255, 255, 1),
-        0rpx 8rpx 20rpx rgba(112, 125, 88, 0.27);
-      .audio-player {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        height: 100%;
-        padding: 40rpx 32rpx;
-      }
-
-      .category-selector {
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 25rpx;
-        padding: 20rpx 0;
-        margin-bottom: 40rpx;
-        backdrop-filter: blur(10rpx);
-        position: relative;
-      }
-
-      .category-tabs {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-      }
-
-      .category-tab {
-        font-size: 28rpx;
-        color: #666;
-        padding: 10rpx 20rpx;
-      }
-
-      .indicator-wrapper {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 40rpx;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .indicator {
-        width: 30rpx;
-        height: 6rpx;
-        background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
-        border-radius: 3rpx;
-        transition: left 0.3s ease;
-        position: absolute;
-        top: -10rpx;
-      }
-
-      .indicator-arrow {
-        width: 0;
-        height: 0;
-        border-left: 15rpx solid transparent;
-        border-right: 15rpx solid transparent;
-        border-top: 20rpx solid #ff6b6b;
-        margin-top: 5rpx;
-      }
-
-      .audio-card {
-        margin-bottom: 32rpx;
-        display: flex;
-        align-items: center;
-      }
-
-      .audio-cover {
-        width: 198rpx;
-        height: 198rpx;
-        padding: 3rpx;
-        box-sizing: border-box;
-        border-radius: 20rpx;
-        overflow: hidden;
-        margin-right: 30rpx;
-        border: 6rpx solid rgba(255, 255, 255, 1);
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .cover-image {
-        width: 100%;
-        height: 100%;
-        border-radius: 20rpx;
-      }
-
-      .audio-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .audio-title {
-        font-size: 42rpx;
-        font-weight: 700;
-        color: rgba(16, 18, 19, 1);
-        margin-bottom: 15rpx;
-      }
-
-      .audio-desc {
-        font-size: 24rpx;
-        font-weight: 400;
-        letter-spacing: 0rpx;
-        line-height: 32.92rpx;
-        color: rgba(152, 153, 153, 1);
-        margin-bottom: 44rpx;
-      }
-
-      .audio-time {
-        font-size: 24rpx;
-        color: #999;
-      }
-
-      .control-buttons {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .row {
-        display: flex;
-        gap: 32rpx;
-      }
-
-      .control-btn {
-        width: 80rpx;
-        height: 80rpx;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .btn-icon {
-        width: 40rpx;
-        height: 40rpx;
-      }
-
-      .play-btn {
-        width: 120rpx;
-        height: 120rpx;
-        background: linear-gradient(
-          180deg,
-          rgba(211, 248, 79, 1) 0%,
-          rgba(167, 238, 39, 1) 100%
-        );
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .play-icon {
-        width: 38rpx;
-        height: 46rpx;
-      }
-    }
-    .list {
-      border-radius: 24rpx 24rpx, 0rpx, 0rpx;
-      background: #fff;
-      overflow: hidden;
-      &-title {
-        width: fit-content;
-        position: relative;
-        z-index: 5;
-        font-size: 32rpx;
-        font-weight: 700;
-        margin: 32rpx;
-        &::after {
-          content: '';
-          width: 142rpx;
-          height: 13rpx;
-          border-radius: 6.56px;
-          background: linear-gradient(243.43deg, #cefa1e 0%, #a7ee27 100%);
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          z-index: -1;
-          transform: translateX(-50%);
-        }
-      }
-      .item {
-        padding: 24rpx 0;
-        margin: 0 24rpx;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 2rpx dashed rgba(231, 236, 238, 1);
-        .title {
-          font-size: 28rpx;
-          font-weight: 500;
-          margin-bottom: 8rpx;
-        }
-        .info {
-          font-size: 24rpx;
-          font-weight: 400;
-          color: rgba(152, 153, 153, 1);
-        }
-        .row {
-          display: flex;
-          gap: 24rpx;
-        }
-        .star {
-          width: 76rpx;
-          height: 56rpx;
-          border-radius: 26rpx;
-          background: rgba(255, 255, 255, 1);
-          border: 2rpx solid rgba(231, 236, 238, 1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          image {
-            width: 27.18rpx;
-            height: 26rpx;
-          }
-        }
-        .play {
-          width: 76rpx;
-          height: 56rpx;
-          border-radius: 26rpx;
-          background: linear-gradient(
-            180deg,
-            rgba(211, 248, 79, 1) 0%,
-            rgba(167, 238, 39, 1) 100%
-          );
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          image {
-            width: 19.09rpx;
-            height: 26rpx;
-          }
-        }
-      }
-    }
-  }
+<style scoped lang="scss">
+  // 这里可以添加其他脚本逻辑
+  @import './index.scss';
 </style>

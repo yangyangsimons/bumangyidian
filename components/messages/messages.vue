@@ -3,38 +3,29 @@
     <!-- 如果有消息数据，循环渲染每条消息 -->
     <view v-if="messageData.length > 0" class="my-message-container">
       <view
-        v-for="(message, index) in messageData"
+        v-for="(message, index) in approvedMessages"
         :key="index"
         class="my-message-item"
       >
         <view class="my-message-header">
           <view class="avator">
-            <image :src="avator"></image>
+            <image :src="message.avator"></image>
           </view>
           <view class="info-container">
             <view class="user-info-setting">
               <view class="user-info">
-                <view class="name">{{ userName }}</view>
+                <view class="name">{{ message.user_name }}</view>
                 <view class="date">{{ message.created_at }}</view>
               </view>
             </view>
-            <view class="audit">
-              <!--审核状态 根据status字段显示-->
-              <view
-                class="audit-text"
-                v-if="message.status === 2"
-                style="background-color: rgba(250, 116, 104, 1)"
-                ><text>审核未通过</text></view
-              >
-              <view
-                class="audit-text"
-                v-if="message.status === 0"
-                style="background-color: rgba(107, 215, 227, 1)"
-                ><text>审核中</text></view
-              >
-              <view class="audit-text" v-if="message.status === 1"
-                ><text>已审核</text></view
-              >
+            <view class="like-container" @click="toggleLike(message)">
+              <view class="text">{{ message.liked_count }}</view>
+              <view class="like">
+                <image
+                  :src="getLikeImageSrc(message)"
+                  mode="aspectFill"
+                ></image>
+              </view>
             </view>
           </view>
         </view>
@@ -50,7 +41,6 @@
         class="empty-message"
         src="../../static/my/empty-message.png"
       ></image>
-      <text>暂无留言数据</text>
     </view>
 
     <!-- 留言输入区域 -->
@@ -74,17 +64,44 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
   import request from '@/utils/request.js'
   import { baseUrl } from '@/utils/config'
 
   const messageData = ref([])
   const replyMessage = ref('')
   const isSubmitting = ref(false)
+  // 根据点赞状态返回对应的图片地址
+  const getLikeImageSrc = (message) => {
+    return message.liked
+      ? '../../static/my/like.png'
+      : '../../static/my/like-false.png'
+  }
+  //点赞和取消点赞
+  const toggleLike = async (message) => {
+    //发送请求
+    const response = await request(`${baseUrl}/leave_msg/like`, 'POST', {
+      leave_msg_id: message.id,
+    })
+    if (response.data.liked) {
+      uni.showToast({
+        title: '点赞成功',
+        icon: 'success',
+      })
+    } else {
+      uni.showToast({
+        title: '已取消点赞',
+        icon: 'none',
+      })
+    }
+    //刷新一下列表
+    await loadData()
+  }
 
-  // 用户信息
-  const avator = ref('../../static/logo.png')
-  const userName = ref('用户名')
+  // 计算属性：只显示已审核通过的留言
+  const approvedMessages = computed(() => {
+    return messageData.value.filter((message) => message.status === 1)
+  })
 
   // 发送留言
   const sendMessage = async () => {
@@ -115,12 +132,12 @@
 
     try {
       const response = await request(`${baseUrl}/leave_msg/leave_msg`, 'POST', {
-        content: replyMessage.value.trim(),
+        msg: replyMessage.value.trim(),
       })
 
       if (response.code === 0) {
         uni.showToast({
-          title: '留言提交成功',
+          title: '留言提交成功,审核通过后可见',
           icon: 'success',
         })
         replyMessage.value = ''
@@ -148,15 +165,6 @@
     console.log('开始加载留言数据')
 
     try {
-      // 获取用户信息
-      const userInfo = await request(`${baseUrl}/user/user_info`, 'GET')
-      console.log('获取用户信息:', userInfo)
-
-      if (userInfo.code === 0 && userInfo.data) {
-        avator.value = userInfo.data.avator || '../../static/logo.png'
-        userName.value = userInfo.data.username || '游客'
-      }
-
       // 获取留言信息
       const messageInfo = await request(
         `${baseUrl}/leave_msg/get_leave_msg_list`,
