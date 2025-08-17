@@ -33,7 +33,7 @@
               src="../../static/my/checkin.png"
               mode="scaleToFill"
             ></image>
-            <view class="checkin-text">已签到{{ 26 }}天</view>
+            <view class="checkin-text">已签到{{ checkInDays }}天</view>
           </view>
           <!-- points container -->
           <view class="points">
@@ -42,7 +42,7 @@
               src="../../static/my/points.png"
               mode="scaleToFill"
             ></image>
-            <view class="checkin-points">积分 {{ 26 }}</view>
+            <view class="checkin-points">积分 {{ points_balance }}</view>
           </view>
           <view class="checkin-btn" @click="checkin">
             <image
@@ -138,7 +138,8 @@
   const sexSrc = ref('') // 用户性别图标路径
   const school = ref('湖南工商大学') // 用户学校
   const sptime = ref(0)
-
+  const checkInDays = ref(0) // 用户签到天数
+  const points_balance = ref(0) // 用户积分余额
   //商城信息相关
   const productsList = ref([])
   const allActiveProducts = ref([]) // 存储所有 is_active 为 true 的商品
@@ -169,14 +170,17 @@
   const checkin = async () => {
     const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
     console.log('签到结果', checkinRes)
-    if (checkinRes.code === 0) {
+    if (checkinRes.code === 0 && checkinRes.data) {
       uni.showToast({
-        title: '签到成功',
+        title: `${checkinRes.data.msg}`,
         icon: 'success',
       })
       // 查询用户的签到日历
-      const checkinLog = await request(`${baseUrl}/user/get_sign_log`, 'get')
-      console.log('签到日历', checkinLog)
+      const response = await request(`${baseUrl}/user/user_info`, 'get')
+      console.log('签到日历:', response)
+      if (response.code === 0) {
+        checkInDays.value = response.data.sign_count
+      }
     } else {
       uni.showToast({
         title: checkinRes.message || '签到失败',
@@ -337,6 +341,7 @@
         user.value = userInfoRes.data
         avator.value = userInfoRes.data.avator
         toneId.value = userInfoRes.data.tone
+
         uni.setStorage({
           key: 'toneId',
           data: toneId.value,
@@ -346,6 +351,8 @@
         userMbti.value = userInfoRes.data.mbti_ch
         userSex.value = userInfoRes.data.sex
         school.value = userInfoRes.data.school_name
+        points_balance.value = userInfoRes.data.points_balance
+        checkInDays.value = userInfoRes.data.sign_count
         sexSrc.value =
           userSex.value === '男'
             ? '../../static/male.png'

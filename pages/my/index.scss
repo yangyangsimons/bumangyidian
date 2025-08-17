@@ -40,11 +40,15 @@
         z-index: -1;
         background-size: cover;
     }
-    // nav bar top style
     ::v-deep .uni-navbar__header-container {
         // border: 1px solid red;
         text-align: left;
-        display: flex;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    ::v-deep .uni-navbar__header-container-inner {
+        display: flex !important;
         align-items: center;
         justify-content: flex-start;
     }

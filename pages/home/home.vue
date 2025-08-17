@@ -1,5 +1,9 @@
 <template>
   <view class="container" :style="{ paddingTop: menuButtonRect.top + 'px' }">
+    <musicbar
+      class="music-bar"
+      style="position: fixed; top: 35%; left: 0; right: 0; z-index: 99999"
+    />
     <div
       :style="{ height: menuButtonRect.height + 'px' }"
       class="logo-container"
@@ -8,7 +12,7 @@
     </div>
     <image src="/static/banner.png" class="banner" mode="aspectFill" />
     <div class="content">
-      <div class="player">
+      <!-- <div class="player">
         <div class="disc">
           <image src="/static/disc.png" mode="aspectFill" />
         </div>
@@ -20,7 +24,7 @@
           <image src="/static/player.png" mode="widthFix" />
           <image src="/static/more.png" mode="widthFix" />
         </div>
-      </div>
+      </div> -->
 
       <!-- 可滚动的新闻容器 -->
       <view class="news-scroll-container">
@@ -99,10 +103,12 @@
   import request from '@/utils/request.js'
   import { baseUrl } from '../../utils/config'
   import tabbar from '@/components/tabbar/tabbar.vue'
+  import { useMusicStore } from '@/stores/music'
+  import musicbar from '@/components/musicbar/musicbar.vue'
 
   const statusBarHeight = uni.getSystemInfoSync().statusBarHeight
   const menuButtonRect = uni.getMenuButtonBoundingClientRect()
-
+  const musicStore = useMusicStore()
   // 数据相关
   const mainNews = ref(null)
   const newsList = ref([])
@@ -193,6 +199,28 @@
 
   onShow(async () => {
     console.log('页面显示，开始加载数据')
+    // 初始化音频
+    // musicStore.initAudio()
+
+    // 设置播放列表（示例）
+    const playlist = [
+      {
+        id: 1,
+        title: '歌曲1',
+        desc: '艺术家1',
+        audio_url:
+          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/school_music/%E7%9F%A5%E8%AF%86%E7%B1%BB/%E9%99%86%E8%A8%80.mp3',
+        cover:
+          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/news/1753428336_thumb.jpg',
+      },
+      // ... 更多歌曲
+    ]
+    //如果有歌曲了我就直接添加，如果没有我就设置一个 list
+    if (musicStore.playlist.length > 0) {
+      musicStore.addAndPlaySong(playlist)
+    } else {
+      musicStore.setPlaylist(playlist)
+    }
     await loadAllNews()
   })
 

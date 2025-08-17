@@ -131,6 +131,8 @@
   import { subjectShowStore } from '../../stores/subjectShow'
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import { useToggleModelStore } from '../../stores/toggleModelStore'
+  import { useMusicStore } from '../../stores/music'
+  const musicStore = useMusicStore()
   const showAd = ref(false)
   const adList = ref([])
 
@@ -534,6 +536,8 @@
         ],
       }
     )
+    //暂停其他的音乐先
+    musicStore.stopPlay()
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')

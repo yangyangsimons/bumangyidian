@@ -1,0 +1,194 @@
+.player {
+    width: calc(100% - 70rpx);
+    display: flex;
+    transform: translateY(-25%);
+    background-color: #fff;
+    border-radius: 0px 17.49rpx 17.49rpx 0px;
+    box-shadow: 0px 8.75rpx 15.31rpx rgba(103, 134, 134, 0.18);
+    flex-shrink: 0;
+    margin: 0 auto;
+    height: 120rpx;
+    z-index: 99999;
+    .disc {
+        image {
+            width: 164rpx;
+            height: 120rpx;
+        }
+    }
+
+    .text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 20rpx;
+
+        text:first-child {
+            font-weight: 700;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        text:last-child {
+            font-size: 24rpx;
+            color: #6e7070;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin-top: 10rpx;
+        }
+    }
+
+    .icons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 26rpx;
+        margin-right: 17rpx;
+
+        .music-controls {
+            width: 42rpx;
+            height: 42rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(16, 18, 19, 1);
+            border-radius: 50%;
+            image {
+                width: 14rpx;
+                height: 18rpx;
+            }
+        }
+
+        image {
+            width: 48rpx;
+            height: 48rpx;
+        }
+    }
+}
+
+// 播放列表弹窗样式
+.playlist-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+}
+
+.playlist-content {
+    width: 100%;
+    max-height: 70vh;
+    background: #fff;
+    border-radius: 30rpx 30rpx 0 0;
+    overflow: hidden;
+}
+
+.playlist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30rpx 40rpx;
+    border-bottom: 1rpx solid #eee;
+
+    .title {
+        font-size: 32rpx;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .close-btn {
+        width: 60rpx;
+        height: 60rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48rpx;
+        color: #666;
+        background: #f5f5f5;
+        border-radius: 50%;
+    }
+}
+
+.playlist-list {
+    max-height: 50vh;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24rpx 40rpx;
+    border-bottom: 1rpx solid #f5f5f5;
+
+    &.active {
+        background: #f8f9ff;
+
+        .song-title {
+            color: #007aff;
+        }
+    }
+
+    .song-info {
+        flex: 1;
+        min-width: 0;
+
+        .song-title {
+            display: block;
+            font-size: 30rpx;
+            font-weight: 400;
+            color: #333;
+            margin-bottom: 8rpx;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            display: block;
+            font-size: 26rpx;
+            color: #666;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .song-status {
+        .playing-icon {
+            font-size: 28rpx;
+            color: #007aff;
+        }
+    }
+}
+
+.playlist-footer {
+    padding: 30rpx 40rpx;
+    border-top: 1rpx solid #eee;
+
+    .control-buttons {
+        display: flex;
+        gap: 30rpx;
+
+        .control-btn {
+            flex: 1;
+            height: 80rpx;
+            background: #f5f5f5;
+            border-radius: 40rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28rpx;
+            color: #333;
+
+            &:active {
+                background: #e5e5e5;
+            }
+        }
+    }
+}

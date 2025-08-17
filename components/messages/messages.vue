@@ -67,6 +67,8 @@
   import { ref, onMounted, computed } from 'vue'
   import request from '@/utils/request.js'
   import { baseUrl } from '@/utils/config'
+  import { useMusicStore } from '@/stores/music'
+  import musicbar from '@/components/musicbar/musicbar.vue'
 
   const messageData = ref([])
   const replyMessage = ref('')

@@ -25,8 +25,7 @@
         .category-selector {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 25rpx;
-            padding: 20rpx 0;
-            margin-bottom: 40rpx;
+            margin-bottom: 60rpx;
             backdrop-filter: blur(10rpx);
             position: relative;
         }
@@ -52,25 +51,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        .indicator {
-            width: 30rpx;
-            height: 6rpx;
-            background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
-            border-radius: 3rpx;
-            transition: left 0.3s ease;
-            position: absolute;
-            top: -10rpx;
-        }
-
-        .indicator-arrow {
-            width: 0;
-            height: 0;
-            border-left: 15rpx solid transparent;
-            border-right: 15rpx solid transparent;
-            border-top: 20rpx solid #ff6b6b;
-            margin-top: 5rpx;
         }
 
         .audio-card {
@@ -137,7 +117,12 @@
             display: flex;
             gap: 32rpx;
         }
-
+        wx-button {
+            padding: 0 !important;
+        }
+        wx-button:after {
+            border: none !important;
+        }
         .control-btn {
             width: 80rpx;
             height: 80rpx;
@@ -171,7 +156,7 @@
     .list {
         // 底部安全距离
         box-sizing: border-box;
-        padding-bottom: 100rpx;
+        padding-bottom: 220rpx;
         height: 600rpx;
         border-radius:
             24rpx 24rpx,

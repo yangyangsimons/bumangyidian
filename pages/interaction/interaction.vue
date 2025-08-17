@@ -19,21 +19,44 @@
       <Programme v-if="navActive === 0" />
       <Messages v-if="navActive === 1" />
     </div>
+    <musicbar
+      class="music-bar"
+      style="position: fixed; bottom: 150rpx; left: 0; right: 0; z-index: 99999"
+    />
     <tabbar />
   </view>
 </template>
 
 <script setup>
   import { ref, onMounted } from 'vue'
+  import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
   import Programme from './components/programme.vue'
   import Messages from '@/components/messages/messages.vue'
   import tabbar from '@/components/tabbar/tabbar.vue'
+  import musicbar from '@/components/musicbar/musicbar.vue'
+  import { useMusicStore } from '@/stores/music'
+
   const statusBarHeight = uni.getSystemInfoSync().statusBarHeight
   const menuButtonRect = uni.getMenuButtonBoundingClientRect()
   console.log('导航栏高度:', statusBarHeight)
   console.log('菜单按钮位置:', menuButtonRect)
   const navActive = ref(0)
   const nav = ['节目', '留言']
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/index/index',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+    }
+  })
 </script>
 
 <style lang="scss" scoped>

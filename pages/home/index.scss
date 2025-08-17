@@ -7,7 +7,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-
+    position: relative;
     .logo-container {
         display: flex;
         justify-content: start;
@@ -108,6 +108,7 @@
 
     /* 可滚动的新闻容器 */
     .news-scroll-container {
+        margin-top: 130rpx;
         overflow-y: auto;
         flex: 1;
         /* 确保底部有足够空间，避免被 tabbar 遮挡 */
