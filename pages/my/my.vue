@@ -55,63 +55,68 @@
       </view>
     </view>
     <view class="main">
-      <view class="goods-head"
-        ><view class="title">
-          <text>积分好礼</text>
-          <view class="bar"></view>
-        </view>
-        <view class="more" @click="goMore"
-          ><view class="more-text">更多</view>
-          <image
-            class="more-icon"
-            src="../../static/my/more.png"
-            mode="scaleToFill"
-          ></image>
-        </view>
-      </view>
-      <view class="goods-main">
-        <!-- 这里显示商品列表 -->
-        <view
-          v-for="product in productsList"
-          :key="product.id"
-          class="product-item"
-        >
-          <view class="image-wrap">
-            <image
-              :src="product.main_image"
-              mode="scaleToFill"
-              class="product-pic"
-            ></image>
-            <view class="product-name">{{ product.name }}</view>
+      <view class="goods-container">
+        <view class="goods-head"
+          ><view class="title">
+            <text>积分好礼</text>
+            <view class="bar"></view>
           </view>
+          <view class="more" @click="goMore"
+            ><view class="more-text">更多</view>
+            <image
+              class="more-icon"
+              src="../../static/my/more.png"
+              mode="scaleToFill"
+            ></image>
+          </view>
+        </view>
+        <view class="goods-main">
+          <!-- 这里显示商品列表 -->
+          <view
+            v-for="product in productsList"
+            :key="product.id"
+            class="product-item"
+            @click="goToProductDetail(product.id)"
+          >
+            <view class="image-wrap">
+              <image
+                :src="product.main_image"
+                mode="scaleToFill"
+                class="product-pic"
+              ></image>
+              <view class="product-name">{{ product.name }}</view>
+            </view>
 
-          <view class="product-points">{{ product.points }}积分</view>
+            <view class="product-points">{{ product.points }}积分</view>
+          </view>
         </view>
       </view>
     </view>
     <view class="footer">
-      <view class="footer-head"
-        ><view class="title">
-          <text>我的互动</text>
-          <view class="bar"></view>
+      <view class="container">
+        <view class="footer-head"
+          ><view class="title">
+            <text>我的互动</text>
+            <view class="bar"></view>
+          </view>
         </view>
-      </view>
-      <view class="footer-main">
-        <view class="icon-container" @click="goMessage">
-          <image
-            class="icon"
-            src="../../static/my/leave-message.png"
-            mode="scaleToFill"
-          ></image>
-          <view class="icon-text">留言</view>
-        </view>
-        <view class="icon-container" @click="goCollect">
-          <image
-            class="icon"
-            src="../../static/my/collect.png"
-            mode="scaleToFill"
-          ></image>
-          <view class="icon-text">收藏</view>
+        <view class="footer-main">
+          <view class="icon-container" @click="goMessage">
+            <image
+              class="icon"
+              src="../../static/my/leave-message.png"
+              mode="scaleToFill"
+            ></image>
+            <view class="icon-text">留言</view>
+          </view>
+          <view class="icon-container" @click="goCollect">
+            <image
+              class="icon"
+              src="../../static/my/collect.png"
+              mode="scaleToFill"
+            ></image>
+            <view class="icon-text">收藏</view>
+          </view>
         </view>
       </view>
     </view>
@@ -126,6 +131,8 @@
   import { baseUrl } from '../../utils/config'
   import { dmReport } from '../../utils/report'
   import tabbar from '@/components/tabbar/tabbar.vue'
+  import { checkTokenAndNavigate } from '@/utils/auth'
+
   const toneId = ref(null)
 
   //用户信息
@@ -147,46 +154,47 @@
   const totalPages = ref(0) // 总页数
   const isLoading = ref(false) // 是否正在加载
 
+  const goToProductDetail = (productId) => {
+    checkTokenAndNavigate((token) => {
+      uni.navigateTo({
+        url: `/pages/shop/shop?token=${token}&id=${productId}`,
+      })
+    })
+  }
+
   // 获取更多商品
   const goMore = () => {
-    // 检查是否已登录
-    const token = uni.getStorageSync('token')
-
-    if (!token) {
-      uni.showToast({
-        title: '请先登录',
-        icon: 'none',
+    checkTokenAndNavigate((token) => {
+      uni.navigateTo({
+        url: `/pages/shop/shop?token=${token}`,
       })
-      return
-    }
-
-    // 直接跳转到shop页面，不需要传递URL参数
-    uni.navigateTo({
-      url: '/pages/shop/shop',
-    })
+    }) // 这个可以使用简单的toast提示
   }
 
   // 签到 checkin
   const checkin = async () => {
-    const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
-    console.log('签到结果', checkinRes)
-    if (checkinRes.code === 0 && checkinRes.data) {
-      uni.showToast({
-        title: `${checkinRes.data.msg}`,
-        icon: 'success',
-      })
-      // 查询用户的签到日历
-      const response = await request(`${baseUrl}/user/user_info`, 'get')
-      console.log('签到日历:', response)
-      if (response.code === 0) {
-        checkInDays.value = response.data.sign_count
+    //先判断是不是登录了
+    checkTokenAndNavigate(async (token) => {
+      const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
+      console.log('签到结果', checkinRes)
+      if (checkinRes.code === 0 && checkinRes.data) {
+        uni.showToast({
+          title: `${checkinRes.data.msg}`,
+          icon: 'success',
+        })
+        // 查询用户的签到日历
+        const response = await request(`${baseUrl}/user/user_info`, 'get')
+        console.log('签到日历:', response)
+        if (response.code === 0) {
+          checkInDays.value = response.data.sign_count
+        }
+      } else {
+        uni.showToast({
+          title: checkinRes.message || '签到失败',
+          icon: 'none',
+        })
       }
-    } else {
-      uni.showToast({
-        title: checkinRes.message || '签到失败',
-        icon: 'none',
-      })
-    }
+    })
   }
   // 获取所有商品数据
   const getAllProducts = async () => {
@@ -383,8 +391,10 @@
   }
   //去设置页面
   const goSetting = () => {
-    uni.navigateTo({
-      url: '/pages/mysetting/mysetting',
+    checkTokenAndNavigate(() => {
+      uni.navigateTo({
+        url: '/pages/mysetting/mysetting',
+      })
     })
   }
   // 去收藏页面

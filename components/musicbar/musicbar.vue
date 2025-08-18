@@ -10,14 +10,13 @@
     </view>
 
     <view class="icons">
-      <view class="music-controls">
+      <view class="music-controls" @click="musicStore.togglePlay()">
         <!-- 播放/暂停按钮 -->
         <image
           :src="
             musicStore.isPlaying ? '/static/pause.png' : '/static/triangle.png'
           "
           mode="widthFix"
-          @click="musicStore.togglePlay()"
         />
       </view>
       <!-- 更多按钮 -->

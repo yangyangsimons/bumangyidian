@@ -22,14 +22,14 @@
     box-sizing: border-box;
     position: fixed;
     height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32rpx;
+
     background-color: #00000025;
     font-family: "AlibabaPuHuiTi";
-    padding-right: 0;
     padding-bottom: 200rpx;
     .bg {
         position: fixed;
@@ -72,6 +72,8 @@
         align-items: flex-start;
         gap: 24rpx;
         height: 185rpx;
+        padding-left: 32rpx;
+        box-sizing: border-box;
 
         .avator {
             border: 4rpx solid rgba(255, 255, 255, 1);
@@ -191,9 +193,16 @@
         width: 100%;
         padding: 30rpx 24rpx 40rpx 24rpx;
         // border: 1px solid red;
-        background: rgba(255, 255, 255, 1);
-        border-radius: 28rpx;
 
+        border-radius: 28rpx;
+        box-sizing: border-box;
+        .goods-container {
+            border-radius: 28rpx;
+            width: 100%;
+            background: rgba(255, 255, 255, 1);
+            padding: 30rpx 24rpx 40rpx 24rpx;
+            box-sizing: border-box;
+        }
         .goods-head {
             // border: 1px solid blue;
             width: 100%;
@@ -270,9 +279,14 @@
     .footer {
         width: 100%;
         padding: 30rpx 24rpx 40rpx 24rpx;
-        // border: 1px solid red;
-        background: rgba(255, 255, 255, 1);
-        border-radius: 28rpx;
+        box-sizing: border-box;
+        .container {
+            width: 100%;
+            padding: 30rpx 24rpx 40rpx 24rpx;
+            background: rgba(255, 255, 255, 1);
+            border-radius: 28rpx;
+            box-sizing: border-box;
+        }
         .footer-head {
             width: 100%;
             display: flex;
@@ -284,7 +298,6 @@
             }
         }
         .footer-main {
-            padding: 0 60rpx;
             width: 100%;
             height: 150rpx;
             display: flex;

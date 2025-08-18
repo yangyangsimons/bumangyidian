@@ -5,13 +5,17 @@
       <div
         v-for="(value, index) in nav"
         :class="{ progame: true, active: navActive == index }"
-        :style="{
-          backgroundImage: navActive == index ? 'url(/static/ellipse.png)' : '',
-        }"
         :key="value"
         @click="navActive = index"
       >
-        <text>{{ value }}</text>
+        <!-- 用 image 替代 backgroundImage -->
+        <image
+          v-if="navActive == index"
+          src="/static/ellipse.png"
+          mode="scaleToFill"
+          class="nav-bg-image"
+        />
+        <text class="nav-text">{{ value }}</text>
       </div>
     </div>
     <div class="content">
@@ -19,10 +23,7 @@
       <Programme v-if="navActive === 0" />
       <Messages v-if="navActive === 1" />
     </div>
-    <musicbar
-      class="music-bar"
-      style="position: fixed; bottom: 150rpx; left: 0; right: 0; z-index: 99999"
-    />
+
     <tabbar />
   </view>
 </template>
@@ -48,7 +49,7 @@
       title: `不芒一点，陪你世界加一点`,
       imageUrl:
         'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
-      path: '/pages/index/index',
+      path: 'pages/interaction/interaction',
     }
   })
   onShareTimeline(() => {
@@ -84,10 +85,26 @@
       gap: 50rpx;
 
       view {
-        background-size: cover;
+        position: relative; // 添加相对定位，为背景图片提供定位参考
         font-size: 28rpx;
         color: rgba(110, 112, 112, 1);
         padding: 10rpx;
+
+        // 背景图片样式
+        .nav-bg-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -1; // 置于文字后面
+        }
+
+        // 文字样式，确保在背景图片之上
+        .nav-text {
+          position: relative;
+          z-index: 1;
+        }
       }
 
       .active {

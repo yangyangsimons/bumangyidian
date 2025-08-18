@@ -83,10 +83,7 @@
           </view>
 
           <view class="play-btn" @click="togglePlay(recommendInfo)">
-            <image
-              class="play-icon"
-              :src="isPlaying ? '/static/pause.png' : '/static/triangle.png'"
-            />
+            <image class="play-icon" src="/static/triangle.png" />
           </view>
         </view>
       </view>
@@ -110,6 +107,10 @@
         </div>
       </div>
     </div>
+    <musicbar
+      class="music-bar"
+      style="position: fixed; bottom: 150rpx; left: 0; right: 0; z-index: 99999"
+    />
   </div>
 </template>
 
@@ -127,6 +128,8 @@
   import request from '@/utils/request'
   import { baseUrl } from '@/utils/config'
   import { useMusicStore } from '@/stores/music'
+  import { checkTokenAndNavigate } from '@/utils/auth'
+  import musicbar from '@/components/musicbar/musicbar.vue'
 
   const musicStore = useMusicStore()
 
@@ -459,55 +462,46 @@
       console.log('categories', categories.value)
 
       //获取分类下面的节目列表
-      loadProgramList()
+      await loadProgramList()
+      //如果没有歌曲的话，就把第一个歌曲设置进去
+      if (!musicStore.playlist.length > 0) {
+        console.log(list.value[0])
+        musicStore.setPlaylist([list.value[0]])
+      }
     } catch (error) {
       console.error('初始化数据失败:', error)
     }
   })
 
-  const startAudio = () => {
-    // 创建音频上下文
-    audioContext.value = uni.createInnerAudioContext()
-    audioContext.value.src = recommendInfo.value.src
-    audioContext.value.play()
-
-    audioContext.value.onEnded(() => {
-      isPlaying.value = false
-    })
-  }
-
-  const pauseAudio = () => {
-    if (audioContext.value) {
-      audioContext.value.pause()
-    }
-  }
-
   const toggleFavorite = async (id) => {
-    try {
-      const response = await request(`${baseUrl}/school_music/like`, 'POST', {
-        shcool_music_id: id,
-      })
-      console.log('取消收藏节目:', response)
-      if (response.data.liked) {
-        uni.showToast({
-          title: '收藏成功',
-          icon: 'success',
+    //先判断是不是登录了
+    checkTokenAndNavigate(async (token) => {
+      try {
+        const response = await request(`${baseUrl}/school_music/like`, 'POST', {
+          shcool_music_id: id,
         })
-      } else {
+        console.log('取消收藏节目:', response)
+        if (response.data.liked) {
+          uni.showToast({
+            title: '收藏成功',
+            icon: 'success',
+          })
+        } else {
+          uni.showToast({
+            title: '已取消收藏',
+            icon: 'none',
+          })
+        }
+        // 重新加载节目列表
+        loadProgramList()
+      } catch (error) {
+        console.error('取消收藏节目失败:', error)
         uni.showToast({
-          title: '已取消收藏',
+          title: '取消收藏失败',
           icon: 'none',
         })
       }
-      // 重新加载节目列表
-      loadProgramList()
-    } catch (error) {
-      console.error('取消收藏节目失败:', error)
-      uni.showToast({
-        title: '取消收藏失败',
-        icon: 'none',
-      })
-    }
+    })
   }
 
   const shareAudio = (recommendInfo) => {
@@ -544,7 +538,7 @@
       title: `不芒一点，陪你世界加一点`,
       imageUrl:
         'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
-      path: '/pages/index/index',
+      path: '/pages/interaction/interaction',
     }
   })
   onShareTimeline(() => {

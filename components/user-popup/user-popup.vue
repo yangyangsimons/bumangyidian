@@ -7,16 +7,9 @@
         mode="scaleToFill"
       />
       <view class="header">
-        <image class="avator" :src="avator" @click="changeAvator"></image>
+        <image class="avator" :src="avator"></image>
         <view class="user-info">
-          <view class="name"
-            >{{ userName }}
-            <image
-              class="change"
-              src="../../static/change.png"
-              @click="changeName"
-            ></image>
-          </view>
+          <view class="name">{{ userName }} </view>
           <view class="info-container">
             <view class="age">{{ userAge }}岁</view>
             <view class="sex">
@@ -26,11 +19,6 @@
               <view class="mbti-name">{{ userMbti }}</view>
               <view class="mbti-short">{{ userMbtiShort }}</view>
             </view>
-            <image
-              class="change"
-              src="../../static/change.png"
-              @click="changeMbti"
-            ></image>
           </view>
         </view>
       </view>
@@ -270,23 +258,23 @@
     audioPlayer.value = null
     audioPlayerStore.setTtsVolume(1)
     console.log('更新音色', selectedToneId.value)
-    //先判断是不是选择了id为6的音色，这是金种子，不更新给后台
-    if (selectedToneId.value == 6 && modelStore.model !== '金种子杯模式') {
-      // 选中的是音色6，触发模式切换逻辑
-      console.log(
-        '选了金种子，直接切换模式，不更新音色了',
-        selectedToneId.value
-      )
-      toggleModelStore.triggerModelChange()
-      return
-    }
-    if (selectedToneId.value == 6 && modelStore.model == '金种子杯模式') {
-      //金种子杯模式下，选中的是音色6，什么都不做；
-      console.log(
-        '金种子杯模式下选中的是音色6，什么都不做',
-        selectedToneId.value
-      )
-    }
+    // //先判断是不是选择了id为6的音色，这是金种子，不更新给后台
+    // if (selectedToneId.value == 6 && modelStore.model !== '金种子杯模式') {
+    //   // 选中的是音色6，触发模式切换逻辑
+    //   console.log(
+    //     '选了金种子，直接切换模式，不更新音色了',
+    //     selectedToneId.value
+    //   )
+    //   toggleModelStore.triggerModelChange()
+    //   return
+    // }
+    // if (selectedToneId.value == 6 && modelStore.model == '金种子杯模式') {
+    //   //金种子杯模式下，选中的是音色6，什么都不做；
+    //   console.log(
+    //     '金种子杯模式下选中的是音色6，什么都不做',
+    //     selectedToneId.value
+    //   )
+    // }
 
     const res = await request(`${baseUrl}/tone/update`, 'post', {
       tone_id: selectedToneId.value,

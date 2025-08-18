@@ -30,7 +30,7 @@
       </view>
     </scroll-view>
     <view class="button-icons">
-      <button class="share" @click="shareNews">
+      <button class="share" @click="shareNews" open-type="share">
         <image src="../../static/my/share.png" mode="scaleToFill" />
         <text>分享</text>
       </button>
@@ -60,36 +60,56 @@
   import { baseUrl } from '../../utils/config'
   import { useMusicStore } from '@/stores/music'
   import musicbar from '@/components/musicbar/musicbar.vue'
+  import { checkTokenAndNavigate } from '@/utils/auth'
+  import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 
   const isCollected = ref(false)
   const newsid = ref('')
 
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/home/home',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+    }
+  })
   const collectNews = async () => {
-    try {
-      const response = await request(`${baseUrl}/school_news/like`, 'POST', {
-        school_new_id: newsid.value,
-      })
-      console.log('收藏资讯:', response)
-      if (response.data.liked) {
-        uni.showToast({
-          title: '收藏成功',
-          icon: 'success',
+    //先判断是不是登录了
+    checkTokenAndNavigate(async (token) => {
+      try {
+        const response = await request(`${baseUrl}/school_news/like`, 'POST', {
+          school_new_id: newsid.value,
         })
-        isCollected.value = true
-      } else {
+        console.log('收藏资讯:', response)
+        if (response.data.liked) {
+          uni.showToast({
+            title: '收藏成功',
+            icon: 'success',
+          })
+          isCollected.value = true
+        } else {
+          uni.showToast({
+            title: '已取消收藏',
+            icon: 'none',
+          })
+          isCollected.value = false
+        }
+      } catch (error) {
+        console.error('收藏资讯失败:', error)
         uni.showToast({
-          title: '已取消收藏',
+          title: '收藏失败',
           icon: 'none',
         })
-        isCollected.value = false
       }
-    } catch (error) {
-      console.error('收藏资讯失败:', error)
-      uni.showToast({
-        title: '收藏失败',
-        icon: 'none',
-      })
-    }
+    })
   }
 
   const newsTitle = ref('')

@@ -216,9 +216,7 @@
       // ... 更多歌曲
     ]
     //如果有歌曲了我就直接添加，如果没有我就设置一个 list
-    if (musicStore.playlist.length > 0) {
-      musicStore.addAndPlaySong(playlist)
-    } else {
+    if (!musicStore.playlist.length > 0) {
       musicStore.setPlaylist(playlist)
     }
     await loadAllNews()

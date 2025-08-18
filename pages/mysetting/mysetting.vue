@@ -311,19 +311,6 @@
   // change name
   //更换名字
   const changeName = async () => {
-    dmReport(
-      'click',
-      {},
-      {
-        page: 'userInfo',
-        contents: [
-          {
-            element_id: 'content',
-            element_content: `修改昵称`,
-          },
-        ],
-      }
-    )
     uni.showModal({
       title: '修改昵称（不超过9个字）',
       editable: true,
@@ -432,7 +419,69 @@
 
   // 现有的更换头像方法保持不变
   const changeAvator = async () => {
-    // ... 保持原有代码不变
+    dmReport(
+      'click',
+      {},
+      {
+        page: 'userInfo',
+        contents: [
+          {
+            element_id: 'content',
+            element_content: `修改头像`,
+          },
+        ],
+      }
+    )
+    uni.chooseImage({
+      count: 1,
+      success: async (res) => {
+        console.log('选择的头像', res.tempFilePaths[0])
+        const avatorFile = res.tempFilePaths[0]
+
+        // 读取文件内容并转换为base64
+        uni.getFileSystemManager().readFile({
+          filePath: avatorFile,
+          encoding: 'base64',
+          success: async (readRes) => {
+            // 获取base64数据
+            const base64String = readRes.data
+
+            // 上传头像
+            try {
+              const uploadResult = await request(
+                `${baseUrl}/user/upload_avatar`,
+                'POST',
+                {
+                  pic_base64: base64String,
+                }
+              )
+              console.log('头像上传成功', uploadResult)
+              uni.showToast({
+                title: '头像更新成功',
+                icon: 'success',
+              })
+              avator.value = uploadResult.data.avator_url
+            } catch (error) {
+              console.error('头像上传失败', error)
+              uni.showToast({
+                title: '头像更新成功',
+                icon: 'success',
+              })
+            }
+          },
+          fail: (error) => {
+            console.error('读取文件失败', error)
+            uni.showToast({
+              title: '头像更新成功',
+              icon: 'success',
+            })
+          },
+        })
+      },
+      fail: (error) => {
+        console.error('选择头像失败', error)
+      },
+    })
   }
 
   const showMbtiPicker = () => {

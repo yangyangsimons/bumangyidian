@@ -18,7 +18,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   const bgAudioId = ref(null)
   const bgPlayTime = ref(0)
   const bgIsPlaying = ref(false)
-  const bgVolume = ref(1.0) // 背景音乐音量，范围0-1
+  const bgVolume = ref(0) // 背景音乐音量，范围0-1
   const bgLoop = ref(false) // 是否循环播放背景音乐
   const currentBgUrl = ref('') // 当前背景音乐URL，用于循环播放时重新播放
 
@@ -33,7 +33,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   const ttsAudioId = ref(null)
   const ttsIsPlaying = ref(false)
   const ttsPlayTime = ref(0)
-  const ttsVolume = ref(1.0) // TTS音量，范围0-1
+  const ttsVolume = ref(0) // TTS音量，范围0-1
   const ttsPaused = ref(false) // 新增：TTS是否被暂停（与停止不同）
   const currentTtsUrl = ref('') // 新增：当前TTS音频URL，用于恢复播放
 
