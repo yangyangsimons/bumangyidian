@@ -34,7 +34,6 @@
   import Programme from './components/programme.vue'
   import Messages from '@/components/messages/messages.vue'
   import tabbar from '@/components/tabbar/tabbar.vue'
-  import musicbar from '@/components/musicbar/musicbar.vue'
   import { useMusicStore } from '@/stores/music'
 
   const statusBarHeight = uni.getSystemInfoSync().statusBarHeight

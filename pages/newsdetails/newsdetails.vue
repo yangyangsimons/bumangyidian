@@ -34,16 +34,6 @@
         <image src="../../static/my/share.png" mode="scaleToFill" />
         <text>分享</text>
       </button>
-      <musicbar
-        class="music-bar"
-        style="
-          position: fixed;
-          bottom: 120rpx;
-          left: 0;
-          right: 0;
-          z-index: 99999;
-        "
-      />
       <button class="collect" @click="collectNews">
         <image src="../../static/my/news-collect.png" mode="scaleToFill" />
         <text v-if="!isCollected">收藏</text>
@@ -59,7 +49,6 @@
   import request from '@/utils/request.js'
   import { baseUrl } from '../../utils/config'
   import { useMusicStore } from '@/stores/music'
-  import musicbar from '@/components/musicbar/musicbar.vue'
   import { checkTokenAndNavigate } from '@/utils/auth'
   import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 

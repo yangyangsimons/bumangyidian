@@ -42,10 +42,7 @@
         src="../../static/my/empty-message.png"
       ></image>
     </view>
-    <musicbar
-      class="music-bar"
-      style="position: fixed; bottom: 250rpx; left: 0; right: 0; z-index: 99999"
-    />
+
     <!-- 留言输入区域 -->
     <view class="sendMessage">
       <input
@@ -71,7 +68,6 @@
   import request from '@/utils/request.js'
   import { baseUrl } from '@/utils/config'
   import { useMusicStore } from '@/stores/music'
-  import musicbar from '@/components/musicbar/musicbar.vue'
 
   const messageData = ref([])
   const replyMessage = ref('')

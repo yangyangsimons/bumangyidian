@@ -53,17 +53,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(16, 18, 19, 1);
+            border: 2px solid rgba(16, 18, 19, 1);
             border-radius: 50%;
             image {
                 width: 14rpx;
                 height: 18rpx;
             }
         }
-
-        image {
-            width: 48rpx;
-            height: 48rpx;
+        .more {
+            width: 42rpx;
+            height: 42rpx;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(16, 18, 19, 1);
+            image {
+                width: 22rpx;
+                height: 8rpx;
+            }
         }
     }
 }

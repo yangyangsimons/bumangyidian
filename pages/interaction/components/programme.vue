@@ -83,7 +83,16 @@
           </view>
 
           <view class="play-btn" @click="togglePlay(recommendInfo)">
-            <image class="play-icon" src="/static/triangle.png" />
+            <image
+              class="play-icon"
+              :src="
+                musicStore.isPlaying &&
+                musicStore.currentSong &&
+                musicStore.currentSong.id === recommendInfo.id
+                  ? '/static/pause.png'
+                  : '/static/triangle.png'
+              "
+            />
           </view>
         </view>
       </view>
@@ -102,15 +111,20 @@
             <image :src="getLikeImageSrc(item)" mode="widthFix" />
           </div>
           <div class="play" @click="togglePlay(item)">
-            <image src="/static/triangle.png" mode="widthFix" />
+            <image
+              :src="
+                musicStore.isPlaying &&
+                musicStore.currentSong &&
+                musicStore.currentSong.id === item.id
+                  ? '/static/pause.png'
+                  : '/static/triangle.png'
+              "
+              mode="widthFix"
+            />
           </div>
         </div>
       </div>
     </div>
-    <musicbar
-      class="music-bar"
-      style="position: fixed; bottom: 150rpx; left: 0; right: 0; z-index: 99999"
-    />
   </div>
 </template>
 
@@ -129,13 +143,20 @@
   import { baseUrl } from '@/utils/config'
   import { useMusicStore } from '@/stores/music'
   import { checkTokenAndNavigate } from '@/utils/auth'
-  import musicbar from '@/components/musicbar/musicbar.vue'
 
   const musicStore = useMusicStore()
 
   const togglePlay = (item) => {
-    isPlaying.value = !isPlaying.value
-    musicStore.addAndPlaySong(item)
+    console.log('切换播放状态:', item)
+
+    // 检查当前是否正在播放这首歌
+    if (musicStore.currentSong && musicStore.currentSong.id === item.id) {
+      // 如果是同一首歌，就切换播放/暂停状态
+      musicStore.togglePlay()
+    } else {
+      // 如果是不同的歌，就播放新歌
+      musicStore.addAndPlaySong(item)
+    }
   }
   const list = ref([])
   // 在 setup 顶部获取实例
@@ -146,7 +167,6 @@
   const categories = ref([])
   const activeCategory = ref(1) // 默认选中"知识类"
   const recommendInfo = ref({})
-  const isPlaying = ref(false)
   const isFavorite = ref(false)
   const audioContext = ref(null)
 
@@ -464,7 +484,11 @@
       //获取分类下面的节目列表
       await loadProgramList()
       //如果没有歌曲的话，就把第一个歌曲设置进去
-      if (!musicStore.playlist.length > 0) {
+      if (
+        musicStore.playlist.length <= 0 &&
+        list.value.length > 0 &&
+        list.value[0]
+      ) {
         console.log(list.value[0])
         musicStore.setPlaylist([list.value[0]])
       }

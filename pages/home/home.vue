@@ -12,20 +12,6 @@
     </div>
     <image src="/static/banner.png" class="banner" mode="aspectFill" />
     <div class="content">
-      <!-- <div class="player">
-        <div class="disc">
-          <image src="/static/disc.png" mode="aspectFill" />
-        </div>
-        <div class="text">
-          <text>校园之声</text>
-          <text>杨思思-校园广播电台情感电台</text>
-        </div>
-        <div class="icons">
-          <image src="/static/player.png" mode="widthFix" />
-          <image src="/static/more.png" mode="widthFix" />
-        </div>
-      </div> -->
-
       <!-- 可滚动的新闻容器 -->
       <view class="news-scroll-container">
         <div class="title">热点资讯</div>
@@ -176,8 +162,8 @@
       // 设置主新闻和新闻列表
       if (allNews.value.length > 0) {
         mainNews.value = allNews.value[0]
-        // 显示所有数据（包括主新闻，这样第一个新闻会显示两次）
-        newsList.value = allNews.value
+        // 新闻列表不包含主新闻，从第二条开始显示
+        newsList.value = allNews.value.slice(1)
 
         console.log('主新闻设置完成')
         console.log('allNews总数:', allNews.value.length)
@@ -199,28 +185,106 @@
 
   onShow(async () => {
     console.log('页面显示，开始加载数据')
-    // 初始化音频
-    // musicStore.initAudio()
 
-    // 设置播放列表（示例）
-    const playlist = [
-      {
-        id: 1,
-        title: '歌曲1',
-        desc: '艺术家1',
-        audio_url:
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/school_music/%E7%9F%A5%E8%AF%86%E7%B1%BB/%E9%99%86%E8%A8%80.mp3',
-        cover:
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/news/1753428336_thumb.jpg',
-      },
-      // ... 更多歌曲
-    ]
-    //如果有歌曲了我就直接添加，如果没有我就设置一个 list
-    if (!musicStore.playlist.length > 0) {
-      musicStore.setPlaylist(playlist)
+    // 如果播放列表为空，从后端获取节目列表并随机选择一首
+    if (musicStore.playlist.length <= 0) {
+      await loadRandomSongToPlaylist()
     }
+
     await loadAllNews()
   })
+
+  // 从后端获取节目列表并随机选择一首歌曲添加到播放列表（不播放）
+  const loadRandomSongToPlaylist = async () => {
+    try {
+      console.log('播放列表为空，从后端获取节目列表...')
+
+      // 先获取所有分类
+      const categoriesResponse = await request(
+        `${baseUrl}/school_music/categories`,
+        'GET'
+      )
+
+      if (
+        categoriesResponse.code !== 0 ||
+        !categoriesResponse.data ||
+        categoriesResponse.data.length === 0
+      ) {
+        console.log('获取分类失败或无分类数据')
+        return
+      }
+
+      const categories = [...categoriesResponse.data] // 复制数组，避免修改原数组
+      let randomSong = null
+
+      // 循环尝试不同的分类，直到找到有节目的分类或所有分类都尝试过
+      while (categories.length > 0 && !randomSong) {
+        // 随机选择一个分类索引
+        const randomIndex = Math.floor(Math.random() * categories.length)
+        const randomCategory = categories[randomIndex]
+
+        // 从数组中移除已尝试的分类，避免重复尝试
+        categories.splice(randomIndex, 1)
+
+        console.log(
+          `尝试分类: ${randomCategory} (剩余未尝试: ${categories.length})`
+        )
+
+        try {
+          // 获取该分类下的节目列表
+          const programResponse = await request(
+            `${baseUrl}/school_music/list?category=${randomCategory}`,
+            'GET'
+          )
+
+          if (
+            programResponse.code === 0 &&
+            programResponse.data &&
+            programResponse.data.length > 0
+          ) {
+            const programs = programResponse.data
+            // 随机选择一首歌曲
+            const randomSongIndex = Math.floor(Math.random() * programs.length)
+            randomSong = programs[randomSongIndex]
+
+            console.log(
+              `在分类 "${randomCategory}" 中找到 ${programs.length} 首节目`
+            )
+            console.log('随机选择的歌曲:', randomSong)
+            break
+          } else {
+            console.log(
+              `分类 "${randomCategory}" 下没有节目或获取失败，尝试其他分类...`
+            )
+          }
+        } catch (categoryError) {
+          console.error(`获取分类 "${randomCategory}" 节目失败:`, categoryError)
+          // 继续尝试下一个分类
+        }
+      }
+
+      if (randomSong) {
+        // 使用不会自动播放的方法设置播放列表
+        musicStore.setPlaylistWithoutPlay([randomSong], 0)
+        console.log('随机歌曲已添加到播放列表（未播放）')
+      } else {
+        console.log('所有分类都没有找到可用的节目')
+        // 可以在这里设置一个默认的音乐或显示提示
+        uni.showToast({
+          title: '暂无可播放的节目',
+          icon: 'none',
+          duration: 2000,
+        })
+      }
+    } catch (error) {
+      console.error('加载随机歌曲失败:', error)
+      uni.showToast({
+        title: '获取节目失败',
+        icon: 'none',
+        duration: 2000,
+      })
+    }
+  }
 
   // 点击新闻处理函数
   // 查看资讯详情

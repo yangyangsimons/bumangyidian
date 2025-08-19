@@ -19,7 +19,7 @@ export const useMusicStore = defineStore('music', {
 
   actions: {
     initAudio() {
-      this.audioContext = uni.createInnerAudioContext()
+      this.audioContext = uni.getBackgroundAudioManager()
       this.setupAudioEvents()
     },
 
@@ -31,6 +31,10 @@ export const useMusicStore = defineStore('music', {
       })
 
       this.audioContext.onPause(() => {
+        this.isPlaying = false
+      })
+
+      this.audioContext.onStop(() => {
         this.isPlaying = false
       })
 
@@ -46,18 +50,58 @@ export const useMusicStore = defineStore('music', {
 
     setPlaylist(list, index = 0) {
       console.log('设置播放列表:', list, '当前索引:', index)
-      this.playlist = list
+      // 过滤掉无效的歌曲数据
+      this.playlist = list.filter((item) => item && item.id && item.audio_url)
       this.currentIndex = index
       this.currentSong = this.getCurrentSong
       if (this.audioContext && this.currentSong) {
+        // 设置背景音乐管理器的必要属性
+        this.audioContext.title = this.currentSong.title || '不芒一点'
+        this.audioContext.epname = this.currentSong.desc || '校园节目'
+        this.audioContext.singer = this.currentSong.artist || ''
+        this.audioContext.coverImgUrl =
+          this.currentSong.cover ||
+          'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg'
+
         this.audioContext.src = this.currentSong.audio_url
+      }
+    },
+
+    // 设置播放列表但不自动播放（仅准备音频源）
+    setPlaylistWithoutPlay(list, index = 0) {
+      console.log('设置播放列表（不播放）:', list, '当前索引:', index)
+      // 过滤掉无效的歌曲数据
+      this.playlist = list.filter((item) => item && item.id && item.audio_url)
+      this.currentIndex = index
+      this.currentSong = this.getCurrentSong
+
+      // 只设置歌曲信息，不设置音频源，避免自动播放
+      if (this.audioContext && this.currentSong) {
+        // 设置背景音乐管理器的必要属性
+        this.audioContext.title = this.currentSong.title || '不芒一点'
+        this.audioContext.epname = this.currentSong.desc || '校园节目'
+        this.audioContext.singer = this.currentSong.artist || ''
+        this.audioContext.coverImgUrl =
+          this.currentSong.cover ||
+          'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg'
+
+        // 注意：这里不设置 src，避免自动播放
+        console.log('播放列表已设置，但不会自动播放')
       }
     },
 
     // 添加歌曲到播放列表并立即播放
     addAndPlaySong(song, playImmediately = true) {
+      console.log('添加并播放歌曲:', song, '立即播放:', playImmediately)
+
+      // 验证歌曲数据的有效性
+      if (!song || !song.id || !song.audio_url) {
+        console.error('无效的歌曲数据:', song)
+        return
+      }
+
       const existingIndex = this.playlist.findIndex(
-        (item) => item.id === song.id
+        (item) => item && item.id === song.id
       )
 
       if (existingIndex !== -1) {
@@ -95,7 +139,25 @@ export const useMusicStore = defineStore('music', {
         const audioPlayerStore = useAudioPlayerStore()
         audioPlayerStore.stopAllAudio()
 
-        this.audioContext.play()
+        // 检查是否已经设置了音频源
+        if (
+          !this.audioContext.src ||
+          this.audioContext.src !== this.currentSong.audio_url
+        ) {
+          console.log('音频源未设置或不匹配，重新设置音频源')
+          // 设置音频源
+          this.audioContext.src = this.currentSong.audio_url
+          // backgroundAudioManager 设置 src 后会自动播放
+        } else {
+          // 对于 backgroundAudioManager，如果已经有src则可以调用play()
+          try {
+            this.audioContext.play()
+          } catch (error) {
+            console.error('恢复播放失败，重新设置音频源:', error)
+            // 如果播放失败，重新设置音频源
+            this.playSong(this.currentIndex)
+          }
+        }
       }
     },
 
@@ -110,8 +172,16 @@ export const useMusicStore = defineStore('music', {
       this.currentSong = this.getCurrentSong
 
       if (this.audioContext && this.currentSong) {
+        // 设置背景音乐管理器的必要属性
+        this.audioContext.title = this.currentSong.title || '不芒一点'
+        this.audioContext.epname = this.currentSong.desc || '校园节目'
+        this.audioContext.singer = this.currentSong.artist || ''
+        this.audioContext.coverImgUrl =
+          this.currentSong.cover ||
+          'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg'
+
         this.audioContext.src = this.currentSong.audio_url
-        this.audioContext.play()
+        // backgroundAudioManager 设置 src 后会自动播放，不需要手动调用 play()
       }
     },
 
@@ -157,7 +227,8 @@ export const useMusicStore = defineStore('music', {
 
     destroyAudio() {
       if (this.audioContext) {
-        this.audioContext.destroy()
+        // backgroundAudioManager 不需要调用 destroy()，只需要停止即可
+        this.audioContext.stop()
         this.audioContext = null
       }
     },

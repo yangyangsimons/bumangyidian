@@ -20,11 +20,9 @@
         />
       </view>
       <!-- 更多按钮 -->
-      <image
-        src="/static/more.png"
-        mode="widthFix"
-        @click="showPlaylist = true"
-      />
+      <view class="more">
+        <image src="/static/more.png" mode="widthFix" @click="goToProgramPage"
+      /></view>
     </view>
 
     <!-- 歌曲列表弹窗 -->
@@ -85,6 +83,13 @@
   const playSong = (index) => {
     musicStore.playSong(index)
     showPlaylist.value = false
+  }
+
+  // 跳转到节目页面
+  const goToProgramPage = () => {
+    uni.switchTab({
+      url: '/pages/interaction/interaction',
+    })
   }
 </script>
 <style scoped lang="scss">
