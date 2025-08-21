@@ -46,12 +46,14 @@
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
+        padding: 0 32rpx;
     }
     ::v-deep .uni-navbar__header-container-inner {
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
     }
+
     ::v-deep .uni-nav-bar-text {
         font-size: 36rpx !important;
         font-weight: 700 !important;
@@ -234,8 +236,8 @@
             grid-template-columns: repeat(auto-fill, minmax(140rpx, 1fr));
             grid-template-rows: repeat(auto-fill, 180rpx);
             align-items: center;
-            justify-items: center;
-            row-gap: 40rpx;
+            justify-items: space-between;
+            row-gap: 45rpx;
             .product-item {
                 width: 140rpx;
                 height: 180rpx;
@@ -246,6 +248,7 @@
                 position: relative;
                 font-size: 24rpx;
                 font-weight: 500;
+                gap: 8rpx;
                 .image-wrap {
                     position: relative;
                     width: 100%;
@@ -269,6 +272,12 @@
                     }
                 }
                 .product-points {
+                    text-align: center;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto;
+                    width: 90%;
                     font-size: 24rpx;
                     font-weight: 500;
                     color: rgba(16, 18, 19, 1);

@@ -22,9 +22,19 @@
 }
 
 .banner {
+    // border: 1px solid red;
     width: 100%;
     height: 400rpx;
     flex-shrink: 0;
+    .banner-item {
+        // border: 1px solid blue;
+        height: 100%;
+        width: 100%;
+        image {
+            width: 100%;
+            height: 100%;
+        }
+    }
 }
 
 .content {
@@ -87,6 +97,8 @@
     .title {
         width: fit-content;
         margin-inline: 35rpx;
+        margin-top: 130rpx;
+        margin-bottom: 32rpx;
         font-weight: 700;
         position: relative;
         z-index: 5;
@@ -108,11 +120,26 @@
 
     /* 可滚动的新闻容器 */
     .news-scroll-container {
-        margin-top: 130rpx;
         overflow-y: auto;
         flex: 1;
         /* 确保底部有足够空间，避免被 tabbar 遮挡 */
         padding-bottom: 120rpx;
+
+        /* 顶部模糊过渡效果 */
+        mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 20rpx,
+            rgba(0, 0, 0, 0.8) 60rpx,
+            black 100rpx
+        );
+        -webkit-mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 20rpx,
+            rgba(0, 0, 0, 0.8) 60rpx,
+            black 100rpx
+        );
     }
 
     .news-container {

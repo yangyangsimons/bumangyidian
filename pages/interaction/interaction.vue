@@ -61,8 +61,9 @@
 
 <style lang="scss" scoped>
   .container {
+    position: fixed;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;

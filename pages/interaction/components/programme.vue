@@ -97,10 +97,12 @@
         </view>
       </view>
     </div>
+    <!-- 节目列表标题 -->
+    <div class="list-title">
+      <div>节目列表</div>
+    </div>
+    <!-- 可滚动的节目列表容器 -->
     <div class="list">
-      <div class="list-title">
-        <div>节目列表</div>
-      </div>
       <div class="item" v-for="item in list" :key="item.id">
         <div>
           <div class="title">{{ item.title }}</div>
@@ -483,14 +485,14 @@
 
       //获取分类下面的节目列表
       await loadProgramList()
-      //如果没有歌曲的话，就把第一个歌曲设置进去
+      //如果没有歌曲的话，就把第一个歌曲设置进去（但不自动播放）
       if (
         musicStore.playlist.length <= 0 &&
         list.value.length > 0 &&
         list.value[0]
       ) {
         console.log(list.value[0])
-        musicStore.setPlaylist([list.value[0]])
+        musicStore.setPlaylistWithoutPlay([list.value[0]])
       }
     } catch (error) {
       console.error('初始化数据失败:', error)

@@ -58,18 +58,39 @@
   onShareAppMessage(() => {
     console.log('onShareAppMessage......')
     return {
-      title: `不芒一点，陪你世界加一点`,
+      title: newsTitle.value || `不芒一点，陪你世界加一点`,
       imageUrl:
         'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
-      path: '/pages/home/home',
+      path: `/pages/home/home?shareNewsId=${newsid.value}`,
     }
   })
+
   onShareTimeline(() => {
     console.log('onShareTimeline......')
     return {
-      title: `不芒一点，陪你世界加一点`,
+      title: newsTitle.value || `不芒一点，陪你世界加一点`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      query: `shareNewsId=${newsid.value}`,
     }
   })
+  // const shareNews = () => {
+  //   uni.share({
+  //     provider: 'weixin',
+  //     scene: 'WXSceneSession',
+  //     type: 0,
+  //     href: 'http://uniapp.dcloud.io/',
+  //     title: `不芒一点，陪你世界加一点`,
+  //     imageUrl:
+  //       'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+  //     success: function (res) {
+  //       console.log('success:' + JSON.stringify(res))
+  //     },
+  //     fail: function (err) {
+  //       console.log('fail:' + JSON.stringify(err))
+  //     },
+  //   })
+  // }
   const collectNews = async () => {
     //先判断是不是登录了
     checkTokenAndNavigate(async (token) => {
@@ -137,13 +158,13 @@
     newsid.value = info.id
     //info.liked是0 就是没收藏，为1就是收藏了
     isCollected.value = info.liked == 1
+
     if (newsDetail) {
       newsTitle.value = newsDetail.title || '资讯详情'
       newsTime.value = newsDetail.created_at || ''
       originalHtml.value = newsDetail.html || ''
 
       console.log('原始HTML:', newsDetail.html)
-
       uni.removeStorageSync('currentNewsDetail')
     } else {
       uni.showToast({

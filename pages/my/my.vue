@@ -84,7 +84,7 @@
                 mode="scaleToFill"
                 class="product-pic"
               ></image>
-              <view class="product-name">{{ product.name }}</view>
+              <!-- <view class="product-name">{{ product.name }}</view> -->
             </view>
 
             <view class="product-points">{{ product.points }}积分</view>
@@ -187,6 +187,12 @@
         console.log('签到日历:', response)
         if (response.code === 0) {
           checkInDays.value = response.data.sign_count
+        }
+        //这里还要再次查询用户的积分，进行更新
+        const pointsResponse = await request(`${baseUrl}/user/user_info`, 'get')
+        console.log('用户积分:', pointsResponse)
+        if (pointsResponse.code === 0) {
+          points_balance.value = pointsResponse.data.points_balance
         }
       } else {
         uni.showToast({

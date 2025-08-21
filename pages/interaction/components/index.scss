@@ -153,6 +153,30 @@
             height: 46rpx;
         }
     }
+
+    /* 节目列表标题 */
+    .list-title {
+        width: fit-content;
+        position: relative;
+        z-index: 5;
+        font-size: 32rpx;
+        font-weight: 700;
+        margin: 32rpx;
+        &::after {
+            content: "";
+            width: 142rpx;
+            height: 13rpx;
+            border-radius: 6.56px;
+            background: linear-gradient(243.43deg, #cefa1e 0%, #a7ee27 100%);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            z-index: -1;
+            transform: translateX(-50%);
+        }
+    }
+
+    /* 可滚动的节目列表容器 */
     .list {
         // 底部安全距离
         box-sizing: border-box;
@@ -164,26 +188,22 @@
             0rpx;
         background: #fff;
         overflow-y: auto;
-        &-title {
-            width: fit-content;
-            position: relative;
-            z-index: 5;
-            font-size: 32rpx;
-            font-weight: 700;
-            margin: 32rpx;
-            &::after {
-                content: "";
-                width: 142rpx;
-                height: 13rpx;
-                border-radius: 6.56px;
-                background: linear-gradient(243.43deg, #cefa1e 0%, #a7ee27 100%);
-                position: absolute;
-                bottom: 0;
-                left: 50%;
-                z-index: -1;
-                transform: translateX(-50%);
-            }
-        }
+
+        /* 顶部模糊过渡效果 */
+        mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 20rpx,
+            rgba(0, 0, 0, 0.8) 60rpx,
+            black 100rpx
+        );
+        -webkit-mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 20rpx,
+            rgba(0, 0, 0, 0.8) 60rpx,
+            black 100rpx
+        );
         .item {
             padding: 24rpx 0;
             margin: 0 30rpx;

@@ -10,11 +10,27 @@
     >
       <image src="/static/global-title.png" class="logo" mode="widthFix" />
     </div>
-    <image src="/static/banner.png" class="banner" mode="aspectFill" />
+    <!-- 轮播图 -->
+    <swiper
+      class="banner"
+      :indicator-dots="false"
+      :autoplay="true"
+      :circular="true"
+      :interval="2000"
+    >
+      <swiper-item
+        v-for="(item, index) in swiperList"
+        :key="index"
+        class="banner-item"
+      >
+        <image :src="item.pic_url" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
     <div class="content">
+      <!-- 标题 -->
+      <div class="title">热点资讯</div>
       <!-- 可滚动的新闻容器 -->
       <view class="news-scroll-container">
-        <div class="title">热点资讯</div>
         <view class="news-container">
           <!-- 主要新闻卡片 -->
           <view class="main-news-card" v-if="mainNews">
@@ -85,7 +101,7 @@
 
 <script setup>
   import { ref, onMounted } from 'vue'
-  import { onShow, onHide } from '@dcloudio/uni-app'
+  import { onShow, onHide, onLoad } from '@dcloudio/uni-app'
   import request from '@/utils/request.js'
   import { baseUrl } from '../../utils/config'
   import tabbar from '@/components/tabbar/tabbar.vue'
@@ -103,6 +119,8 @@
   const refreshing = ref(false)
   const pageSize = 20 // 每页加载数量，可以适当调大
 
+  //轮播图
+  const swiperList = ref([])
   // 格式化日期
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
@@ -169,6 +187,29 @@
         console.log('allNews总数:', allNews.value.length)
         console.log('newsList数量:', newsList.value.length)
         console.log('显示总数:', 1 + newsList.value.length)
+
+        // 检查是否需要自动跳转到特定资讯
+        const autoOpenNewsId = uni.getStorageSync('autoOpenNewsId')
+        if (autoOpenNewsId) {
+          console.log('自动跳转到资讯:', autoOpenNewsId)
+
+          // 在所有资讯中查找对应的资讯
+          const targetNews = allNews.value.find(
+            (news) => news.id == autoOpenNewsId
+          )
+          if (targetNews) {
+            // 清除标识
+            uni.removeStorageSync('autoOpenNewsId')
+
+            // 延迟一点时间确保页面渲染完成
+            setTimeout(() => {
+              viewNewsDetail(targetNews)
+            }, 500)
+          } else {
+            console.log('未找到对应的资讯')
+            uni.removeStorageSync('autoOpenNewsId')
+          }
+        }
       } else {
         console.log('没有获取到任何新闻数据')
       }
@@ -192,8 +233,47 @@
     }
 
     await loadAllNews()
+    // 获取轮播图
+    await getSwiperList()
   })
 
+  // 处理分享链接进入
+  onLoad((options) => {
+    console.log('页面加载参数:', options)
+
+    // 检查是否是从分享链接进入
+    if (options.shareNewsId) {
+      console.log('从分享链接进入，资讯ID:', options.shareNewsId)
+
+      // 设置一个标识，在数据加载完成后自动跳转到对应资讯
+      uni.setStorageSync('autoOpenNewsId', options.shareNewsId)
+    }
+  })
+  const getSwiperList = async () => {
+    try {
+      const response = await request(`${baseUrl}/system/get_quick_link`, 'GET')
+      if (response.code === 0) {
+        swiperList.value = response.data || []
+        // const mock = [
+        //   {
+        //     id: 1,
+        //     pic_url:
+        //       'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/news/1755745285_1755740570676122.png',
+        //   },
+        //   {
+        //     id: 2,
+        //     pic_url:
+        //       'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/quick_link/1755604934_%E9%87%91%E5%88%9A%E4%BD%8D.png',
+        //   },
+        // ]
+        // swiperList.value = mock
+      } else {
+        console.error('获取轮播图失败:', response.message)
+      }
+    } catch (error) {
+      console.error('获取轮播图异常:', error)
+    }
+  }
   // 从后端获取节目列表并随机选择一首歌曲添加到播放列表（不播放）
   const loadRandomSongToPlaylist = async () => {
     try {

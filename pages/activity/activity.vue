@@ -99,8 +99,58 @@
         if (activities.length === 1) {
           activities[0].is_top = true
         }
-
+        // const mock = [
+        //   {
+        //     id: 2,
+        //     title:
+        //       '湖南广电“不芒学长”现身湘江实验室，这波“双创”经验包投递到校门口了',
+        //     link: 'https://mp.weixin.qq.com/s/MhaqphOSsge3aT0kJkxkKA?scene=1',
+        //     pic: 'https://i.postimg.cc/5tSW8SHQ/temp-Image91h-X5-F.avif',
+        //     is_top: 0,
+        //   },
+        //   {
+        //     id: 3,
+        //     title:
+        //       '湖南广电“不芒学长”现身湘江实验室，这波“双创”经验包投递到校门口了',
+        //     link: 'https://mp.weixin.qq.com/s/MhaqphOSsge3aT0kJkxkKA?scene=1',
+        //     pic: 'https://i.postimg.cc/5tSW8SHQ/temp-Image91h-X5-F.avif',
+        //     is_top: 0,
+        //   },
+        //   {
+        //     id: 6,
+        //     title:
+        //       '湖南广电“不芒学长”现身湘江实验室，这波“双创”经验包投递到校门口了',
+        //     link: 'https://mp.weixin.qq.com/s/MhaqphOSsge3aT0kJkxkKA?scene=1',
+        //     pic: 'https://i.postimg.cc/5tSW8SHQ/temp-Image91h-X5-F.avif',
+        //     is_top: 0,
+        //   },
+        //   {
+        //     id: 7,
+        //     title:
+        //       '湖南广电“不芒学长”现身湘江实验室，这波“双创”经验包投递到校门口了',
+        //     link: 'https://mp.weixin.qq.com/s/MhaqphOSsge3aT0kJkxkKA?scene=1',
+        //     pic: 'https://i.postimg.cc/5tSW8SHQ/temp-Image91h-X5-F.avif',
+        //     is_top: 0,
+        //   },
+        //   {
+        //     id: 1,
+        //     title:
+        //       '湖南广电“不芒学长”现身湘江实验室，这波“双创”经验包投递到校门口了',
+        //     link: 'https://mp.weixin.qq.com/s/MhaqphOSsge3aT0kJkxkKA?scene=1',
+        //     pic: 'https://i.postimg.cc/5tSW8SHQ/temp-Image91h-X5-F.avif',
+        //     is_top: 0,
+        //   },
+        //   {
+        //     id: 5,
+        //     title:
+        //       '湖南广电“不芒学长”现身湘江实验室，这波“双创”经验包投递到校门口了',
+        //     link: 'https://mp.weixin.qq.com/s/MhaqphOSsge3aT0kJkxkKA?scene=1',
+        //     pic: 'https://i.postimg.cc/5tSW8SHQ/temp-Image91h-X5-F.avif',
+        //     is_top: 1,
+        //   },
+        // ]
         activityList.value = activities
+        // activityList.value = mock
       }
     } catch (error) {
       console.error('获取活动列表失败:', error)

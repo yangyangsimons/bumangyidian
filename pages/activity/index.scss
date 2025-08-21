@@ -11,6 +11,7 @@
         display: flex !important;
         align-items: center;
         justify-content: flex-start;
+        padding: 0 32rpx;
     }
     ::v-deep .uni-navbar__header-container-inner {
         display: flex !important;
@@ -41,6 +42,23 @@
         padding-bottom: 220rpx;
         box-sizing: border-box;
         overflow-y: scroll;
+
+        /* 顶部模糊过渡效果 */
+        mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 10rpx,
+            rgba(0, 0, 0, 0.8) 40rpx,
+            black 100rpx
+        );
+        -webkit-mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 10rpx,
+            rgba(0, 0, 0, 0.8) 40rpx,
+            black 100rpx
+        );
+
         // 可选：网格布局，如果希望显示为网格可以启用以下样式
         // display: grid;
         // grid-template-columns: 1fr 1fr;
