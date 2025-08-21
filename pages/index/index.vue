@@ -24,6 +24,9 @@
     </button>
 
     <image :src="bgSrc" class="cover-image" mode="aspectFill" />
+    <view class="ai-mask">
+      <view class="mask-text"> AI会话 </view>
+    </view>
     <!-- 根据shine_point的valid显示亮点 -->
     <view
       v-if="shinePointVisible"

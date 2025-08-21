@@ -29,7 +29,7 @@
     justify-content: space-between;
 
     background-color: #00000025;
-    font-family: "AlibabaPuHuiTi";
+
     padding-bottom: 200rpx;
     .bg {
         position: fixed;
@@ -67,6 +67,7 @@
 
     .header {
         // border: 1px solid red;
+        font-family: "AlibabaPuHuiTi";
         width: 100%;
         margin-top: 50rpx;
         display: flex;
@@ -192,6 +193,7 @@
         }
     }
     .main {
+        font-family: "AlibabaPuHuiTi";
         width: 100%;
         padding: 30rpx 24rpx 40rpx 24rpx;
         // border: 1px solid red;
@@ -286,8 +288,9 @@
         }
     }
     .footer {
+        font-family: "AlibabaPuHuiTi";
         width: 100%;
-        padding: 30rpx 24rpx 40rpx 24rpx;
+        padding: 30rpx 24rpx 40rpx 28rpx;
         box-sizing: border-box;
         .container {
             width: 100%;
@@ -307,6 +310,7 @@
             }
         }
         .footer-main {
+            margin-left: 5rpx;
             width: 100%;
             height: 150rpx;
             display: flex;

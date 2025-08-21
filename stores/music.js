@@ -9,6 +9,7 @@ export const useMusicStore = defineStore('music', {
     playlist: [],
     currentSong: null,
     audioContext: null,
+    currentCategory: null, // 当前播放歌曲的分类信息
   }),
 
   getters: {
@@ -48,12 +49,13 @@ export const useMusicStore = defineStore('music', {
       })
     },
 
-    setPlaylist(list, index = 0) {
-      console.log('设置播放列表:', list, '当前索引:', index)
+    setPlaylist(list, index = 0, category = null) {
+      console.log('设置播放列表:', list, '当前索引:', index, '分类:', category)
       // 过滤掉无效的歌曲数据
       this.playlist = list.filter((item) => item && item.id && item.audio_url)
       this.currentIndex = index
       this.currentSong = this.getCurrentSong
+      this.currentCategory = category // 设置当前分类
       if (this.audioContext && this.currentSong) {
         // 设置背景音乐管理器的必要属性
         this.audioContext.title = this.currentSong.title || '不芒一点'
@@ -68,12 +70,20 @@ export const useMusicStore = defineStore('music', {
     },
 
     // 设置播放列表但不自动播放（仅准备音频源）
-    setPlaylistWithoutPlay(list, index = 0) {
-      console.log('设置播放列表（不播放）:', list, '当前索引:', index)
+    setPlaylistWithoutPlay(list, index = 0, category = null) {
+      console.log(
+        '设置播放列表（不播放）:',
+        list,
+        '当前索引:',
+        index,
+        '分类:',
+        category
+      )
       // 过滤掉无效的歌曲数据
       this.playlist = list.filter((item) => item && item.id && item.audio_url)
       this.currentIndex = index
       this.currentSong = this.getCurrentSong
+      this.currentCategory = category // 设置当前分类
 
       // 只设置歌曲信息，不设置音频源，避免自动播放
       if (this.audioContext && this.currentSong) {
@@ -91,14 +101,23 @@ export const useMusicStore = defineStore('music', {
     },
 
     // 添加歌曲到播放列表并立即播放
-    addAndPlaySong(song, playImmediately = true) {
-      console.log('添加并播放歌曲:', song, '立即播放:', playImmediately)
+    addAndPlaySong(song, playImmediately = true, category = null) {
+      console.log(
+        '添加并播放歌曲:',
+        song,
+        '立即播放:',
+        playImmediately,
+        '分类:',
+        category
+      )
 
       // 验证歌曲数据的有效性
       if (!song || !song.id || !song.audio_url) {
         console.error('无效的歌曲数据:', song)
         return
       }
+
+      this.currentCategory = category // 设置当前分类
 
       const existingIndex = this.playlist.findIndex(
         (item) => item && item.id === song.id
@@ -117,8 +136,8 @@ export const useMusicStore = defineStore('music', {
     },
 
     // 替换当前播放列表并播放指定歌曲
-    playNewSong(song) {
-      this.setPlaylist([song], 0)
+    playNewSong(song, category = null) {
+      this.setPlaylist([song], 0, category)
       this.playSong(0)
     },
 

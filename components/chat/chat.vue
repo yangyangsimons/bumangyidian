@@ -45,6 +45,7 @@
         @focus="onInputFocus"
         @blur="onInputBlur"
         adjust-position="true"
+        cursor-spacing="12"
       />
       <view class="send" @tap.stop="handleSubmit" v-if="sendAble">
         <image
@@ -86,6 +87,7 @@
         @focus="radioInputFocus"
         @input="onRadioKeyInput"
         @blur="onRadioInputBlur"
+        cursor-spacing="12"
       />
       <view class="send" @tap.stop="stopRadio" v-if="radioPlay && !radioInput">
         <image

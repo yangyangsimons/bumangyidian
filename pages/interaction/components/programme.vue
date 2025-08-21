@@ -51,7 +51,7 @@
           <view class="audio-cover">
             <image
               class="cover-image"
-              src="/static/recommend.png"
+              :src="currentCategoryCover"
               mode="aspectFill"
             />
           </view>
@@ -156,8 +156,9 @@
       // 如果是同一首歌，就切换播放/暂停状态
       musicStore.togglePlay()
     } else {
-      // 如果是不同的歌，就播放新歌
-      musicStore.addAndPlaySong(item)
+      // 如果是不同的歌，就播放新歌，传递当前分类信息
+      const currentCategory = categories.value[activeCategory.value]
+      musicStore.addAndPlaySong(item, true, currentCategory)
     }
   }
   const list = ref([])
@@ -190,6 +191,17 @@
     return item.liked ? '/static/my/music-collect.png' : '/static/my/star.png'
   }
 
+  // 获取当前激活分类的封面图片
+  const currentCategoryCover = computed(() => {
+    if (categories.value.length > 0 && categories.value[activeCategory.value]) {
+      return (
+        categories.value[activeCategory.value].cover_url ||
+        '/static/recommend.png'
+      )
+    }
+    return '/static/recommend.png'
+  })
+
   // 生成刻度尺项目数组（两端添加空白滑块）
   const rulerItems = computed(() => {
     if (!categories.value.length || !containerWidth.value) return []
@@ -216,7 +228,7 @@
         isValid: isValidIndex,
         isActive,
         showText: isValidIndex,
-        text: isValidIndex ? categories.value[categoryIndex] : '',
+        text: isValidIndex ? categories.value[categoryIndex].name : '',
       }
     })
   })
@@ -444,7 +456,7 @@
         categoryIndex !== null ? categoryIndex : activeCategory.value
 
       // 获取对应分类名称
-      const categoryName = categories.value[targetCategoryIndex]
+      const categoryName = categories.value[targetCategoryIndex]?.name
 
       if (!categoryName) {
         console.error('分类不存在')
@@ -492,7 +504,8 @@
         list.value[0]
       ) {
         console.log(list.value[0])
-        musicStore.setPlaylistWithoutPlay([list.value[0]])
+        const currentCategory = categories.value[activeCategory.value]
+        musicStore.setPlaylistWithoutPlay([list.value[0]], 0, currentCategory)
       }
     } catch (error) {
       console.error('初始化数据失败:', error)

@@ -71,11 +71,10 @@
           <view class="arrow"
             ><image src="../../static//my/arrow.png" mode="scaleToFill" /></view
         ></view>
-        <view class="about-us" @click="openAgreement('about')">
-          <view class="text">关于我们</view>
-          <view class="arrow"
-            ><image src="../../static//my/arrow.png" mode="scaleToFill" /></view
-        ></view>
+        <view class="about-us">
+          <view class="text">版本号</view>
+          <view class="arrow">2.0.0</view></view
+        >
       </view>
       <view class="logout" @click="logout">
         <text class="logout-text">退出账号</text>

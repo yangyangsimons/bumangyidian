@@ -296,12 +296,14 @@
 
       const categories = [...categoriesResponse.data] // 复制数组，避免修改原数组
       let randomSong = null
+      let selectedCategory = null // 保存选中的分类对象
 
       // 循环尝试不同的分类，直到找到有节目的分类或所有分类都尝试过
       while (categories.length > 0 && !randomSong) {
         // 随机选择一个分类索引
         const randomIndex = Math.floor(Math.random() * categories.length)
-        const randomCategory = categories[randomIndex]
+        const randomCategoryObj = categories[randomIndex]
+        const randomCategory = randomCategoryObj.name // 获取分类对象的name属性
 
         // 从数组中移除已尝试的分类，避免重复尝试
         categories.splice(randomIndex, 1)
@@ -326,6 +328,7 @@
             // 随机选择一首歌曲
             const randomSongIndex = Math.floor(Math.random() * programs.length)
             randomSong = programs[randomSongIndex]
+            selectedCategory = randomCategoryObj // 保存成功找到歌曲的分类对象
 
             console.log(
               `在分类 "${randomCategory}" 中找到 ${programs.length} 首节目`
@@ -344,8 +347,8 @@
       }
 
       if (randomSong) {
-        // 使用不会自动播放的方法设置播放列表
-        musicStore.setPlaylistWithoutPlay([randomSong], 0)
+        // 使用不会自动播放的方法设置播放列表，传递分类信息
+        musicStore.setPlaylistWithoutPlay([randomSong], 0, selectedCategory)
         console.log('随机歌曲已添加到播放列表（未播放）')
       } else {
         console.log('所有分类都没有找到可用的节目')

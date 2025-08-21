@@ -1,7 +1,7 @@
 <template>
   <view class="player" v-if="musicStore.currentSong">
     <view class="disc">
-      <image src="/static/disc.png" mode="aspectFill" />
+      <image :src="getCurrentDiscImage" mode="aspectFill" />
     </view>
 
     <view class="text" @click="showPlaylist = true">
@@ -73,11 +73,19 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
   import { useMusicStore } from '@/stores/music'
 
   const musicStore = useMusicStore()
   const showPlaylist = ref(false)
+
+  // 获取当前disc图片，优先使用分类封面
+  const getCurrentDiscImage = computed(() => {
+    if (musicStore.currentCategory && musicStore.currentCategory.cover_url) {
+      return musicStore.currentCategory.cover_url
+    }
+    return '/static/recommend.png' // 默认图片
+  })
 
   // 播放指定歌曲
   const playSong = (index) => {
