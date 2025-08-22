@@ -44,6 +44,14 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   // 上报API地址
   const UPLOAD_PROGRESS_URL = `${baseUrl}/content/upload_progress`
 
+  // 添加回调函数来处理音乐播放完成
+  const onMusicEndedCallback = ref(null)
+
+  // 设置音乐播放完成回调
+  const setOnMusicEndedCallback = (callback) => {
+    onMusicEndedCallback.value = callback
+  }
+
   // 初始化背景音乐播放器 (使用backgroundAudioManager)
   const initBgAudioManager = () => {
     if (!bgAudioManager.value) {
@@ -69,6 +77,15 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
           // 上报播放完成
           reportBgMusicFinish()
           bgIsPlaying.value = false
+
+          // 如果有设置音乐播放完成回调（用于自动切换下一首）
+          if (
+            onMusicEndedCallback.value &&
+            typeof onMusicEndedCallback.value === 'function'
+          ) {
+            console.log('调用音乐播放完成回调')
+            onMusicEndedCallback.value()
+          }
 
           // 停止歌词同步
           try {
@@ -118,6 +135,9 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
         }
         bgIsPlaying.value = false
 
+        // 注意：不要在这里重置bgAudioId，因为我们需要保持当前音频的ID
+        // bgAudioId应该只在明确播放新音频时才更新
+
         // 背景音乐停止时停止歌词同步
         try {
           const messageProcessorStore = useMessageProcessorStore()
@@ -133,6 +153,14 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       bgAudioManager.value.onPlay(() => {
         console.log('背景音乐开始播放')
         bgIsPlaying.value = true
+
+        // 重要：在onPlay事件中，确保bgAudioId没有被意外重置
+        // 如果bgAudioId为null但我们确实在播放音乐，这是异常情况
+        if (bgAudioId.value === null) {
+          console.warn('onPlay事件中bgAudioId为null，这可能是时序问题')
+        }
+
+        console.log('onPlay事件中的bgAudioId值:', bgAudioId.value)
       })
 
       // 暂停事件
@@ -269,7 +297,21 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   }
 
   // 播放背景音乐（使用backgroundAudioManager）
-  const playBgMusic = (url, playTime = 0, sectionId = null, audioId = null) => {
+  const playBgMusic = (
+    url,
+    playTime = 0,
+    sectionId = null,
+    audioId = null,
+    metadata = null
+  ) => {
+    console.log('playBgMusic调用参数:', {
+      url,
+      playTime,
+      sectionId,
+      audioId,
+      metadata,
+    })
+
     initBgAudioManager()
 
     // 保存相关ID和URL（用于循环播放）
@@ -278,11 +320,37 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     bgPlayTime.value = playTime
     currentBgUrl.value = url
 
-    // 更新背景音乐属性（使用当前主题）
-    updateBgMusicProperties()
+    console.log(
+      '设置后的bgAudioId:',
+      bgAudioId.value,
+      '传入的audioId:',
+      audioId
+    )
+
+    // 设置音频元数据
+    if (metadata && bgAudioManager.value) {
+      bgAudioManager.value.title = metadata.title || musicTitle.value
+      bgAudioManager.value.epname = metadata.epname || '校园节目'
+      bgAudioManager.value.singer = metadata.singer || ''
+      bgAudioManager.value.coverImgUrl =
+        metadata.coverImgUrl ||
+        'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg'
+    } else {
+      // 使用当前主题更新背景音乐属性
+      updateBgMusicProperties()
+    }
 
     // 设置音频源并播放
     bgAudioManager.value.src = url
+
+    // 重要：在设置src后立即检查bgAudioId是否被重置
+    console.log('设置src后bgAudioId值:', bgAudioId.value)
+
+    // 如果bgAudioId被重置了，重新设置
+    if (bgAudioId.value !== audioId) {
+      console.warn('bgAudioId在设置src后被重置，重新设置')
+      bgAudioId.value = audioId
+    }
 
     // 设置音量
     bgAudioManager.value.volume = bgVolume.value
@@ -300,7 +368,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       playTime,
       sectionId,
       audioId,
-      title: musicTitle.value,
+      title: metadata?.title || musicTitle.value,
       volume: bgVolume.value,
       loop: bgLoop.value,
     })
@@ -697,6 +765,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     bgLoop,
     musicTitle, // 导出计算属性，便于UI显示
     resetBgMusic, // 新增：重置背景音乐
+    setOnMusicEndedCallback, // 新增：设置音乐播放完成回调
 
     // TTS相关
     playTtsAudio,
@@ -723,6 +792,11 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     // 队列长度（便于调试显示）
     get queueLength() {
       return ttsQueue.value.length
+    },
+
+    // 导出bgAudioId用于状态对比 - 使用getter确保状态同步
+    get bgAudioId() {
+      return bgAudioId
     },
   }
 })

@@ -86,9 +86,7 @@
             <image
               class="play-icon"
               :src="
-                musicStore.isPlaying &&
-                musicStore.currentSong &&
-                musicStore.currentSong.id === recommendInfo.id
+                safeIsPlayingAudio(recommendInfo?.id)
                   ? '/static/pause.png'
                   : '/static/triangle.png'
               "
@@ -115,9 +113,7 @@
           <div class="play" @click="togglePlay(item)">
             <image
               :src="
-                musicStore.isPlaying &&
-                musicStore.currentSong &&
-                musicStore.currentSong.id === item.id
+                safeIsPlayingAudio(item.id)
                   ? '/static/pause.png'
                   : '/static/triangle.png'
               "
@@ -144,22 +140,82 @@
   import request from '@/utils/request'
   import { baseUrl } from '@/utils/config'
   import { useMusicStore } from '@/stores/music'
+  import { useAudioPlayerStore } from '@/stores/audioPlayer'
   import { checkTokenAndNavigate } from '@/utils/auth'
 
   const musicStore = useMusicStore()
 
+  console.log('programme.vue 中的 musicStore:', musicStore)
+  console.log(
+    'musicStore.isPlayingAudio 类型:',
+    typeof musicStore.isPlayingAudio
+  )
+
+  // 添加安全检查函数
+  const safeIsPlayingAudio = (audioId) => {
+    if (!audioId) {
+      console.log('safeIsPlayingAudio 检查失败: audioId为空')
+      return false
+    }
+
+    if (!musicStore || !musicStore.isPlayingAudio) {
+      console.log('safeIsPlayingAudio 检查失败:', {
+        hasMusicStore: !!musicStore,
+        hasMethod: !!musicStore?.isPlayingAudio,
+        hasAudioId: !!audioId,
+      })
+      return false
+    }
+
+    try {
+      return musicStore.isPlayingAudio(audioId)
+    } catch (error) {
+      console.error('safeIsPlayingAudio 调用出错:', error)
+      return false
+    }
+  }
+
   const togglePlay = (item) => {
-    console.log('切换播放状态:', item)
+    console.log('切换播放状态:', item.title, 'ID:', item.id)
+    console.log('当前状态:', {
+      currentSong: musicStore.currentSong?.title,
+      currentSongId: musicStore.currentSong?.id,
+      isPlaying: musicStore.isPlaying,
+      isPlayingThisAudio: safeIsPlayingAudio(item.id),
+    })
 
     // 检查当前是否正在播放这首歌
     if (musicStore.currentSong && musicStore.currentSong.id === item.id) {
       // 如果是同一首歌，就切换播放/暂停状态
+      console.log('切换播放/暂停状态')
       musicStore.togglePlay()
     } else {
       // 如果是不同的歌，就播放新歌，传递当前分类信息
+      console.log('播放新歌曲')
       const currentCategory = categories.value[activeCategory.value]
+
+      // 重新设置音乐播放完成回调（恢复自动切换下一首功能）
+      const audioPlayerStore = useAudioPlayerStore()
+      if (audioPlayerStore) {
+        audioPlayerStore.setOnMusicEndedCallback(() => {
+          console.log('音乐播放完成，切换到下一首')
+          musicStore.next()
+        })
+      }
+
       musicStore.addAndPlaySong(item, true, currentCategory)
     }
+
+    // 添加一个延迟检查，看看状态是否已经更新
+    setTimeout(() => {
+      const audioPlayerStore = useAudioPlayerStore()
+      console.log('延迟检查状态:', {
+        isPlaying: musicStore.isPlaying,
+        isPlayingThisAudio: safeIsPlayingAudio(item.id),
+        bgIsPlaying: audioPlayerStore?.bgIsPlaying,
+        bgAudioId: audioPlayerStore?.bgAudioId,
+      })
+    }, 1000)
   }
   const list = ref([])
   // 在 setup 顶部获取实例

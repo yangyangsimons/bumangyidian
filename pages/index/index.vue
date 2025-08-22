@@ -546,7 +546,7 @@
       }
     )
     //暂停其他的音乐先
-    musicStore.stopPlay()
+    // musicStore.stopPlay()
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')

@@ -12,7 +12,7 @@
     >
       <!-- iOS系统且为shop页面时使用cover-image -->
       <cover-image
-        src="/static/back-icon.png"
+        src="/static/close-shop.png"
         class="back-button-img"
       ></cover-image>
     </cover-view>

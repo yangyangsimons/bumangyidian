@@ -9,8 +9,7 @@ export const useMusicStore = defineStore('music', () => {
   const playlist = ref([])
   const currentSong = ref(null)
   const currentCategory = ref(null)
-
-  console.log('musicStore 正在创建...') // 调试信息
+  const audioPlayerStore = useAudioPlayerStore()
 
   // 计算属性：当前歌曲
   const getCurrentSong = computed(() => {
@@ -19,106 +18,42 @@ export const useMusicStore = defineStore('music', () => {
 
   // 计算属性：播放状态 - 基于audioPlayerStore的状态计算
   const isPlaying = computed(() => {
-    if (!currentSong.value) return false
+    if (!currentSong.value || !audioPlayerStore) return false
 
-    const audioPlayerStore = useAudioPlayerStore() // 在计算属性内部获取
     const bgIsPlaying = audioPlayerStore.bgIsPlaying
+    const bgAudioId = audioPlayerStore.bgAudioId
     const currentId = currentSong.value.id
 
-    // 如果背景音乐没有在播放，直接返回false
-    if (!bgIsPlaying) return false
-
-    // 尝试多种方式获取bgAudioId的值
-    let bgAudioId = null
-    try {
-      // 方式1: 直接通过.value访问
-      bgAudioId = audioPlayerStore.bgAudioId?.value
-
-      // 方式2: 如果方式1失败，尝试直接访问bgAudioId属性
-      if (bgAudioId === null || bgAudioId === undefined) {
-        bgAudioId = audioPlayerStore.bgAudioId
-        if (
-          typeof bgAudioId === 'object' &&
-          bgAudioId &&
-          'value' in bgAudioId
-        ) {
-          bgAudioId = bgAudioId.value
-        }
-      }
-    } catch (error) {
-      console.error('获取bgAudioId时出错:', error)
-      bgAudioId = null
-    }
-
-    // 严格匹配：只有当bgAudioId明确等于currentId时才认为正在播放
-    const result = bgAudioId === currentId
-
-    // 添加更详细的调试信息
-    console.log('isPlaying计算 - 详细信息:', {
+    console.log('isPlaying计算:', {
       currentId,
       bgAudioId,
-      bgAudioIdRef: audioPlayerStore.bgAudioId,
-      bgAudioIdDirect: audioPlayerStore.bgAudioId
-        ? audioPlayerStore.bgAudioId.value
-        : 'ref为null',
       bgIsPlaying,
-      result,
+      result: bgIsPlaying && bgAudioId === currentId,
     })
 
-    return result
+    return bgIsPlaying && bgAudioId === currentId
   })
 
   // 判断指定音乐是否正在播放
   const isPlayingAudio = (audioId) => {
-    if (!audioId) return false
+    if (!audioPlayerStore || !audioId) return false
 
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
     const bgIsPlaying = audioPlayerStore.bgIsPlaying
-
-    // 如果背景音乐没有在播放，直接返回false
-    if (!bgIsPlaying) return false
-
-    // 尝试从audioPlayerStore获取bgAudioId
-    let currentAudioId = null
-    try {
-      // 尝试多种方式获取bgAudioId的值
-      currentAudioId = audioPlayerStore.bgAudioId?.value
-
-      if (currentAudioId === null || currentAudioId === undefined) {
-        currentAudioId = audioPlayerStore.bgAudioId
-        if (
-          typeof currentAudioId === 'object' &&
-          currentAudioId &&
-          'value' in currentAudioId
-        ) {
-          currentAudioId = currentAudioId.value
-        }
-      }
-    } catch (error) {
-      console.error('获取bgAudioId时出错:', error)
-      currentAudioId = null
-    }
-
-    // 严格匹配：只有当bgAudioId明确等于audioId时才认为正在播放
-    // 移除备用逻辑，避免当用户从index页面进入programme页面时的误判
-    const result = currentAudioId === audioId
+    const currentAudioId = audioPlayerStore.bgAudioId
 
     console.log('isPlayingAudio检查:', {
       audioId,
       bgIsPlaying,
       currentAudioId,
-      bgAudioIdRef: audioPlayerStore.bgAudioId,
-      bgAudioIdType: typeof audioPlayerStore.bgAudioId,
-      result,
+      result: bgIsPlaying && currentAudioId === audioId,
     })
 
-    return result
+    return bgIsPlaying && currentAudioId === audioId
   }
 
   // Actions
   const initAudio = () => {
     // 设置音乐播放完成的回调，用于自动切换下一首
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
     audioPlayerStore.setOnMusicEndedCallback(() => {
       console.log('音乐播放完成，切换到下一首')
       next()
@@ -133,8 +68,7 @@ export const useMusicStore = defineStore('music', () => {
     currentSong.value = getCurrentSong.value
     currentCategory.value = category // 设置当前分类
 
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
-    if (currentSong.value) {
+    if (audioPlayerStore && currentSong.value) {
       // 使用audioPlayer store播放背景音乐
       audioPlayerStore.playBgMusic(
         currentSong.value.audio_url,
@@ -221,14 +155,13 @@ export const useMusicStore = defineStore('music', () => {
   }
 
   const togglePlay = () => {
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
-    if (!currentSong.value) return
+    if (!audioPlayerStore || !currentSong.value) return
 
     console.log('togglePlay调用:', {
       isPlaying: isPlaying.value,
       currentSong: currentSong.value.title,
       bgIsPlaying: audioPlayerStore.bgIsPlaying,
-      bgAudioId: audioPlayerStore.bgAudioId?.value || null,
+      bgAudioId: audioPlayerStore.bgAudioId,
     })
 
     if (isPlaying.value) {
@@ -239,7 +172,7 @@ export const useMusicStore = defineStore('music', () => {
       // 如果当前歌曲与audioPlayer正在播放的不同，播放新歌曲
       if (
         !audioPlayerStore.bgIsPlaying ||
-        (audioPlayerStore.bgAudioId?.value || null) !== currentSong.value.id
+        audioPlayerStore.bgAudioId !== currentSong.value.id
       ) {
         console.log('播放新歌曲')
         playSong(currentIndex.value)
@@ -254,11 +187,10 @@ export const useMusicStore = defineStore('music', () => {
   const playSong = (index) => {
     if (index < 0 || index >= playlist.value.length) return
 
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
     currentIndex.value = index
     currentSong.value = getCurrentSong.value
 
-    if (currentSong.value) {
+    if (audioPlayerStore && currentSong.value) {
       console.log(
         '开始播放歌曲:',
         currentSong.value.title,
@@ -289,17 +221,8 @@ export const useMusicStore = defineStore('music', () => {
       console.log(
         '播放后状态:',
         audioPlayerStore.bgIsPlaying,
-        audioPlayerStore.bgAudioId?.value || null
+        audioPlayerStore.bgAudioId
       )
-
-      // 添加延迟检查，确认状态是否正确设置
-      setTimeout(() => {
-        console.log('延迟检查audioPlayerStore状态:', {
-          bgIsPlaying: audioPlayerStore.bgIsPlaying,
-          bgAudioId: audioPlayerStore.bgAudioId?.value || null,
-          传入的audioId: currentSong.value.id,
-        })
-      }, 100)
     }
   }
 
@@ -317,21 +240,21 @@ export const useMusicStore = defineStore('music', () => {
   }
 
   const startPlay = () => {
-    if (!currentSong.value) return
+    if (!audioPlayerStore || !currentSong.value) return
     // 播放当前音乐
     playSong(currentIndex.value)
   }
 
   const pausePlay = () => {
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
-    if (isPlaying.value) {
+    if (audioPlayerStore && isPlaying.value) {
       audioPlayerStore.pauseBgMusic()
     }
   }
 
   const stopPlay = () => {
-    const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
-    audioPlayerStore.stopBgMusic()
+    if (audioPlayerStore) {
+      audioPlayerStore.stopBgMusic()
+    }
   }
 
   const destroyAudio = () => {
@@ -340,12 +263,13 @@ export const useMusicStore = defineStore('music', () => {
   }
 
   // 返回所有需要暴露的状态和方法
-  const storeInstance = {
+  return {
     // 状态
     currentIndex,
     playlist,
     currentSong,
     currentCategory,
+    audioPlayerStore,
 
     // 计算属性
     getCurrentSong,
@@ -368,11 +292,4 @@ export const useMusicStore = defineStore('music', () => {
     stopPlay,
     destroyAudio,
   }
-
-  console.log(
-    'musicStore 创建完成，isPlayingAudio 方法:',
-    typeof storeInstance.isPlayingAudio
-  ) // 调试信息
-
-  return storeInstance
 })

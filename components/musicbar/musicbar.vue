@@ -14,7 +14,10 @@
         <!-- 播放/暂停按钮 -->
         <image
           :src="
-            musicStore.isPlaying ? '/static/pause.png' : '/static/triangle.png'
+            musicStore.currentSong &&
+            musicStore.isPlayingAudio(musicStore.currentSong.id)
+              ? '/static/pause.png'
+              : '/static/triangle.png'
           "
           mode="widthFix"
         />
@@ -91,6 +94,12 @@
   const playSong = (index) => {
     musicStore.playSong(index)
     showPlaylist.value = false
+  }
+
+  // 处理播放/暂停切换
+  const handleTogglePlay = () => {
+    console.log('musicbar 切换播放状态')
+    musicStore.togglePlay()
   }
 
   // 跳转到节目页面
