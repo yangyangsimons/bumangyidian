@@ -60,10 +60,18 @@
                 src="../../static/my/music-collect.png"
                 @click="removeFromFavorites(item.id)"
               ></image>
-              <image
-                src="../../static/my/play.png"
-                @click="playAudio(item.audio_url)"
-              ></image>
+              <view class="play-btn">
+                <image
+                  class="play-icon"
+                  mode="aspectFill"
+                  :src="
+                    safeIsPlayingAudio(item.id)
+                      ? '/static/pause.png'
+                      : '/static/triangle.png'
+                  "
+                  @click="togglePlay(item)"
+                ></image>
+              </view>
             </view>
           </view>
         </view>
@@ -106,6 +114,10 @@
   import { onShow, onHide } from '@dcloudio/uni-app'
   import request from '@/utils/request.js'
   import { baseUrl } from '../../utils/config'
+  import { useMusicStore } from '@/stores/music'
+  import { useAudioPlayerStore } from '@/stores/audioPlayer'
+
+  const musicStore = useMusicStore()
   const activeTab = ref('program')
   const programList = ref([]) // 节目收藏数据
   const newsList = ref([]) // 资讯收藏数据
@@ -121,6 +133,75 @@
 
   const goBack = () => {
     uni.navigateBack()
+  }
+
+  // 添加安全检查函数
+  const safeIsPlayingAudio = (audioId) => {
+    if (!audioId) {
+      console.log('safeIsPlayingAudio 检查失败: audioId为空')
+      return false
+    }
+
+    if (!musicStore || !musicStore.isPlayingAudio) {
+      console.log('safeIsPlayingAudio 检查失败:', {
+        hasMusicStore: !!musicStore,
+        hasMethod: !!musicStore?.isPlayingAudio,
+        hasAudioId: !!audioId,
+      })
+      return false
+    }
+
+    try {
+      return musicStore.isPlayingAudio(audioId)
+    } catch (error) {
+      console.error('safeIsPlayingAudio 调用出错:', error)
+      return false
+    }
+  }
+
+  // 播放控制函数 - 与 programme 组件保持一致
+  const togglePlay = (item) => {
+    console.log('切换播放状态:', item.title, 'ID:', item.id)
+    console.log('当前状态:', {
+      currentSong: musicStore.currentSong?.title,
+      currentSongId: musicStore.currentSong?.id,
+      isPlaying: musicStore.isPlaying,
+      isPlayingThisAudio: safeIsPlayingAudio(item.id),
+    })
+
+    // 检查当前是否正在播放这首歌
+    if (musicStore.currentSong && musicStore.currentSong.id === item.id) {
+      // 如果是同一首歌，就切换播放/暂停状态
+      console.log('切换播放/暂停状态')
+      musicStore.togglePlay()
+    } else {
+      // 如果是不同的歌，就播放新歌
+      console.log('播放新歌曲')
+
+      // 重新设置音乐播放完成回调
+      const audioPlayerStore = useAudioPlayerStore()
+      if (audioPlayerStore) {
+        audioPlayerStore.setOnMusicEndedCallback(() => {
+          console.log('音乐播放完成，切换到下一首')
+          musicStore.next()
+        })
+      }
+
+      // 对于收藏列表，我们可以传递一个默认的分类信息
+      const defaultCategory = { name: '收藏', id: 'favorites' }
+      musicStore.addAndPlaySong(item, true, defaultCategory)
+    }
+
+    // 添加一个延迟检查，看看状态是否已经更新
+    setTimeout(() => {
+      const audioPlayerStore = useAudioPlayerStore()
+      console.log('延迟检查状态:', {
+        isPlaying: musicStore.isPlaying,
+        isPlayingThisAudio: safeIsPlayingAudio(item.id),
+        bgIsPlaying: audioPlayerStore?.bgIsPlaying,
+        bgAudioId: audioPlayerStore?.bgAudioId,
+      })
+    }, 1000)
   }
 
   // 查看资讯详情

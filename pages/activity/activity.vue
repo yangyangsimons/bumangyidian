@@ -12,34 +12,37 @@
     >
     </uni-nav-bar>
     <image src="/static/my/bg.png" mode="scaleToFill" class="bg" />
-    <view class="activity-list">
+    <view class="main">
+      <view class="activity-list">
+        <view
+          class="activity-item"
+          :class="{ 'top-item': item.is_top }"
+          v-for="item in sortedActivityList"
+          :key="item.id"
+          @click="handleActivityClick(item)"
+        >
+          <image
+            :src="item.pic"
+            class="activity-image"
+            mode="aspectFill"
+            :lazy-load="true"
+          />
+        </view>
+      </view>
+      <!-- 空状态 -->
       <view
-        class="activity-item"
-        :class="{ 'top-item': item.is_top }"
-        v-for="item in sortedActivityList"
-        :key="item.id"
-        @click="handleActivityClick(item)"
+        v-if="sortedActivityList.length === 0 && !loading"
+        class="empty-state"
       >
-        <image
-          :src="item.pic"
-          class="activity-image"
-          mode="aspectFill"
-          :lazy-load="true"
-        />
+        <text class="empty-text">暂无活动信息</text>
+      </view>
+
+      <!-- 加载状态 -->
+      <view v-if="loading" class="loading-state">
+        <text class="loading-text">加载中...</text>
       </view>
     </view>
-    <!-- 空状态 -->
-    <view
-      v-if="sortedActivityList.length === 0 && !loading"
-      class="empty-state"
-    >
-      <text class="empty-text">暂无活动信息</text>
-    </view>
 
-    <!-- 加载状态 -->
-    <view v-if="loading" class="loading-state">
-      <text class="loading-text">加载中...</text>
-    </view>
     <tabbar />
   </view>
 </template>
@@ -72,6 +75,23 @@
 
   // 点击活动项
   const handleActivityClick = (item) => {
+    const adUrl = item.link || ''
+    if (adUrl.includes('pages')) {
+      // 确保路径以 / 开头
+      const localUrl = adUrl.startsWith('/') ? adUrl : `/${adUrl}`
+      console.log('跳转到本地页面:', localUrl)
+
+      uni.navigateTo({
+        url: localUrl,
+        success: () => {
+          console.log('跳转成功')
+        },
+        fail: (err) => {
+          console.error('跳转失败:', err)
+        },
+      })
+      return
+    }
     if (item.link) {
       // 跳转到活动链接
       uni.navigateTo({

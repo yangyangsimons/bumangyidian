@@ -28,6 +28,11 @@
         white-space: nowrap;
         margin-left: 0 !important;
     }
+    .main {
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+    }
     .bg {
         position: absolute;
         top: 0;
@@ -37,8 +42,9 @@
         z-index: -1;
     }
     .activity-list {
+        box-sizing: border-box;
         margin-top: 40rpx;
-        height: 90%;
+        height: 120%;
         padding-bottom: 220rpx;
         box-sizing: border-box;
         overflow-y: scroll;

@@ -30,6 +30,7 @@
                     valid: category.isValid,
                   }"
                   :style="{ left: index * ITEM_WIDTH + 'rpx' }"
+                  @click="onRulerItemClick(category)"
                 >
                   <text v-if="category.showText" class="ruler-text">
                     {{ category.text }}
@@ -504,6 +505,39 @@
     }, 50)
   }
 
+  // 处理点击 ruler-item 事件
+  const onRulerItemClick = (category) => {
+    // 只有有效的分类项才能被点击
+    if (!category.isValid) {
+      return
+    }
+
+    console.log(
+      '点击 ruler-item:',
+      category.text,
+      '索引:',
+      category.originalIndex
+    )
+
+    // 如果点击的不是当前激活的分类，则切换到该分类
+    if (category.originalIndex !== activeCategory.value) {
+      activeCategory.value = category.originalIndex
+
+      // 加载对应的节目列表
+      loadProgramList(category.originalIndex)
+
+      // 触发分类变更事件
+      emit('categoryChange', category.originalIndex)
+    }
+
+    // 无论是否切换分类，都让这个分类居中
+    // 防止用户滚动标记影响程序滚动
+    isUserScrolling.value = false
+
+    // 滚动到指定分类并居中
+    scrollToCategoryIndex(category.originalIndex, true)
+  }
+
   // 加载节目列表的方法
   const loadProgramList = async (categoryIndex = null) => {
     try {
@@ -689,6 +723,17 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    cursor: pointer; // 添加手型光标提示
+  }
+
+  // 添加点击态样式
+  .ruler-item:active {
+    transform: scale(0.95);
+  }
+
+  // 为有效的分类项添加可点击的视觉反馈
+  .ruler-item.valid {
+    cursor: pointer;
   }
 
   .ruler-text {

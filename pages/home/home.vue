@@ -33,12 +33,15 @@
       <view class="news-scroll-container">
         <view class="news-container">
           <!-- 主要新闻卡片 -->
-          <view class="main-news-card" v-if="mainNews">
+          <view
+            class="main-news-card"
+            v-if="mainNews"
+            @click="viewNewsDetail(mainNews)"
+          >
             <image
               class="main-news-image"
               :src="mainNews.pic"
               mode="aspectFill"
-              @click="handleNewsClick(mainNews)"
             />
             <view class="main-news-overlay">
               <view class="main-news-content" @click="viewNewsDetail(mainNews)">
