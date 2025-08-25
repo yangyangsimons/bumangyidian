@@ -56,25 +56,24 @@
 
   const handleTabClick = (index) => {
     if (index !== tabbarStore.activeIndex) {
-      // 原来的页面跳转功能（暂时注释，开发完后恢复使用）
-      // tabbarStore.switchTab(index)
+      tabbarStore.switchTab(index)
 
       // 临时功能：只更新activeIndex，不跳转页面
-      tabbarStore.activeIndex = index
+      // tabbarStore.activeIndex = index
     }
 
-    // 临时添加：显示提示功能
-    showTip.value = true
-    tipIndex.value = index
-    // 随机选择一个提示消息
-    tipMessage.value =
-      tipMessages[Math.floor(Math.random() * tipMessages.length)]
+    // // 临时添加：显示提示功能
+    // showTip.value = true
+    // tipIndex.value = index
+    // // 随机选择一个提示消息
+    // tipMessage.value =
+    //   tipMessages[Math.floor(Math.random() * tipMessages.length)]
 
-    // 2秒后隐藏提示
-    setTimeout(() => {
-      showTip.value = false
-      tipIndex.value = -1
-    }, 2000)
+    // // 2秒后隐藏提示
+    // setTimeout(() => {
+    //   showTip.value = false
+    //   tipIndex.value = -1
+    // }, 2000)
   }
 </script>
 

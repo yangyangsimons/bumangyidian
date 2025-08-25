@@ -28,7 +28,10 @@ const request = (url, method = 'GET', data = {}, header = {}) => {
       success(res) {
         // 后端返回响应状态码200视为成功
         // console.log('请求成功:', res)
-        if (res.statusCode == 200 && res.data.code == 0) {
+        if (
+          res.statusCode == 200 &&
+          (res.data.code == 0 || res.data.code == 200)
+        ) {
           resolve(res.data)
         } else {
           reject(res.data || res)

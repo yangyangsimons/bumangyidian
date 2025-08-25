@@ -97,7 +97,7 @@
     </view>
 
     <guide />
-    <!-- <tabbar></tabbar> -->
+    <tabbar></tabbar>
   </view>
 </template>
 
@@ -547,6 +547,9 @@
       if (adRes.code == 0 && adRes.data.length > 0) {
         adList.value = adRes.data
         showAd.value = true
+        console.log(
+          `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+        )
         console.log(
           `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
         )

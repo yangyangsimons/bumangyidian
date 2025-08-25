@@ -93,7 +93,7 @@
     onShow: function () {
       console.log('App Show')
       //下载字体
-      wx.loadFontFace({
+      uni.loadFontFace({
         global: true,
         family: 'AlibabaPuHuiTi',
         source:

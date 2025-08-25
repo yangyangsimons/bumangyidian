@@ -1,4 +1,6 @@
-# 忽略 unpackage 目录
+# 忽略 unpackage/dist/
+
+unpackage 目录
 unpackage/
 
 # 忽略 dist 目录

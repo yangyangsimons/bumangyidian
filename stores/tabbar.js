@@ -16,13 +16,13 @@ export const useTabbarStore = defineStore('tabbar', {
     tabList: [
       {
         name: '首页',
-        path: '/pages/hello/hello',
+        path: '/pages/home/home',
         icon: Home,
         iconSelected: HomeSelect,
       },
       {
         name: '互动',
-        path: '/pages/enrollment2025/enrollment2025',
+        path: '/pages/interaction/interaction',
         icon: Chat,
         iconSelected: ChatSelect,
       },
@@ -35,13 +35,13 @@ export const useTabbarStore = defineStore('tabbar', {
       },
       {
         name: '活动',
-        path: '/pages/lottery/lottery',
+        path: '/pages/activity/activity',
         icon: Activity,
         iconSelected: ActivitySelect,
       },
       {
         name: '我的',
-        path: '/pages/profile/index',
+        path: '/pages/my/my',
         icon: My,
         iconSelected: MySelect,
       },

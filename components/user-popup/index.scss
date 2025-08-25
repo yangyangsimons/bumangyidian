@@ -215,7 +215,7 @@
     .footer {
         // border: 1px solid red;
         overflow-y: auto;
-        // min-height: 150rpx;
+        min-height: 150rpx;
         box-sizing: border-box;
         position: absolute;
         bottom: 50rpx;
@@ -224,7 +224,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        // padding-bottom: 70rpx;
+        padding-bottom: 70rpx;
         wx-button {
             border: none;
         }
