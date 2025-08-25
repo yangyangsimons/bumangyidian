@@ -45,6 +45,7 @@
         @focus="onInputFocus"
         @blur="onInputBlur"
         adjust-position="true"
+        cursor-spacing="12"
       />
       <view class="send" @tap.stop="handleSubmit" v-if="sendAble">
         <image
@@ -86,6 +87,7 @@
         @focus="radioInputFocus"
         @input="onRadioKeyInput"
         @blur="onRadioInputBlur"
+        cursor-spacing="12"
       />
       <view class="send" @tap.stop="stopRadio" v-if="radioPlay && !radioInput">
         <image
@@ -113,6 +115,16 @@
         />
       </view>
     </view>
+    <!-- 静音和取消静音 -->
+    <view class="mute-container">
+      <image
+        class="mute-icon"
+        :src="mute ? '../../static/mute.png' : '../../static/mute-disable.png'"
+        mode="scaleToFill"
+        @click="toggleMute"
+      />
+    </view>
+
     <image
       class="voice-icon"
       :src="voiceIconSrc"
@@ -156,6 +168,13 @@
   const radioPlay = ref(true)
   const colorSystem = ref('background: rgba(0, 0, 0, 0.2);')
   const inputColor = ref('color:rgba(255, 255, 255, 1)')
+  const mute = ref(true)
+
+  const toggleMute = () => {
+    mute.value = !mute.value
+    audioPlayerStore.setBgVolume(mute.value ? 0 : 1)
+    audioPlayerStore.setTtsVolume(mute.value ? 0 : 1)
+  }
   // 设置能否发送消息
   const sendAble = computed(() => {
     return sendStore.send

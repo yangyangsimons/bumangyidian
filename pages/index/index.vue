@@ -24,6 +24,9 @@
     </button>
 
     <image :src="bgSrc" class="cover-image" mode="aspectFill" />
+    <view class="ai-mask">
+      <view class="mask-text"> AI会话 </view>
+    </view>
     <!-- 根据shine_point的valid显示亮点 -->
     <view
       v-if="shinePointVisible"
@@ -131,8 +134,11 @@
   import { subjectShowStore } from '../../stores/subjectShow'
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import { useToggleModelStore } from '../../stores/toggleModelStore'
+  import { useMusicStore } from '../../stores/music'
+  const musicStore = useMusicStore()
   const showAd = ref(false)
   const adList = ref([])
+  const shouldShowAd = ref(false) // 标识本次会话是否应该显示广告
 
   // 轮播相关配置
   const autoplay = computed(() => adList.value.length > 1) // 只有多于1个广告时才自动播放
@@ -148,6 +154,11 @@
   }
   onLoad(async (query) => {
     console.log('onLoad主页面加载')
+
+    // 每次小程序启动（onLoad被调用）时都应该显示广告
+    shouldShowAd.value = true
+    console.log('小程序启动，设置显示广告标识')
+
     if (query && query.q) {
       // 如果有query参数，表示从外部链接打开
       console.log('从外部链接打开，query.q:', query.q)
@@ -373,7 +384,7 @@
       // audioPlayerStore.resetBgMusic()
       // audioPlayerStore.resetTtsAudio()
       console.log('停止并清空所有音频队列')
-      barrageStore.clearMessages()
+      // barrageStore.clearMessages()
       console.log('清空消息列表')
       // 更新状态管理
       if (currentModel.value === '金种子杯模式') {
@@ -534,25 +545,31 @@
         ],
       }
     )
+    //暂停其他的音乐先
+    // musicStore.stopPlay()
     try {
       // 页面显示时可以进行一些操作
       console.log('主页面显示')
 
-      //从后端获取是否有广告
-      const adRes = await request(
-        `${baseUrl}/system/get_activity_notify`,
-        'GET'
-      )
-      console.log('获取广告', adRes)
-      if (adRes.code == 0 && adRes.data.length > 0) {
-        adList.value = adRes.data
-        showAd.value = true
-        console.log(
-          `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+      //从后端获取是否有广告（仅小程序启动时显示）
+      if (shouldShowAd.value) {
+        const adRes = await request(
+          `${baseUrl}/system/get_activity_notify`,
+          'GET'
         )
-        console.log(
-          `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
-        )
+        console.log('获取广告', adRes)
+        if (adRes.code == 0 && adRes.data.length > 0) {
+          adList.value = adRes.data
+          showAd.value = true
+          console.log(
+            `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+          )
+          console.log(
+            `广告数量: ${adRes.data.length}, 自动轮播: ${autoplay.value}`
+          )
+        }
+        // 标记本次会话已经显示过广告，避免从其他页面切换回来时重复显示
+        shouldShowAd.value = false
       }
       // 获取当前主题
       const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')
@@ -626,7 +643,7 @@
     } else {
       // audioPlayerStore.stopAllAudio()
       audioPlayerStore.stopTtsAudio()
-      barrageStore.clearMessages()
+      // barrageStore.clearMessages()
       console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
       // 清空消息列表
       console.log('清空消息列表')

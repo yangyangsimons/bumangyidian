@@ -2,25 +2,48 @@
   <div class="container">
     <div class="card">
       <view class="audio-player">
-        <!-- 分类选择器 -->
+        <!-- 分类选择器 - 改为滑动式 -->
         <view class="category-selector">
-          <view class="category-tabs">
-            <text
-              v-for="(category, index) in categories"
-              :key="index"
-              class="category-tab"
-              :class="{ active: activeCategory === index }"
-              @click="selectCategory(index)"
+          <view
+            class="category-ruler-wrapper ruler-wrapper-unique"
+            id="ruler-wrapper"
+          >
+            <image src="/static/ruler-bg.png" mode="scaleToFill" />
+            <scroll-view
+              class="category-ruler"
+              scroll-x
+              :scroll-left="scrollLeft"
+              :scroll-with-animation="scrollWithAnimation"
+              @scroll="onScroll"
+              @scrollend="onScrollEnd"
             >
-              {{ category }}
-            </text>
-          </view>
-          <view class="indicator-wrapper">
-            <view
-              class="indicator"
-              :style="{ left: indicatorLeft + 'rpx' }"
-            ></view>
-            <view class="indicator-arrow"></view>
+              <view
+                class="ruler-content"
+                :style="{ width: rulerWidth + 'rpx' }"
+              >
+                <view
+                  v-for="(category, index) in rulerItems"
+                  :key="index"
+                  class="ruler-item"
+                  :class="{
+                    active: category.isActive,
+                    valid: category.isValid,
+                  }"
+                  :style="{ left: index * ITEM_WIDTH + 'rpx' }"
+                  @click="onRulerItemClick(category)"
+                >
+                  <text v-if="category.showText" class="ruler-text">
+                    {{ category.text }}
+                  </text>
+                </view>
+              </view>
+            </scroll-view>
+
+            <!-- 中心指示线 -->
+            <view class="center-indicator">
+              <view class="indicator-line"></view>
+              <view class="indicator-arrow"></view>
+            </view>
           </view>
         </view>
 
@@ -29,439 +52,737 @@
           <view class="audio-cover">
             <image
               class="cover-image"
-              :src="audioInfo.cover"
+              :src="currentCategoryCover"
               mode="aspectFill"
             />
           </view>
 
           <view class="audio-info">
-            <text class="audio-title">{{ audioInfo.title }}</text>
-            <text class="audio-desc">{{ audioInfo.description }}</text>
-            <text class="audio-time">{{ audioInfo.duration }}</text>
+            <text class="audio-title">{{ recommendInfo.title }}</text>
+            <text class="audio-desc">{{ recommendInfo.desc }}</text>
+            <text class="audio-time">{{ recommendInfo.effective_time }}</text>
           </view>
         </view>
 
         <!-- 控制按钮 -->
         <view class="control-buttons">
           <view class="row">
-            <view class="control-btn" @click="toggleFavorite">
+            <view class="control-btn" @click="toggleFavorite(recommendInfo.id)">
               <image
                 class="btn-icon"
                 :src="
-                  isFavorite ? '/static/star-filled.png' : '/static/star.png'
+                  recommendInfo.liked
+                    ? '/static/star-filled.png'
+                    : '/static/star.png'
                 "
               />
             </view>
 
-            <view class="control-btn" @click="shareAudio">
+            <button class="control-btn" open-type="share">
               <image class="btn-icon" src="/static/share-cirle.png" />
-            </view>
-
-            <view class="control-btn" @click="showHistory">
-              <image class="btn-icon" src="/static/history.png" />
-            </view>
+            </button>
           </view>
 
-          <view class="play-btn" @click="togglePlay">
+          <view class="play-btn" @click="togglePlay(recommendInfo)">
             <image
               class="play-icon"
-              :src="isPlaying ? '/static/pause.png' : '/static/triangle.png'"
+              :src="
+                safeIsPlayingAudio(recommendInfo?.id)
+                  ? '/static/pause.png'
+                  : '/static/triangle.png'
+              "
             />
           </view>
         </view>
       </view>
     </div>
+    <!-- 节目列表标题 -->
+    <div class="list-title">
+      <div>节目列表</div>
+    </div>
+    <!-- 可滚动的节目列表容器 -->
     <div class="list">
-      <div class="list-title">
-        <div>节目列表</div>
-      </div>
       <div class="item" v-for="item in list" :key="item.id">
         <div>
           <div class="title">{{ item.title }}</div>
-          <div class="info">{{ item.info }}</div>
+          <div class="info">{{ item.desc }}</div>
         </div>
         <div class="row">
-          <div class="star">
-            <image src="/static/star.png" mode="widthFix" />
+          <div class="star" @click="toggleFavorite(item.id)">
+            <image :src="getLikeImageSrc(item)" mode="widthFix" />
           </div>
-          <div class="play">
-            <image src="/static/triangle.png" mode="widthFix" />
+          <div class="play" @click="togglePlay(item)">
+            <image
+              :src="
+                safeIsPlayingAudio(item.id)
+                  ? '/static/pause.png'
+                  : '/static/triangle.png'
+              "
+              mode="widthFix"
+            />
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script setup>
-import { ref, computed, onUnmounted, getCurrentInstance } from "vue";
+  import {
+    ref,
+    computed,
+    onUnmounted,
+    getCurrentInstance,
+    onMounted,
+    nextTick,
+    watch,
+  } from 'vue'
+  import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
+  import request from '@/utils/request'
+  import { baseUrl } from '@/utils/config'
+  import { useMusicStore } from '@/stores/music'
+  import { useAudioPlayerStore } from '@/stores/audioPlayer'
+  import { checkTokenAndNavigate } from '@/utils/auth'
 
-const list = ref([
-  {
-    id: 1,
-    title: "校园之声标题名称",
-    info: "节目信息介绍",
-  },
-  {
-    id: 2,
-    title: "校园之声标题名称",
-    info: "节目信息介绍",
-  },
-  {
-    id: 3,
-    title: "校园之声标题名称",
-    info: "节目信息介绍",
-  },
-  {
-    id: 4,
-    title: "校园之声标题名称",
-    info: "节目信息介绍",
-  },
-]);
+  const musicStore = useMusicStore()
 
-// 获取组件实例用于emit
-const { emit } = getCurrentInstance();
+  console.log('programme.vue 中的 musicStore:', musicStore)
+  console.log(
+    'musicStore.isPlayingAudio 类型:',
+    typeof musicStore.isPlayingAudio
+  )
 
-// 响应式数据
-const categories = ref(["娱乐", "知识类", "音乐类", "访谈类", "新闻"]);
-const activeCategory = ref(1); // 默认选中"知识类"
-const audioInfo = ref({
-  title: "校园之声",
-  description: "杨思思 校园内发生的点滴趣事",
-  duration: "08:00-08:55",
-  cover: "https://img.js.design/assets/img/6837d23d6ef735a4735723a0.png",
-});
-const isPlaying = ref(false);
-const isFavorite = ref(false);
-const audioContext = ref(null);
+  // 添加安全检查函数
+  const safeIsPlayingAudio = (audioId) => {
+    if (!audioId) {
+      console.log('safeIsPlayingAudio 检查失败: audioId为空')
+      return false
+    }
 
-// 计算属性
-const indicatorLeft = computed(() => {
-  // 计算指示器位置，每个标签约150rpx宽度
-  return activeCategory.value * 150 + 75 - 15; // 减去指示器宽度的一半
-});
+    if (!musicStore || !musicStore.isPlayingAudio) {
+      console.log('safeIsPlayingAudio 检查失败:', {
+        hasMusicStore: !!musicStore,
+        hasMethod: !!musicStore?.isPlayingAudio,
+        hasAudioId: !!audioId,
+      })
+      return false
+    }
 
-// 方法定义
-const selectCategory = (index) => {
-  activeCategory.value = index;
-  // 这里可以添加切换分类的逻辑
-  emit("categoryChange", index);
-};
-
-const togglePlay = () => {
-  isPlaying.value = !isPlaying.value;
-  if (isPlaying.value) {
-    // 开始播放音频
-    startAudio();
-  } else {
-    // 暂停音频
-    pauseAudio();
+    try {
+      return musicStore.isPlayingAudio(audioId)
+    } catch (error) {
+      console.error('safeIsPlayingAudio 调用出错:', error)
+      return false
+    }
   }
-};
 
-const startAudio = () => {
-  // 创建音频上下文
-  audioContext.value = uni.createInnerAudioContext();
-  audioContext.value.src = audioInfo.value.src;
-  audioContext.value.play();
+  const togglePlay = (item) => {
+    console.log('切换播放状态:', item.title, 'ID:', item.id)
+    console.log('当前状态:', {
+      currentSong: musicStore.currentSong?.title,
+      currentSongId: musicStore.currentSong?.id,
+      isPlaying: musicStore.isPlaying,
+      isPlayingThisAudio: safeIsPlayingAudio(item.id),
+    })
 
-  audioContext.value.onEnded(() => {
-    isPlaying.value = false;
-  });
-};
+    // 检查当前是否正在播放这首歌
+    if (musicStore.currentSong && musicStore.currentSong.id === item.id) {
+      // 如果是同一首歌，就切换播放/暂停状态
+      console.log('切换播放/暂停状态')
+      musicStore.togglePlay()
+    } else {
+      // 如果是不同的歌，就播放新歌，传递当前分类信息
+      console.log('播放新歌曲')
+      const currentCategory = categories.value[activeCategory.value]
 
-const pauseAudio = () => {
-  if (audioContext.value) {
-    audioContext.value.pause();
+      // 重新设置音乐播放完成回调（恢复自动切换下一首功能）
+      const audioPlayerStore = useAudioPlayerStore()
+      if (audioPlayerStore) {
+        audioPlayerStore.setOnMusicEndedCallback(() => {
+          console.log('音乐播放完成，切换到下一首')
+          musicStore.next()
+        })
+      }
+
+      musicStore.addAndPlaySong(item, true, currentCategory)
+    }
+
+    // 添加一个延迟检查，看看状态是否已经更新
+    setTimeout(() => {
+      const audioPlayerStore = useAudioPlayerStore()
+      console.log('延迟检查状态:', {
+        isPlaying: musicStore.isPlaying,
+        isPlayingThisAudio: safeIsPlayingAudio(item.id),
+        bgIsPlaying: audioPlayerStore?.bgIsPlaying,
+        bgAudioId: audioPlayerStore?.bgAudioId,
+      })
+    }, 1000)
   }
-};
+  const list = ref([])
+  // 在 setup 顶部获取实例
+  // 获取组件实例用于emit
+  const { emit } = getCurrentInstance()
 
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-  // 添加到收藏或取消收藏
-  emit("favoriteChange", isFavorite.value);
-};
+  // 响应式数据
+  const categories = ref([])
+  const activeCategory = ref(1) // 默认选中"知识类"
+  const recommendInfo = ref({})
+  const isFavorite = ref(false)
+  const audioContext = ref(null)
 
-const shareAudio = () => {
-  // 分享功能
-  uni.share({
-    provider: "weixin",
-    scene: "WXSceneSession",
-    type: 0,
-    href: "https://example.com/audio/" + audioInfo.value.id,
-    title: audioInfo.value.title,
-    summary: audioInfo.value.description,
-    imageUrl: audioInfo.value.cover,
-    success: function (res) {
-      console.log("分享成功");
-    },
-  });
-};
+  // 刻度尺相关常量和变量 - 统一使用rpx
+  const ITEM_WIDTH = 145 // 每个刻度项的宽度(rpx) - 与CSS保持一致
+  const scrollLeft = ref(0)
+  const actualScrollLeft = ref(0)
+  const centerOffset = ref(0) // 容器中心偏移量(rpx)
+  const containerWidth = ref(0) // 容器宽度(rpx)
+  const rulerWidth = ref(0)
+  const isScrolling = ref(false)
+  const scrollWithAnimation = ref(true)
+  const isInitialized = ref(false)
+  const isUserScrolling = ref(false) // 区分用户滚动还是程序滚动
+  const scrollEndTimer = ref(null) // 滚动结束计时器
 
-const showHistory = () => {
-  // 显示播放历史
-  uni.navigateTo({
-    url: "/pages/history/history",
-  });
-};
-
-// 组件卸载时销毁音频
-onUnmounted(() => {
-  if (audioContext.value) {
-    audioContext.value.destroy();
+  // 根据收藏状态返回对应的图片地址
+  const getLikeImageSrc = (item) => {
+    return item.liked ? '/static/my/music-collect.png' : '/static/my/star.png'
   }
-});
+
+  // 获取当前激活分类的封面图片
+  const currentCategoryCover = computed(() => {
+    if (categories.value.length > 0 && categories.value[activeCategory.value]) {
+      return (
+        categories.value[activeCategory.value].cover_url ||
+        '/static/recommend.png'
+      )
+    }
+    return '/static/recommend.png'
+  })
+
+  // 生成刻度尺项目数组（两端添加空白滑块）
+  const rulerItems = computed(() => {
+    if (!categories.value.length || !containerWidth.value) return []
+
+    // 计算需要在两端添加的空白项数量
+    const emptyItemsCount = Math.ceil(centerOffset.value / ITEM_WIDTH)
+    console.log(
+      '空白项数量:',
+      emptyItemsCount,
+      'centerOffset:',
+      centerOffset.value
+    )
+    const totalItems = categories.value.length + emptyItemsCount * 2
+
+    return Array.from(Array(totalItems)).map((_, index) => {
+      const categoryIndex = index - emptyItemsCount
+      const isValidIndex =
+        categoryIndex >= 0 && categoryIndex < categories.value.length
+
+      const isActive = isValidIndex && categoryIndex === activeCategory.value
+
+      return {
+        originalIndex: categoryIndex,
+        isValid: isValidIndex,
+        isActive,
+        showText: isValidIndex,
+        text: isValidIndex ? categories.value[categoryIndex].name : '',
+      }
+    })
+  })
+
+  // 获取容器宽度 - 统一使用rpx
+  const getContainerWidth = () => {
+    return new Promise((resolve) => {
+      uni.getSystemInfo({
+        success: (res) => {
+          const screenWidthRpx = 750 // 屏幕宽度固定为750rpx
+          // 左右两侧各有64rpx padding，总共128rpx
+          const totalPaddingRpx = 128
+          const containerWidthValue = screenWidthRpx - totalPaddingRpx // 622rpx
+
+          containerWidth.value = containerWidthValue
+          centerOffset.value = containerWidthValue / 2 - ITEM_WIDTH / 2 // 311rpx
+
+          console.log('屏幕宽度(rpx):', screenWidthRpx)
+          console.log('总padding(rpx):', totalPaddingRpx)
+          console.log('计算后的容器宽度(rpx):', containerWidthValue)
+          console.log('中心偏移(rpx):', centerOffset.value)
+
+          resolve(containerWidthValue)
+        },
+        fail: () => {
+          // 默认值
+          const screenWidthRpx = 750
+          const totalPaddingRpx = 128
+          const containerWidthValue = screenWidthRpx - totalPaddingRpx
+
+          containerWidth.value = containerWidthValue
+          centerOffset.value = containerWidthValue / 2
+
+          console.log('使用默认宽度计算(rpx):', containerWidthValue)
+          resolve(containerWidthValue)
+        },
+      })
+    })
+  }
+
+  // 监听categories变化，初始化刻度尺
+  watch(categories, () => {
+    if (categories.value.length > 0) {
+      nextTick(async () => {
+        // 增加延时，确保DOM完全渲染
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        await getContainerWidth()
+        initRuler()
+      })
+    }
+  })
+
+  // 初始化刻度尺
+  const initRuler = () => {
+    if (!containerWidth.value) {
+      console.error('容器宽度未获取到')
+      return
+    }
+
+    const emptyItemsCount = Math.ceil(centerOffset.value / ITEM_WIDTH)
+
+    console.log('初始化参数:', {
+      containerWidth: containerWidth.value,
+      centerOffset: centerOffset.value,
+      emptyItemsCount,
+      activeCategory: activeCategory.value,
+      ITEM_WIDTH,
+    })
+
+    // 计算总宽度（分类数据 + 两端空白项）- 使用rpx
+    rulerWidth.value =
+      (categories.value.length + emptyItemsCount * 2) * ITEM_WIDTH
+
+    console.log('计算后的rulerWidth(rpx):', rulerWidth.value)
+
+    // 设置初始位置到对应的分类位置
+    scrollToCategoryIndex(activeCategory.value, false)
+
+    setTimeout(() => {
+      scrollWithAnimation.value = true
+      isInitialized.value = true
+      console.log('初始化完成')
+    }, 50)
+  }
+
+  // rpx转px的函数
+  const rpxToPx = (rpx) => {
+    return new Promise((resolve) => {
+      uni.getSystemInfo({
+        success: (res) => {
+          const px = (rpx * res.windowWidth) / 750
+          resolve(px)
+        },
+        fail: () => {
+          // 默认按375px屏幕计算
+          const px = (rpx * 375) / 750
+          resolve(px)
+        },
+      })
+    })
+  }
+
+  // 滚动到指定分类索引
+  const scrollToCategoryIndex = async (categoryIndex, withAnimation = true) => {
+    if (!containerWidth.value) return
+
+    const emptyItemsCount = Math.ceil(centerOffset.value / ITEM_WIDTH)
+    const targetPositionRpx =
+      (emptyItemsCount + categoryIndex) * ITEM_WIDTH - centerOffset.value
+
+    // scroll-view的scroll-left需要px值
+    const targetPositionPx = await rpxToPx(targetPositionRpx)
+
+    console.log('滚动到分类:', {
+      categoryIndex,
+      emptyItemsCount,
+      targetPositionRpx,
+      targetPositionPx,
+      withAnimation,
+    })
+
+    if (withAnimation) {
+      scrollWithAnimation.value = true
+    } else {
+      scrollWithAnimation.value = false
+    }
+
+    scrollLeft.value = targetPositionPx
+    actualScrollLeft.value = targetPositionPx
+  }
+
+  // px转rpx的函数
+  const pxToRpx = (px) => {
+    return new Promise((resolve) => {
+      uni.getSystemInfo({
+        success: (res) => {
+          const rpx = (px * 750) / res.windowWidth
+          resolve(rpx)
+        },
+        fail: () => {
+          // 默认按375px屏幕计算
+          const rpx = (px * 750) / 375
+          resolve(rpx)
+        },
+      })
+    })
+  }
+
+  // 滚动事件处理
+  const onScroll = async (e) => {
+    actualScrollLeft.value = e.detail.scrollLeft
+    isUserScrolling.value = true
+
+    if (!isInitialized.value || !containerWidth.value) return
+
+    // 清除之前的计时器
+    if (scrollEndTimer.value) {
+      clearTimeout(scrollEndTimer.value)
+    }
+
+    // 将px转换为rpx进行计算
+    const scrollLeftRpx = await pxToRpx(actualScrollLeft.value)
+    const centerPositionRpx = scrollLeftRpx + centerOffset.value
+    const currentItemIndex = Math.round(centerPositionRpx / ITEM_WIDTH)
+
+    // 找到对应的分类项
+    const currentItem = rulerItems.value[currentItemIndex]
+    if (
+      currentItem &&
+      currentItem.isValid &&
+      currentItem.originalIndex !== activeCategory.value
+    ) {
+      console.log('滚动中切换分类到:', currentItem.originalIndex)
+      activeCategory.value = currentItem.originalIndex
+      // 切换分类时加载对应的节目列表
+      loadProgramList(currentItem.originalIndex)
+      emit('categoryChange', currentItem.originalIndex)
+    }
+
+    // 设置一个计时器，在滚动停止后触发居中
+    scrollEndTimer.value = setTimeout(() => {
+      if (isUserScrolling.value) {
+        console.log('滚动停止，触发自动居中')
+        centerActiveCategory()
+      }
+    }, 100) // 100ms 后如果没有新的滚动事件就认为滚动结束
+  }
+
+  // 滚动结束事件处理 - 简化
+  const onScrollEnd = () => {
+    console.log('onScrollEnd 触发')
+    setTimeout(() => {
+      isScrolling.value = false
+      if (isUserScrolling.value) {
+        console.log('scrollend 事件触发自动居中')
+        centerActiveCategory()
+      }
+      isUserScrolling.value = false
+    }, 50)
+  }
+
+  // 让当前激活的分类居中
+  const centerActiveCategory = () => {
+    if (!isInitialized.value || !containerWidth.value) {
+      console.log('未初始化，跳过居中')
+      return
+    }
+
+    console.log('执行自动居中，分类:', activeCategory.value)
+
+    // 防止用户滚动标记影响程序滚动
+    isUserScrolling.value = false
+
+    // 延时执行，确保滚动动画完成
+    setTimeout(() => {
+      scrollToCategoryIndex(activeCategory.value, true)
+    }, 50)
+  }
+
+  // 处理点击 ruler-item 事件
+  const onRulerItemClick = (category) => {
+    // 只有有效的分类项才能被点击
+    if (!category.isValid) {
+      return
+    }
+
+    console.log(
+      '点击 ruler-item:',
+      category.text,
+      '索引:',
+      category.originalIndex
+    )
+
+    // 如果点击的不是当前激活的分类，则切换到该分类
+    if (category.originalIndex !== activeCategory.value) {
+      activeCategory.value = category.originalIndex
+
+      // 加载对应的节目列表
+      loadProgramList(category.originalIndex)
+
+      // 触发分类变更事件
+      emit('categoryChange', category.originalIndex)
+    }
+
+    // 无论是否切换分类，都让这个分类居中
+    // 防止用户滚动标记影响程序滚动
+    isUserScrolling.value = false
+
+    // 滚动到指定分类并居中
+    scrollToCategoryIndex(category.originalIndex, true)
+  }
+
+  // 加载节目列表的方法
+  const loadProgramList = async (categoryIndex = null) => {
+    try {
+      // 如果没有传入分类索引，使用当前激活的分类
+      const targetCategoryIndex =
+        categoryIndex !== null ? categoryIndex : activeCategory.value
+
+      // 获取对应分类名称
+      const categoryName = categories.value[targetCategoryIndex]?.name
+
+      if (!categoryName) {
+        console.error('分类不存在')
+        return
+      }
+
+      console.log(categoryName, targetCategoryIndex, '<category>')
+      // 调用API获取指定分类下的节目数据
+      const response = await request(
+        `${baseUrl}/school_music/list?category=${categoryName}`,
+        'GET'
+      )
+      console.log('节目数据:', response)
+
+      if (response.code === 0 && response.data && response.data.length > 0) {
+        list.value = response.data
+        //选择第一个作为推荐
+        recommendInfo.value = { ...response.data[0] }
+      }
+    } catch (error) {
+      console.error('获取节目列表失败:', error)
+    }
+  }
+
+  // 生命周期钩子
+  onMounted(async () => {
+    try {
+      //获取所有分类
+      const responseCategories = await request(
+        `${baseUrl}/school_music/categories`,
+        'GET'
+      )
+      console.log('节目组件加载', responseCategories)
+      if (responseCategories.code === 0 && responseCategories.data) {
+        categories.value = responseCategories.data
+      }
+      console.log('categories', categories.value)
+
+      //获取分类下面的节目列表
+      await loadProgramList()
+      //如果没有歌曲的话，就把第一个歌曲设置进去（但不自动播放）
+      if (
+        musicStore.playlist.length <= 0 &&
+        list.value.length > 0 &&
+        list.value[0]
+      ) {
+        console.log(list.value[0])
+        const currentCategory = categories.value[activeCategory.value]
+        musicStore.setPlaylistWithoutPlay([list.value[0]], 0, currentCategory)
+      }
+    } catch (error) {
+      console.error('初始化数据失败:', error)
+    }
+  })
+
+  const toggleFavorite = async (id) => {
+    //先判断是不是登录了
+    checkTokenAndNavigate(async (token) => {
+      try {
+        const response = await request(`${baseUrl}/school_music/like`, 'POST', {
+          shcool_music_id: id,
+        })
+        console.log('取消收藏节目:', response)
+        if (response.data.liked) {
+          uni.showToast({
+            title: '收藏成功',
+            icon: 'success',
+          })
+        } else {
+          uni.showToast({
+            title: '已取消收藏',
+            icon: 'none',
+          })
+        }
+        // 重新加载节目列表
+        loadProgramList()
+      } catch (error) {
+        console.error('取消收藏节目失败:', error)
+        uni.showToast({
+          title: '取消收藏失败',
+          icon: 'none',
+        })
+      }
+    })
+  }
+
+  const shareAudio = (recommendInfo) => {
+    console.log('分享音频:', recommendInfo)
+    // 分享功能
+    uni.share({
+      provider: 'weixin',
+      scene: 'WXSceneSession',
+      type: 1,
+      title: recommendInfo.title,
+      summary: recommendInfo.desc,
+      href: 'http://uniapp.dcloud.io/',
+      imageUrl: 'https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/uni@2x.png',
+      success: function (res) {
+        console.log('分享成功', res)
+      },
+    })
+  }
+
+  // 组件卸载时销毁音频
+  onUnmounted(() => {
+    console.log('组件卸载,节目组件写在')
+    if (audioContext.value) {
+      audioContext.value.destroy()
+    }
+    // 清除计时器
+    if (scrollEndTimer.value) {
+      clearTimeout(scrollEndTimer.value)
+    }
+  })
+  onShareAppMessage(() => {
+    console.log('onShareAppMessage......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+      imageUrl:
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
+      path: '/pages/interaction/interaction',
+    }
+  })
+  onShareTimeline(() => {
+    console.log('onShareTimeline......')
+    return {
+      title: `不芒一点，陪你世界加一点`,
+    }
+  })
 </script>
-<style lang="scss" scoped>
-.container {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  .card {
-    width: calc(100% - 64rpx);
-    height: 716rpx;
-    margin: 32rpx;
+
+<style scoped lang="scss">
+  // 这里可以添加其他脚本逻辑
+  @import './index.scss';
+
+  /* 新增的刻度尺样式 */
+  .category-ruler-wrapper {
+    position: relative;
+    height: 240rpx; // 统一使用rpx
     overflow: hidden;
-    border-radius: 32rpx;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10rpx);
-    box-shadow: inset 0rpx 0rpx 18rpx rgba(255, 255, 255, 1),
-      0rpx 8rpx 20rpx rgba(112, 125, 88, 0.27);
-    .audio-player {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      height: 100%;
-      padding: 40rpx 32rpx;
-    }
-
-    .category-selector {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 25rpx;
-      padding: 20rpx 0;
-      margin-bottom: 40rpx;
-      backdrop-filter: blur(10rpx);
-      position: relative;
-    }
-
-    .category-tabs {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-
-    .category-tab {
-      font-size: 28rpx;
-      color: #666;
-      padding: 10rpx 20rpx;
-    }
-
-    .indicator-wrapper {
+    image {
       position: absolute;
-      bottom: 0;
+      top: 0;
       left: 0;
-      right: 0;
-      height: 40rpx;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .indicator {
-      width: 30rpx;
-      height: 6rpx;
-      background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
-      border-radius: 3rpx;
-      transition: left 0.3s ease;
-      position: absolute;
-      top: -10rpx;
-    }
-
-    .indicator-arrow {
-      width: 0;
-      height: 0;
-      border-left: 15rpx solid transparent;
-      border-right: 15rpx solid transparent;
-      border-top: 20rpx solid #ff6b6b;
-      margin-top: 5rpx;
-    }
-
-    .audio-card {
-      margin-bottom: 32rpx;
-      display: flex;
-      align-items: center;
-    }
-
-    .audio-cover {
-      width: 198rpx;
-      height: 198rpx;
-      padding: 3rpx;
-      box-sizing: border-box;
-      border-radius: 20rpx;
-      overflow: hidden;
-      margin-right: 30rpx;
-      border: 6rpx solid rgba(255, 255, 255, 1);
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .cover-image {
       width: 100%;
       height: 100%;
-      border-radius: 20rpx;
-    }
-
-    .audio-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .audio-title {
-      font-size: 42rpx;
-      font-weight: 700;
-      color: rgba(16, 18, 19, 1);
-      margin-bottom: 15rpx;
-    }
-
-    .audio-desc {
-      font-size: 24rpx;
-      font-weight: 400;
-      letter-spacing: 0rpx;
-      line-height: 32.92rpx;
-      color: rgba(152, 153, 153, 1);
-      margin-bottom: 44rpx;
-    }
-
-    .audio-time {
-      font-size: 24rpx;
-      color: #999;
-    }
-
-    .control-buttons {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .row {
-      display: flex;
-      gap: 32rpx;
-    }
-
-    .control-btn {
-      width: 80rpx;
-      height: 80rpx;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-icon {
-      width: 40rpx;
-      height: 40rpx;
-    }
-
-    .play-btn {
-      width: 120rpx;
-      height: 120rpx;
-      background: linear-gradient(
-        180deg,
-        rgba(211, 248, 79, 1) 0%,
-        rgba(167, 238, 39, 1) 100%
-      );
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .play-icon {
-      width: 38rpx;
-      height: 46rpx;
+      object-fit: cover;
     }
   }
-  .list {
-    border-radius: 24rpx 24rpx, 0rpx, 0rpx;
-    background: #fff;
-    overflow: hidden;
-    &-title {
-      width: fit-content;
-      position: relative;
-      z-index: 5;
-      font-size: 32rpx;
-      font-weight: 700;
-      margin: 32rpx;
-      &::after {
-        content: "";
-        width: 142rpx;
-        height: 13rpx;
-        border-radius: 6.56px;
-        background: linear-gradient(243.43deg, #cefa1e 0%, #a7ee27 100%);
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        z-index: -1;
-        transform: translateX(-50%);
-      }
-    }
-    .item {
-      padding: 24rpx 0;
-      margin: 0 24rpx;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2rpx dashed rgba(231, 236, 238, 1);
-      .title {
-        font-size: 28rpx;
-        font-weight: 500;
-        margin-bottom: 8rpx;
-      }
-      .info {
-        font-size: 24rpx;
-        font-weight: 400;
-        color: rgba(152, 153, 153, 1);
-      }
-      .row {
-        display: flex;
-        gap: 24rpx;
-      }
-      .star {
-        width: 76rpx;
-        height: 56rpx;
-        border-radius: 26rpx;
-        background: rgba(255, 255, 255, 1);
-        border: 2rpx solid rgba(231, 236, 238, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        image {
-          width: 27.18rpx;
-          height: 26rpx;
-        }
-      }
-      .play {
-        width: 76rpx;
-        height: 56rpx;
-        border-radius: 26rpx;
-        background: linear-gradient(
-          180deg,
-          rgba(211, 248, 79, 1) 0%,
-          rgba(167, 238, 39, 1) 100%
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        image {
-          width: 19.09rpx;
-          height: 26rpx;
-        }
-      }
-    }
+
+  .category-ruler {
+    height: 100%;
+    width: 100%;
+    position: relative;
   }
-}
+
+  .ruler-content {
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ruler-item {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    width: 145rpx; // 与ITEM_WIDTH保持一致
+    height: 100%;
+    display: flex;
+    padding: 0 20rpx;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer; // 添加手型光标提示
+  }
+
+  // 添加点击态样式
+  .ruler-item:active {
+    transform: scale(0.95);
+  }
+
+  // 为有效的分类项添加可点击的视觉反馈
+  .ruler-item.valid {
+    cursor: pointer;
+  }
+
+  .ruler-text {
+    font-size: 28rpx;
+    color: rgba(152, 153, 153, 1);
+    text-align: center;
+    line-height: 1;
+    transform: scale(0.9);
+    font-weight: 400;
+  }
+
+  .ruler-item.active .ruler-text {
+    font-size: 32rpx;
+    font-weight: 500;
+    color: rgba(16, 18, 19, 1);
+    transform: scale(1);
+  }
+
+  .center-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .indicator-line {
+    width: 8rpx;
+    height: 80%;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 52, 52, 1) 0%,
+      rgba(255, 52, 52, 0) 48.77%,
+      rgba(255, 52, 52, 0) 61.2%,
+      rgba(255, 52, 52, 1) 100%
+    );
+  }
+  .indicator-arrow {
+    width: 0;
+    height: 0;
+    border-left: 15rpx solid transparent;
+    border-right: 15rpx solid transparent;
+    border-bottom: 20rpx solid rgba(255, 62, 62, 1);
+    margin-top: 10rpx;
+    border-radius: 2rpx;
+  }
 </style>

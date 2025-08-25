@@ -22,14 +22,14 @@
     box-sizing: border-box;
     position: fixed;
     height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32rpx;
+
     background-color: #00000025;
-    font-family: "AlibabaPuHuiTi";
-    padding-right: 0;
+
     padding-bottom: 200rpx;
     .bg {
         position: fixed;
@@ -40,18 +40,24 @@
         z-index: -1;
         background-size: cover;
     }
-    // nav bar top style
     ::v-deep .uni-navbar__header-container {
         // border: 1px solid red;
         text-align: left;
-        display: flex;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 32rpx;
+    }
+    ::v-deep .uni-navbar__header-container-inner {
+        display: flex !important;
         align-items: center;
         justify-content: flex-start;
     }
+
     ::v-deep .uni-nav-bar-text {
-        font-size: 34rpx !important;
+        font-size: 36rpx !important;
         font-weight: 700 !important;
-        color: rgba(51, 51, 51, 1) !important;
+        color: rgba(16, 18, 19, 1) !important;
         -webkit-line-clamp: 1;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -61,6 +67,7 @@
 
     .header {
         // border: 1px solid red;
+        font-family: "AlibabaPuHuiTi";
         width: 100%;
         margin-top: 50rpx;
         display: flex;
@@ -68,6 +75,8 @@
         align-items: flex-start;
         gap: 24rpx;
         height: 185rpx;
+        padding-left: 32rpx;
+        box-sizing: border-box;
 
         .avator {
             border: 4rpx solid rgba(255, 255, 255, 1);
@@ -184,12 +193,20 @@
         }
     }
     .main {
+        font-family: "AlibabaPuHuiTi";
         width: 100%;
         padding: 30rpx 24rpx 40rpx 24rpx;
         // border: 1px solid red;
-        background: rgba(255, 255, 255, 1);
-        border-radius: 28rpx;
 
+        border-radius: 28rpx;
+        box-sizing: border-box;
+        .goods-container {
+            border-radius: 28rpx;
+            width: 100%;
+            background: rgba(255, 255, 255, 1);
+            padding: 30rpx 24rpx 40rpx 24rpx;
+            box-sizing: border-box;
+        }
         .goods-head {
             // border: 1px solid blue;
             width: 100%;
@@ -221,8 +238,8 @@
             grid-template-columns: repeat(auto-fill, minmax(140rpx, 1fr));
             grid-template-rows: repeat(auto-fill, 180rpx);
             align-items: center;
-            justify-items: center;
-            row-gap: 40rpx;
+            justify-items: space-between;
+            row-gap: 45rpx;
             .product-item {
                 width: 140rpx;
                 height: 180rpx;
@@ -233,6 +250,7 @@
                 position: relative;
                 font-size: 24rpx;
                 font-weight: 500;
+                gap: 8rpx;
                 .image-wrap {
                     position: relative;
                     width: 100%;
@@ -256,6 +274,12 @@
                     }
                 }
                 .product-points {
+                    text-align: center;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto;
+                    width: 90%;
                     font-size: 24rpx;
                     font-weight: 500;
                     color: rgba(16, 18, 19, 1);
@@ -264,11 +288,17 @@
         }
     }
     .footer {
+        font-family: "AlibabaPuHuiTi";
         width: 100%;
-        padding: 30rpx 24rpx 40rpx 24rpx;
-        // border: 1px solid red;
-        background: rgba(255, 255, 255, 1);
-        border-radius: 28rpx;
+        padding: 30rpx 24rpx 40rpx 28rpx;
+        box-sizing: border-box;
+        .container {
+            width: 100%;
+            padding: 30rpx 24rpx 40rpx 24rpx;
+            background: rgba(255, 255, 255, 1);
+            border-radius: 28rpx;
+            box-sizing: border-box;
+        }
         .footer-head {
             width: 100%;
             display: flex;
@@ -280,7 +310,7 @@
             }
         }
         .footer-main {
-            padding: 0 60rpx;
+            margin-left: 5rpx;
             width: 100%;
             height: 150rpx;
             display: flex;

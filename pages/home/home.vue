@@ -1,412 +1,398 @@
 <template>
   <view class="container" :style="{ paddingTop: menuButtonRect.top + 'px' }">
-    <div :style="{ height: menuButtonRect.height + 'px' }" class="logo-container">
+    <musicbar
+      class="music-bar"
+      style="position: fixed; top: 35%; left: 0; right: 0; z-index: 99999"
+    />
+    <div
+      :style="{ height: menuButtonRect.height + 'px' }"
+      class="logo-container"
+    >
       <image src="/static/global-title.png" class="logo" mode="widthFix" />
     </div>
-    <image src="/static/banner.png" class="banner" mode="aspectFill" />
+    <!-- 轮播图 -->
+    <swiper
+      class="banner"
+      :indicator-dots="false"
+      :autoplay="true"
+      :circular="true"
+      :interval="2000"
+    >
+      <swiper-item
+        v-for="(item, index) in swiperList"
+        :key="index"
+        class="banner-item"
+      >
+        <image :src="item.pic_url" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
     <div class="content">
-      <div class="player">
-        <div class="disc">
-          <image src="/static/disc.png" mode="aspectFill" />
-        </div>
-        <div class="text">
-          <text>校园之声</text>
-          <text>杨思思-校园广播电台情感电台</text>
-        </div>
-        <div class="icons">
-          <image src="/static/player.png" mode="widthFix" />
-          <image src="/static/more.png" mode="widthFix" />
-        </div>
-      </div>
+      <!-- 标题 -->
       <div class="title">热点资讯</div>
-      <view class="news-container">
-        <!-- 主要新闻卡片 -->
-        <view class="main-news-card">
-          <image class="main-news-image" :src="mainNews.image" mode="aspectFill" @click="handleNewsClick(mainNews)" />
-          <view class="main-news-overlay">
-            <view class="main-news-content">
-              <text class="main-news-title">{{ mainNews.title }}</text>
-              <view class="main-news-meta">
-                <text class="news-source">{{ mainNews.source }}</text>
-                <text class="news-time">{{ mainNews.star }}点赞</text>
+      <!-- 可滚动的新闻容器 -->
+      <view class="news-scroll-container">
+        <view class="news-container">
+          <!-- 主要新闻卡片 -->
+          <view
+            class="main-news-card"
+            v-if="mainNews"
+            @click="viewNewsDetail(mainNews)"
+          >
+            <image
+              class="main-news-image"
+              :src="mainNews.pic"
+              mode="aspectFill"
+            />
+            <view class="main-news-overlay">
+              <view class="main-news-content" @click="viewNewsDetail(mainNews)">
+                <text class="main-news-title">{{ mainNews.title }}</text>
+                <view class="main-news-meta">
+                  <text class="news-source">校园资讯</text>
+                  <text class="news-time">{{
+                    formatDate(mainNews.created_at)
+                  }}</text>
+                </view>
               </view>
             </view>
           </view>
-        </view>
 
-        <!-- 新闻列表 -->
-        <view class="news-list">
-          <view class="news-item" v-for="(item, index) in newsList" :key="index" @click="handleNewsClick(item)">
-            <view class="news-text-content">
-              <text class="news-title">{{ item.title }}</text>
-              <view class="news-meta">
-                <text class="news-source">{{ item.source }}</text>
-                <text class="news-time">{{ item.star }}点赞</text>
+          <!-- 新闻列表 -->
+          <view class="news-list">
+            <view
+              class="news-item"
+              v-for="(item, index) in newsList"
+              :key="item.id"
+              @click="viewNewsDetail(item)"
+            >
+              <view class="news-text-content">
+                <text class="news-title">{{ item.title }}</text>
+                <view class="news-meta">
+                  <text class="news-source">校园资讯</text>
+                  <text class="news-time">{{
+                    formatDate(item.created_at)
+                  }}</text>
+                </view>
               </view>
+              <image
+                class="news-item-image"
+                :src="item.pic"
+                mode="aspectFill"
+              />
             </view>
-            <image class="news-item-image" :src="item.image" mode="aspectFill" />
+          </view>
+
+          <!-- 加载状态 -->
+          <view class="loading" v-if="loading">
+            <text>加载中...</text>
+          </view>
+
+          <!-- 加载完成提示 -->
+          <view class="load-complete" v-if="!loading && allNews.length > 0">
+            <text>共 {{ allNews.length }} 条资讯</text>
+          </view>
+
+          <!-- 空状态 -->
+          <view class="empty-state" v-if="!loading && allNews.length === 0">
+            <text>暂无资讯</text>
           </view>
         </view>
       </view>
     </div>
+    <tabbar />
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-const statusBarHeight = uni.getSystemInfoSync().statusBarHeight;
-const menuButtonRect = uni.getMenuButtonBoundingClientRect();
-console.log("导航栏高度:", statusBarHeight);
-console.log("菜单按钮位置:", menuButtonRect);
+  import { ref, onMounted } from 'vue'
+  import { onShow, onHide, onLoad } from '@dcloudio/uni-app'
+  import request from '@/utils/request.js'
+  import { baseUrl } from '../../utils/config'
+  import tabbar from '@/components/tabbar/tabbar.vue'
+  import { useMusicStore } from '@/stores/music'
+  import musicbar from '@/components/musicbar/musicbar.vue'
 
-// 主要新闻数据
-const mainNews = ref({
-  title: "跟随总书记走进洛阳邮承集团了解先进制造...",
-  source: "校园咨询",
-  star: "32",
-  image: "https://img.js.design/assets/img/6837d23f0f790768ee34ad44.png",
-});
+  const statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+  const menuButtonRect = uni.getMenuButtonBoundingClientRect()
+  const musicStore = useMusicStore()
+  // 数据相关
+  const mainNews = ref(null)
+  const newsList = ref([])
+  const allNews = ref([])
+  const loading = ref(false)
+  const refreshing = ref(false)
+  const pageSize = 20 // 每页加载数量，可以适当调大
 
-// 新闻列表数据
-const newsList = ref([
-  {
-    title: "2025上合组织数字经济论坛将在天津举办",
-    source: "校园咨询",
-    star: "32",
-    image: "https://img.js.design/assets/img/6837d23eae72b5fd97402c32.png",
-  },
-  {
-    title: "2025上合组织数字经济论坛将在天津举办",
-    source: "校园咨询",
-    star: "32",
-    image: "https://img.js.design/assets/img/66a8b1da6e8e19d66544daf8.png",
-  },
-  {
-    title: "2025上合组织数字经济论坛将在天津举办",
-    source: "校园咨询",
-    star: "32",
-    image: "https://img.js.design/assets/img/66a8b1da6e8e19d66544daf8.png",
-  },
-]);
+  //轮播图
+  const swiperList = ref([])
+  // 格式化日期
+  const formatDate = (dateStr) => {
+    if (!dateStr) return ''
 
-// 点击新闻处理函数
-const handleNewsClick = (newsItem) => {
-  console.log("点击新闻:", newsItem);
-  // 这里可以跳转到新闻详情页
-  uni.navigateTo({
-    url: `/pages/news-detail/news-detail?id=${newsItem.id || 0}`,
-  });
-};
-
-// 页面加载时获取数据
-onMounted(() => {
-  // 这里可以调用API获取新闻数据
-  loadNewsData();
-});
-
-// 加载新闻数据
-const loadNewsData = async () => {
-  try {
-    // 模拟API调用
-    // const response = await uni.request({
-    //   url: 'https://api.example.com/news',
-    //   method: 'GET'
-    // })
-    // mainNews.value = response.data.mainNews
-    // newsList.value = response.data.newsList
-
-    console.log("新闻数据加载完成");
-  } catch (error) {
-    console.error("加载新闻数据失败:", error);
-    uni.showToast({
-      title: "加载失败，请重试",
-      icon: "none",
-    });
+    // 提取日期部分（去掉时间）
+    const datePart = dateStr.split(' ')[0]
+    return datePart
   }
-};
 
-// 下拉刷新
-const onPullDownRefresh = () => {
-  loadNewsData().finally(() => {
-    uni.stopPullDownRefresh();
-  });
-};
+  // 一次性加载所有新闻数据
+  const loadAllNews = async () => {
+    try {
+      loading.value = true
+      allNews.value = []
 
-// 上拉加载更多
-const onReachBottom = () => {
-  // 加载更多新闻
-  loadMoreNews();
-};
+      let page = 1
+      let hasMore = true
 
-// 加载更多新闻
-const loadMoreNews = async () => {
-  try {
-    // 模拟加载更多数据
-    const moreNews = [
-      {
-        title: "更多新闻标题...",
-        source: "校园咨询",
-        time: "1小时前",
-        image: "/static/images/news4.jpg",
-      },
-    ];
-    newsList.value = [...newsList.value, ...moreNews];
-  } catch (error) {
-    console.error("加载更多新闻失败:", error);
+      console.log('开始加载所有新闻数据...')
+
+      while (hasMore) {
+        console.log(`正在加载第 ${page} 页...`)
+
+        const response = await request(
+          `${baseUrl}/school_news/get_school_news_list?page=${page}&size=${pageSize}`,
+          'GET'
+        )
+
+        if (response.code === 0) {
+          const { data: newsData, total } = response.data
+
+          if (newsData && newsData.length > 0) {
+            allNews.value = [...allNews.value, ...newsData]
+
+            // 检查是否还有更多数据
+            if (allNews.value.length >= total || newsData.length < pageSize) {
+              hasMore = false
+              console.log(`数据加载完成，总共 ${allNews.value.length} 条`)
+            } else {
+              page++
+            }
+          } else {
+            hasMore = false
+            console.log('没有更多数据')
+          }
+        } else {
+          console.error('获取新闻失败:', response.message)
+          uni.showToast({
+            title: response.message || '加载失败',
+            icon: 'none',
+          })
+          hasMore = false
+          break
+        }
+      }
+
+      // 设置主新闻和新闻列表
+      if (allNews.value.length > 0) {
+        mainNews.value = allNews.value[0]
+        // 新闻列表不包含主新闻，从第二条开始显示
+        newsList.value = allNews.value.slice(1)
+
+        console.log('主新闻设置完成')
+        console.log('allNews总数:', allNews.value.length)
+        console.log('newsList数量:', newsList.value.length)
+        console.log('显示总数:', 1 + newsList.value.length)
+
+        // 检查是否需要自动跳转到特定资讯
+        const autoOpenNewsId = uni.getStorageSync('autoOpenNewsId')
+        if (autoOpenNewsId) {
+          console.log('自动跳转到资讯:', autoOpenNewsId)
+
+          // 在所有资讯中查找对应的资讯
+          const targetNews = allNews.value.find(
+            (news) => news.id == autoOpenNewsId
+          )
+          if (targetNews) {
+            // 清除标识
+            uni.removeStorageSync('autoOpenNewsId')
+
+            // 延迟一点时间确保页面渲染完成
+            setTimeout(() => {
+              viewNewsDetail(targetNews)
+            }, 500)
+          } else {
+            console.log('未找到对应的资讯')
+            uni.removeStorageSync('autoOpenNewsId')
+          }
+        }
+      } else {
+        console.log('没有获取到任何新闻数据')
+      }
+    } catch (error) {
+      console.error('加载新闻数据失败:', error)
+      uni.showToast({
+        title: '网络错误，请重试',
+        icon: 'none',
+      })
+    } finally {
+      loading.value = false
+    }
   }
-};
 
-// 导出页面配置
-defineExpose({
-  onPullDownRefresh,
-  onReachBottom,
-});
+  onShow(async () => {
+    console.log('页面显示，开始加载数据')
+
+    // 如果播放列表为空，从后端获取节目列表并随机选择一首
+    if (musicStore.playlist.length <= 0) {
+      await loadRandomSongToPlaylist()
+    }
+
+    await loadAllNews()
+    // 获取轮播图
+    await getSwiperList()
+  })
+
+  // 处理分享链接进入
+  onLoad((options) => {
+    console.log('页面加载参数:', options)
+
+    // 检查是否是从分享链接进入
+    if (options.shareNewsId) {
+      console.log('从分享链接进入，资讯ID:', options.shareNewsId)
+
+      // 设置一个标识，在数据加载完成后自动跳转到对应资讯
+      uni.setStorageSync('autoOpenNewsId', options.shareNewsId)
+    }
+  })
+  const getSwiperList = async () => {
+    try {
+      const response = await request(`${baseUrl}/system/get_quick_link`, 'GET')
+      if (response.code === 0) {
+        swiperList.value = response.data || []
+        // const mock = [
+        //   {
+        //     id: 1,
+        //     pic_url:
+        //       'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/news/1755745285_1755740570676122.png',
+        //   },
+        //   {
+        //     id: 2,
+        //     pic_url:
+        //       'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/quick_link/1755604934_%E9%87%91%E5%88%9A%E4%BD%8D.png',
+        //   },
+        // ]
+        // swiperList.value = mock
+      } else {
+        console.error('获取轮播图失败:', response.message)
+      }
+    } catch (error) {
+      console.error('获取轮播图异常:', error)
+    }
+  }
+  // 从后端获取节目列表并随机选择一首歌曲添加到播放列表（不播放）
+  const loadRandomSongToPlaylist = async () => {
+    try {
+      console.log('播放列表为空，从后端获取节目列表...')
+
+      // 先获取所有分类
+      const categoriesResponse = await request(
+        `${baseUrl}/school_music/categories`,
+        'GET'
+      )
+
+      if (
+        categoriesResponse.code !== 0 ||
+        !categoriesResponse.data ||
+        categoriesResponse.data.length === 0
+      ) {
+        console.log('获取分类失败或无分类数据')
+        return
+      }
+
+      const categories = [...categoriesResponse.data] // 复制数组，避免修改原数组
+      let randomSong = null
+      let selectedCategory = null // 保存选中的分类对象
+
+      // 循环尝试不同的分类，直到找到有节目的分类或所有分类都尝试过
+      while (categories.length > 0 && !randomSong) {
+        // 随机选择一个分类索引
+        const randomIndex = Math.floor(Math.random() * categories.length)
+        const randomCategoryObj = categories[randomIndex]
+        const randomCategory = randomCategoryObj.name // 获取分类对象的name属性
+
+        // 从数组中移除已尝试的分类，避免重复尝试
+        categories.splice(randomIndex, 1)
+
+        console.log(
+          `尝试分类: ${randomCategory} (剩余未尝试: ${categories.length})`
+        )
+
+        try {
+          // 获取该分类下的节目列表
+          const programResponse = await request(
+            `${baseUrl}/school_music/list?category=${randomCategory}`,
+            'GET'
+          )
+
+          if (
+            programResponse.code === 0 &&
+            programResponse.data &&
+            programResponse.data.length > 0
+          ) {
+            const programs = programResponse.data
+            // 随机选择一首歌曲
+            const randomSongIndex = Math.floor(Math.random() * programs.length)
+            randomSong = programs[randomSongIndex]
+            selectedCategory = randomCategoryObj // 保存成功找到歌曲的分类对象
+
+            console.log(
+              `在分类 "${randomCategory}" 中找到 ${programs.length} 首节目`
+            )
+            console.log('随机选择的歌曲:', randomSong)
+            break
+          } else {
+            console.log(
+              `分类 "${randomCategory}" 下没有节目或获取失败，尝试其他分类...`
+            )
+          }
+        } catch (categoryError) {
+          console.error(`获取分类 "${randomCategory}" 节目失败:`, categoryError)
+          // 继续尝试下一个分类
+        }
+      }
+
+      if (randomSong) {
+        // 使用不会自动播放的方法设置播放列表，传递分类信息
+        musicStore.setPlaylistWithoutPlay([randomSong], 0, selectedCategory)
+        console.log('随机歌曲已添加到播放列表（未播放）')
+      } else {
+        console.log('所有分类都没有找到可用的节目')
+        // 可以在这里设置一个默认的音乐或显示提示
+        uni.showToast({
+          title: '暂无可播放的节目',
+          icon: 'none',
+          duration: 2000,
+        })
+      }
+    } catch (error) {
+      console.error('加载随机歌曲失败:', error)
+      uni.showToast({
+        title: '获取节目失败',
+        icon: 'none',
+        duration: 2000,
+      })
+    }
+  }
+
+  // 点击新闻处理函数
+  // 查看资讯详情
+  const viewNewsDetail = (newsItem) => {
+    // 将数据存储到本地存储
+    uni.setStorageSync('currentNewsDetail', {
+      title: newsItem.title,
+      html: newsItem.html,
+      created_at: newsItem.created_at,
+    })
+
+    // 跳转到详情页 LIKED直接设置为true
+    uni.navigateTo({
+      url:
+        '/pages/newsdetails/newsdetails?id=' +
+        newsItem.id +
+        '&liked=' +
+        (newsItem.liked ? 1 : 0),
+    })
+  }
 </script>
 
-<style lang="scss" scoped>
-.container {
-  width: 100%;
-  height: 100vh;
-  // background-color: #1890ff;
-  background-image: url("/static/hello-bg.png");
-  background-size: 100% 100%;
-  overflow: auto;
-  box-sizing: border-box;
-
-  .logo-container {
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    padding-inline: 32rpx;
-
-    .logo {
-      width: 224rpx;
-    }
-  }
-}
-
-.banner {
-  width: 100%;
-  height: 400rpx;
-}
-
-.content {
-  width: 100%;
-  height: fit-content;
-  background-color: #fff;
-  border-top-left-radius: 24rpx;
-  border-top-right-radius: 24rpx;
-  position: relative;
-
-  .player {
-    width: calc(100% - 70rpx);
-    display: flex;
-    transform: translateY(-50%);
-    margin-inline: 35rpx;
-    background-color: #fff;
-    border-radius: 0px 17.49rpx 17.49rpx 0px;
-    box-shadow: 0px 8.75rpx 15.31rpx rgba(103, 134, 134, 0.18);
-
-    .disc {
-      image {
-        width: 164rpx;
-        height: 120rpx;
-      }
-    }
-
-    .text {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-
-      text:first-child {
-        font-weight: 700;
-      }
-
-      text:last-child {
-        font-size: 24rpx;
-        color: #6e7070;
-      }
-    }
-
-    .icons {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 26rpx;
-      margin-right: 17rpx;
-
-      image {
-        width: 48rpx;
-        height: 48rpx;
-      }
-    }
-  }
-
-  .title {
-    width: fit-content;
-    margin-top: 30rpx;
-    margin-inline: 35rpx;
-    font-weight: 700;
-    position: relative;
-    z-index: 5;
-
-    &::after {
-      content: "";
-      width: 142rpx;
-      height: 13rpx;
-      border-radius: 6.56px;
-      background: linear-gradient(243.43deg, #cefa1e 0%, #a7ee27 100%);
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      z-index: -1;
-      transform: translateX(-50%);
-    }
-  }
-
-  .news-container {
-    padding: 32rpx;
-  }
-
-  /* 主要新闻卡片样式 */
-  .main-news-card {
-    position: relative;
-    width: 100%;
-    height: 400rpx;
-    border-radius: 24rpx;
-    overflow: hidden;
-    margin-bottom: 32rpx;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-  }
-
-  .main-news-image {
-    width: 100%;
-    height: 100%;
-  }
-
-  .main-news-meta {
-    font-size: 12px;
-  }
-
-  .main-news-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-    padding: 48rpx 32rpx 32rpx;
-  }
-
-  .main-news-content {
-    color: white;
-  }
-
-  .main-news-title {
-    font-size: 36rpx;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    margin-bottom: 16rpx;
-  }
-
-  .main-news-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24rpx;
-    color: rgba(255, 255, 255, 0.64);
-  }
-
-  /* 新闻列表样式 */
-  .news-list {
-    display: flex;
-    flex-direction: column;
-    gap: 24rpx;
-  }
-
-  .news-item {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 16rpx;
-    padding: 24rpx;
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s ease;
-  }
-
-  .news-item:active {
-    transform: scale(0.98);
-  }
-
-  .news-text-content {
-    flex: 1;
-    margin-right: 24rpx;
-  }
-
-  .news-title {
-    font-size: 32rpx;
-    font-weight: 500;
-    color: #333;
-    line-height: 1.4;
-    display: block;
-    margin-bottom: 16rpx;
-    /* 限制显示两行 */
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .news-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24rpx;
-    color: #989999;
-
-    .news-source {
-      font-size: 24rpx;
-    }
-
-    .news-time {
-      font-size: 24rpx;
-    }
-  }
-
-  .news-item-image {
-    width: 160rpx;
-    height: 120rpx;
-    border-radius: 12rpx;
-    flex-shrink: 0;
-  }
-
-  /* 加载状态样式 */
-  .loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 32rpx;
-    color: #999;
-  }
-
-  /* 空状态样式 */
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 100rpx 32rpx;
-    color: #999;
-  }
-
-  .empty-state text {
-    margin-top: 16rpx;
-    font-size: 28rpx;
-  }
-}
+<style scoped lang="scss">
+  @import './index.scss';
 </style>

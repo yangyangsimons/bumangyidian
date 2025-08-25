@@ -1,4 +1,7 @@
 <script>
+  import { onLaunch } from '@dcloudio/uni-app'
+  // import { useMusicStore } from '@/stores/music'
+
   export default {
     onLaunch: function () {
       const updateManager = wx.getUpdateManager()
@@ -25,7 +28,9 @@
         // 新版本下载失败
       })
 
-      console.log('App Launch')
+      // console.log('App Launch')
+      // const musicStore = useMusicStore()
+      // musicStore.initAudio() // 全局初始化一次
       // 判断用户是否授权
       const token = uni.getStorageSync('token')
       if (!token) {
@@ -39,6 +44,7 @@
           },
         })
         //新手引导页设置token
+
         uni.setStorage({
           key: 'isFirst',
           data: true,

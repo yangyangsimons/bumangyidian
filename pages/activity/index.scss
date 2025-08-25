@@ -1,0 +1,127 @@
+.activity-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    padding: 0 32rpx;
+    box-sizing: border-box;
+    // nav bar top style
+    ::v-deep .uni-navbar__header-container {
+        // border: 1px solid red;
+        text-align: left;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0 32rpx;
+    }
+    ::v-deep .uni-navbar__header-container-inner {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    ::v-deep .uni-nav-bar-text {
+        font-size: 36rpx !important;
+        font-weight: 700 !important;
+        color: rgba(16, 18, 19, 1) !important;
+        -webkit-line-clamp: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-left: 0 !important;
+    }
+    .main {
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+    }
+    .bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    .activity-list {
+        box-sizing: border-box;
+        margin-top: 40rpx;
+        height: 120%;
+        padding-bottom: 220rpx;
+        box-sizing: border-box;
+        overflow-y: scroll;
+
+        /* 顶部模糊过渡效果 */
+        mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 10rpx,
+            rgba(0, 0, 0, 0.8) 40rpx,
+            black 100rpx
+        );
+        -webkit-mask: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 10rpx,
+            rgba(0, 0, 0, 0.8) 40rpx,
+            black 100rpx
+        );
+
+        // 可选：网格布局，如果希望显示为网格可以启用以下样式
+        // display: grid;
+        // grid-template-columns: 1fr 1fr;
+        // gap: 24rpx;
+    }
+}
+
+.activity-item {
+    background: white;
+    border-radius: 16rpx;
+    margin-bottom: 24rpx;
+    overflow: hidden;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .activity-image {
+        width: 100%;
+        height: 200rpx; // 普通活动项默认高度
+        display: block;
+    }
+
+    // 置顶活动项的特殊样式
+    &.top-item {
+        .activity-image {
+            height: 400rpx; // 置顶活动项高度
+        }
+    }
+}
+
+.empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400rpx;
+
+    .empty-text {
+        font-size: 28rpx;
+        color: #999;
+    }
+}
+
+.loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200rpx;
+
+    .loading-text {
+        font-size: 28rpx;
+        color: #666;
+    }
+}

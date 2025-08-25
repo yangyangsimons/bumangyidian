@@ -15,7 +15,7 @@ export const useTabbarStore = defineStore('tabbar', {
     activeIndex: 2,
     tabList: [
       {
-        name: '首页',
+        name: '校园',
         path: '/pages/home/home',
         icon: Home,
         iconSelected: HomeSelect,

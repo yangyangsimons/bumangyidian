@@ -68,6 +68,9 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     console.log('收到背景音乐消息', data)
     const { audio_url, play_time, section_id, audio_id } = data
 
+    // 清除音乐播放完成回调，避免WebSocket音乐播放完成后自动切换
+    audioPlayerStore.setOnMusicEndedCallback(null)
+
     // 播放背景音乐
     audioPlayerStore.playBgMusic(audio_url, play_time, section_id, audio_id)
 

@@ -2,9 +2,32 @@
 	"pages": [
 		// pages数组中第一项表示应用启动页，参考：https: //uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/mymessage/mymessage",
+			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": ""
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationBarTitleText": "",
+				"disableScroll": true,
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/activity/activity",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/interaction/interaction",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -15,7 +38,21 @@
 			}
 		},
 		{
-			"path": "pages/index/index",
+			"path": "pages/mycollect/mycollect",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mysetting/mysetting",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mymessage/mymessage",
 			"style": {
 				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
@@ -77,40 +114,16 @@
 			}
 		},
 		{
-			"path": "pages/activity/activity",
+			"path": "pages/newsdetails/newsdetails",
 			"style": {
 				"navigationBarTitleText": "",
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/interaction/interaction",
-			"style": {
-				"navigationBarTitleText": "",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/home/home",
-			"style": {
-				"navigationBarTitleText": "",
-				"disableScroll": true,
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/mycollect/mycollect",
+			"path": "pages/shop/shop",
 			"style": {
 				"navigationBarTitleText": ""
-			}
-		},
-		{
-			"path": "pages/news/news",
-			"style": {
-				"navigationBarTitleText": "",
-				"disableScroll": true,
-				"enablePullDownRefresh": true,
-				"navigationStyle": "custom"
 			}
 		}
 	],

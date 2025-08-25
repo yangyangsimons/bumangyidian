@@ -13,7 +13,7 @@
     </uni-nav-bar>
     <image class="bg" src="../../static/my/bg.png" mode="scaleToFill"></image>
     <view class="header">
-      <image class="avator" :src="avator" @click="changeAvator"></image>
+      <image class="avator" :src="avator"></image>
 
       <view class="info-container">
         <view class="user-info-setting">
@@ -21,7 +21,7 @@
             <view class="name">{{ userName }} </view>
             <view class="school">{{ school }}</view></view
           >
-          <view class="setting">
+          <view class="setting" @click="goSetting">
             <image src="../../static/my/setting.png" mode="scaleToFill" />
           </view>
         </view>
@@ -33,7 +33,7 @@
               src="../../static/my/checkin.png"
               mode="scaleToFill"
             ></image>
-            <view class="checkin-text">已签到{{ 26 }}天</view>
+            <view class="checkin-text">已签到{{ checkInDays }}天</view>
           </view>
           <!-- points container -->
           <view class="points">
@@ -42,7 +42,7 @@
               src="../../static/my/points.png"
               mode="scaleToFill"
             ></image>
-            <view class="checkin-points">积分 {{ 26 }}</view>
+            <view class="checkin-points">积分 {{ points_balance }}</view>
           </view>
           <view class="checkin-btn" @click="checkin">
             <image
@@ -55,63 +55,68 @@
       </view>
     </view>
     <view class="main">
-      <view class="goods-head"
-        ><view class="title">
-          <text>积分好礼</text>
-          <view class="bar"></view>
-        </view>
-        <view class="more"
-          ><view class="more-text">更多</view>
-          <image
-            class="more-icon"
-            src="../../static/my/more.png"
-            mode="scaleToFill"
-          ></image>
-        </view>
-      </view>
-      <view class="goods-main">
-        <!-- 这里显示商品列表 -->
-        <view
-          v-for="product in productsList"
-          :key="product.id"
-          class="product-item"
-        >
-          <view class="image-wrap">
-            <image
-              :src="product.main_image"
-              mode="aspectFill"
-              class="product-pic"
-            ></image>
-            <view class="product-name">{{ product.name }}</view>
+      <view class="goods-container">
+        <view class="goods-head"
+          ><view class="title">
+            <text>积分好礼</text>
+            <view class="bar"></view>
           </view>
+          <view class="more" @click="goMore"
+            ><view class="more-text">更多</view>
+            <image
+              class="more-icon"
+              src="../../static/my/more.png"
+              mode="scaleToFill"
+            ></image>
+          </view>
+        </view>
+        <view class="goods-main">
+          <!-- 这里显示商品列表 -->
+          <view
+            v-for="product in productsList"
+            :key="product.id"
+            class="product-item"
+            @click="goToProductDetail(product.id)"
+          >
+            <view class="image-wrap">
+              <image
+                :src="product.main_image"
+                mode="scaleToFill"
+                class="product-pic"
+              ></image>
+              <!-- <view class="product-name">{{ product.name }}</view> -->
+            </view>
 
-          <view class="product-points">{{ product.points }}积分</view>
+            <view class="product-points">{{ product.points }}积分</view>
+          </view>
         </view>
       </view>
     </view>
     <view class="footer">
-      <view class="footer-head"
-        ><view class="title">
-          <text>我的互动</text>
-          <view class="bar"></view>
+      <view class="container">
+        <view class="footer-head"
+          ><view class="title">
+            <text>我的互动</text>
+            <view class="bar"></view>
+          </view>
         </view>
-      </view>
-      <view class="footer-main">
-        <view class="icon-container">
-          <image
-            class="icon"
-            src="../../static/my/leave-message.png"
-            mode="scaleToFill"
-          ></image>
-          <view class="icon-text">留言</view>
-        </view>
-        <view class="icon-container">
-          <image
-            class="icon"
-            src="../../static/my/collect.png"
-            mode="scaleToFill"
-          ></image>
-          <view class="icon-text">收藏</view>
+        <view class="footer-main">
+          <view class="icon-container" @click="goMessage">
+            <image
+              class="icon"
+              src="../../static/my/leave-message.png"
+              mode="scaleToFill"
+            ></image>
+            <view class="icon-text">留言</view>
+          </view>
+          <view class="icon-container" @click="goCollect">
+            <image
+              class="icon"
+              src="../../static/my/collect.png"
+              mode="scaleToFill"
+            ></image>
+            <view class="icon-text">收藏</view>
+          </view>
         </view>
       </view>
     </view>
@@ -126,6 +131,8 @@
   import { baseUrl } from '../../utils/config'
   import { dmReport } from '../../utils/report'
   import tabbar from '@/components/tabbar/tabbar.vue'
+  import { checkTokenAndNavigate } from '@/utils/auth'
+
   const toneId = ref(null)
 
   //用户信息
@@ -138,31 +145,62 @@
   const sexSrc = ref('') // 用户性别图标路径
   const school = ref('湖南工商大学') // 用户学校
   const sptime = ref(0)
-
+  const checkInDays = ref(0) // 用户签到天数
+  const points_balance = ref(0) // 用户积分余额
   //商城信息相关
   const productsList = ref([])
   const allActiveProducts = ref([]) // 存储所有 is_active 为 true 的商品
   const currentPage = ref(1) // 当前页码
   const totalPages = ref(0) // 总页数
   const isLoading = ref(false) // 是否正在加载
+
+  const goToProductDetail = (productId) => {
+    checkTokenAndNavigate((token) => {
+      uni.navigateTo({
+        url: `/pages/shop/shop?token=${token}&id=${productId}`,
+      })
+    })
+  }
+
+  // 获取更多商品
+  const goMore = () => {
+    checkTokenAndNavigate((token) => {
+      uni.navigateTo({
+        url: `/pages/shop/shop?token=${token}`,
+      })
+    }) // 这个可以使用简单的toast提示
+  }
+
   // 签到 checkin
   const checkin = async () => {
-    const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
-    console.log('签到结果', checkinRes)
-    if (checkinRes.code === 0) {
-      uni.showToast({
-        title: '签到成功',
-        icon: 'success',
-      })
-      // 查询用户的签到日历
-      const checkinLog = await request(`${baseUrl}/user/get_sign_log`, 'get')
-      console.log('签到日历', checkinLog)
-    } else {
-      uni.showToast({
-        title: checkinRes.message || '签到失败',
-        icon: 'none',
-      })
-    }
+    //先判断是不是登录了
+    checkTokenAndNavigate(async (token) => {
+      const checkinRes = await request(`${baseUrl}/user/sign`, 'post', {})
+      console.log('签到结果', checkinRes)
+      if (checkinRes.code === 0 && checkinRes.data) {
+        uni.showToast({
+          title: `${checkinRes.data.msg}`,
+          icon: 'success',
+        })
+        // 查询用户的签到日历
+        const response = await request(`${baseUrl}/user/user_info`, 'get')
+        console.log('签到日历:', response)
+        if (response.code === 0) {
+          checkInDays.value = response.data.sign_count
+        }
+        //这里还要再次查询用户的积分，进行更新
+        const pointsResponse = await request(`${baseUrl}/user/user_info`, 'get')
+        console.log('用户积分:', pointsResponse)
+        if (pointsResponse.code === 0) {
+          points_balance.value = pointsResponse.data.points_balance
+        }
+      } else {
+        uni.showToast({
+          title: checkinRes.message || '签到失败',
+          icon: 'none',
+        })
+      }
+    })
   }
   // 获取所有商品数据
   const getAllProducts = async () => {
@@ -308,73 +346,6 @@
     }
   }
 
-  // 更换头像
-  const changeAvator = async () => {
-    dmReport(
-      'click',
-      {},
-      {
-        page: 'userInfo',
-        contents: [
-          {
-            element_id: 'content',
-            element_content: `修改头像`,
-          },
-        ],
-      }
-    )
-    uni.chooseImage({
-      count: 1,
-      success: async (res) => {
-        console.log('选择的头像', res.tempFilePaths[0])
-        const avatorFile = res.tempFilePaths[0]
-
-        // 读取文件内容并转换为base64
-        uni.getFileSystemManager().readFile({
-          filePath: avatorFile,
-          encoding: 'base64',
-          success: async (readRes) => {
-            // 获取base64数据
-            const base64String = readRes.data
-
-            // 上传头像
-            try {
-              const uploadResult = await request(
-                `${baseUrl}/user/upload_avatar`,
-                'POST',
-                {
-                  pic_base64: base64String,
-                }
-              )
-              console.log('头像上传成功', uploadResult)
-              uni.showToast({
-                title: '头像更新成功',
-                icon: 'success',
-              })
-              avator.value = uploadResult.data.avator_url
-            } catch (error) {
-              console.error('头像上传失败', error)
-              uni.showToast({
-                title: '头像更新成功',
-                icon: 'success',
-              })
-            }
-          },
-          fail: (error) => {
-            console.error('读取文件失败', error)
-            uni.showToast({
-              title: '头像更新成功',
-              icon: 'success',
-            })
-          },
-        })
-      },
-      fail: (error) => {
-        console.error('选择头像失败', error)
-      },
-    })
-  }
-
   onShow(async () => {
     try {
       // 获取用户信息
@@ -384,6 +355,7 @@
         user.value = userInfoRes.data
         avator.value = userInfoRes.data.avator
         toneId.value = userInfoRes.data.tone
+
         uni.setStorage({
           key: 'toneId',
           data: toneId.value,
@@ -393,6 +365,8 @@
         userMbti.value = userInfoRes.data.mbti_ch
         userSex.value = userInfoRes.data.sex
         school.value = userInfoRes.data.school_name
+        points_balance.value = userInfoRes.data.points_balance
+        checkInDays.value = userInfoRes.data.sign_count
         sexSrc.value =
           userSex.value === '男'
             ? '../../static/male.png'
@@ -414,6 +388,27 @@
       console.error('页面初始化失败', error)
     }
   })
+
+  // 去留言页面
+  const goMessage = () => {
+    uni.navigateTo({
+      url: '/pages/mymessage/mymessage',
+    })
+  }
+  //去设置页面
+  const goSetting = () => {
+    checkTokenAndNavigate(() => {
+      uni.navigateTo({
+        url: '/pages/mysetting/mysetting',
+      })
+    })
+  }
+  // 去收藏页面
+  const goCollect = () => {
+    uni.navigateTo({
+      url: '/pages/mycollect/mycollect',
+    })
+  }
 </script>
 
 <style lang="scss" scoped>
