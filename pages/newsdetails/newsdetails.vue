@@ -45,7 +45,7 @@
 
 <script setup>
   import { ref, computed } from 'vue'
-  import { onLoad } from '@dcloudio/uni-app'
+  import { onLoad, onUnload } from '@dcloudio/uni-app'
   import request from '@/utils/request.js'
   import { baseUrl } from '../../utils/config'
   import { useMusicStore } from '@/stores/music'
@@ -54,9 +54,18 @@
 
   const isCollected = ref(false)
   const newsid = ref('')
+  const startTime = ref(0)
 
-  onShareAppMessage(() => {
-    console.log('onShareAppMessage......')
+  onShareAppMessage(async () => {
+    //分享咨询加分
+    const shareAddPoint = await request(
+      `${baseUrl}/school_news/share_news_points`,
+      'POST',
+      {
+        news_id: newsid.value,
+      }
+    )
+    console.log('onShareAppMessage......', shareAddPoint)
     return {
       title: newsTitle.value || `不芒一点，陪你世界加一点`,
       imageUrl:
@@ -74,23 +83,6 @@
       query: `shareNewsId=${newsid.value}`,
     }
   })
-  // const shareNews = () => {
-  //   uni.share({
-  //     provider: 'weixin',
-  //     scene: 'WXSceneSession',
-  //     type: 0,
-  //     href: 'http://uniapp.dcloud.io/',
-  //     title: `不芒一点，陪你世界加一点`,
-  //     imageUrl:
-  //       'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com:443/%E4%BA%8C%E7%BB%B4%E7%A0%81/%E5%88%86%E4%BA%AB%E5%9B%BE.png',
-  //     success: function (res) {
-  //       console.log('success:' + JSON.stringify(res))
-  //     },
-  //     fail: function (err) {
-  //       console.log('fail:' + JSON.stringify(err))
-  //     },
-  //   })
-  // }
   const collectNews = async () => {
     //先判断是不是登录了
     checkTokenAndNavigate(async (token) => {
@@ -130,6 +122,24 @@
     uni.navigateBack()
   }
 
+  onUnload(async () => {
+    console.log('页面隐藏，计算停留时间并上报')
+    const endTime = Date.now()
+    const duration = Math.floor((endTime - startTime.value) / 1000) // 以秒为单位
+    console.log(`用户在资讯详情页停留了 ${duration} 秒`)
+    // 这里可以将 duration 发送到后台进行统计
+    if (newsid.value && duration > 0) {
+      const reportReadTime = await request(
+        `${baseUrl}/school_news/read_news_points`,
+        'POST',
+        {
+          news_id: newsid.value,
+          stay_seconds: duration,
+        }
+      )
+      console.log('上报阅读时长结果:', reportReadTime)
+    }
+  })
   // 清理HTML内容
   const cleanHtml = computed(() => {
     if (!originalHtml.value) return ''
@@ -148,11 +158,12 @@
     // 为img标签添加统一的class，方便样式控制
     html = html.replace(/<img([^>]*?)>/gi, '<img$1 class="content-image">')
 
-    console.log('清理后的HTML:', html)
+    // console.log('清理后的HTML:', html)
     return html
   })
 
   onLoad((info) => {
+    startTime.value = Date.now()
     const newsDetail = uni.getStorageSync('currentNewsDetail')
     console.log('加载资讯详情:', info)
     newsid.value = info.id
@@ -164,7 +175,7 @@
       newsTime.value = newsDetail.created_at || ''
       originalHtml.value = newsDetail.html || ''
 
-      console.log('原始HTML:', newsDetail.html)
+      // console.log('原始HTML:', newsDetail.html)
       uni.removeStorageSync('currentNewsDetail')
     } else {
       uni.showToast({

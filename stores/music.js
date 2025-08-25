@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import { useAudioPlayerStore } from './audioPlayer'
 import { ref, computed } from 'vue'
+import request from '../utils/request'
 
 export const useMusicStore = defineStore('music', () => {
   // 状态
@@ -235,6 +236,8 @@ export const useMusicStore = defineStore('music', () => {
       // 暂停背景音乐
       console.log('暂停音乐')
       audioPlayerStore.pauseBgMusic()
+      // 暂停时上报播放进度
+      reportMusicProgress()
     } else {
       // 如果当前歌曲与audioPlayer正在播放的不同，播放新歌曲
       if (
@@ -304,11 +307,15 @@ export const useMusicStore = defineStore('music', () => {
   }
 
   const next = () => {
+    // 切换前上报当前歌曲的播放进度
+    reportMusicProgress()
     const nextIndex = (currentIndex.value + 1) % playlist.value.length
     playSong(nextIndex)
   }
 
   const prev = () => {
+    // 切换前上报当前歌曲的播放进度
+    reportMusicProgress()
     const prevIndex =
       currentIndex.value === 0
         ? playlist.value.length - 1
@@ -326,12 +333,86 @@ export const useMusicStore = defineStore('music', () => {
     const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
     if (isPlaying.value) {
       audioPlayerStore.pauseBgMusic()
+      // 暂停时上报播放进度
+      reportMusicProgress()
     }
   }
 
   const stopPlay = () => {
     const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
+    // 停止前先上报播放进度
+    reportMusicProgress()
     audioPlayerStore.stopBgMusic()
+  }
+
+  // 上报音乐播放进度
+  const reportMusicProgress = async () => {
+    if (!currentSong.value) {
+      console.log('没有当前播放的音乐，无需上报进度')
+      return
+    }
+
+    const audioPlayerStore = useAudioPlayerStore()
+
+    try {
+      // 获取当前播放时间
+      const currentTime = audioPlayerStore.bgPlayTime || 0
+
+      // 获取音频总时长
+      let duration = 0
+
+      // 尝试从backgroundAudioManager获取duration
+      if (
+        audioPlayerStore.bgAudioManager &&
+        audioPlayerStore.bgAudioManager.duration
+      ) {
+        duration = audioPlayerStore.bgAudioManager.duration
+      }
+
+      // 如果backgroundAudioManager没有duration属性，尝试获取音频元数据中的时长
+      if (duration <= 0 && currentSong.value.duration) {
+        duration = currentSong.value.duration
+      }
+
+      // 如果仍然无法获取总时长，设置一个默认值或跳过上报
+      if (duration <= 0) {
+        console.log('无法获取音频总时长，使用当前播放时间作为总时长')
+        // 如果没有总时长信息，可以假设当前播放时间就是总进度
+        // 或者我们可以设置播放百分比为当前播放的秒数除以一个估算值
+        // 这里我们使用一种更安全的方式：如果播放时间大于0，设置为0.99（99%）
+        if (currentTime > 0) {
+          duration = currentTime / 0.99 // 假设当前时间为99%的进度
+        } else {
+          console.log('当前播放时间为0，跳过进度上报')
+          return
+        }
+      }
+
+      // 计算播放百分比
+      const playPercentage = Math.min(Math.max(currentTime / duration, 0), 1.0)
+
+      const reportData = {
+        music_id: currentSong.value.id,
+        play_percentage: Number(playPercentage.toFixed(3)), // 保留3位小数
+      }
+
+      console.log('上报音乐播放进度:', {
+        ...reportData,
+        currentTime,
+        duration,
+        musicTitle: currentSong.value.title,
+      })
+
+      // 发送上报请求
+      await request(
+        'https://mang.5gradio.com.cn/school_music/listen_music_points',
+        'POST',
+        reportData
+      )
+      console.log('音乐播放进度上报成功')
+    } catch (error) {
+      console.error('音乐播放进度上报失败:', error)
+    }
   }
 
   const destroyAudio = () => {
@@ -366,6 +447,7 @@ export const useMusicStore = defineStore('music', () => {
     startPlay,
     pausePlay,
     stopPlay,
+    reportMusicProgress,
     destroyAudio,
   }
 

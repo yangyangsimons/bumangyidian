@@ -798,6 +798,11 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     get bgAudioId() {
       return bgAudioId
     },
+
+    // 导出bgAudioManager用于获取音频信息
+    get bgAudioManager() {
+      return bgAudioManager.value
+    },
   }
 })
 //
