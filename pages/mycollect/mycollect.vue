@@ -48,33 +48,56 @@
             src="../../static/my/empty-message.png"
           />
         </view>
-        <view v-else class="content-list">
-          <!-- 节目列表内容 -->
-          <view v-for="item in programList" :key="item.id" class="program-item">
-            <view class="content"
-              ><view class="title">{{ item.title }}</view>
-              <view class="desc">{{ item.desc }}</view>
-            </view>
-            <view class="actions">
-              <image
-                src="../../static/my/music-collect.png"
-                @click="removeFromFavorites(item.id)"
-              ></image>
-              <view class="play-btn">
+        <scroll-view
+          v-else
+          scroll-y="true"
+          class="content-list"
+          bounces="true"
+          @touchstart="onTouchStart"
+          @touchmove.stop.prevent="onTouchMove"
+          @touchend="onTouchEnd"
+          @scroll="onScroll"
+          :scroll-top="scrollTop"
+        >
+          <!-- pull-wrapper 会在顶部下拉时做 translateY 动画，产生回弹效果 -->
+          <view
+            class="pull-wrapper"
+            :class="{ dragging: dragging }"
+            :style="{
+              transform: `translateY(${translateY}px)`,
+            }"
+          >
+            <!-- 节目列表内容 -->
+            <view
+              v-for="item in programList"
+              :key="item.id"
+              class="program-item"
+            >
+              <view class="content"
+                ><view class="title">{{ item.title }}</view>
+                <view class="desc">{{ item.desc }}</view>
+              </view>
+              <view class="actions">
                 <image
-                  class="play-icon"
-                  mode="aspectFill"
-                  :src="
-                    safeIsPlayingAudio(item.id)
-                      ? '/static/pause.png'
-                      : '/static/triangle.png'
-                  "
-                  @click="togglePlay(item)"
+                  src="../../static/my/music-collect.png"
+                  @click="removeFromFavorites(item.id)"
                 ></image>
+                <view class="play-btn">
+                  <image
+                    class="play-icon"
+                    mode="aspectFill"
+                    :src="
+                      safeIsPlayingAudio(item.id)
+                        ? '/static/pause.png'
+                        : '/static/triangle.png'
+                    "
+                    @click="togglePlay(item)"
+                  ></image>
+                </view>
               </view>
             </view>
           </view>
-        </view>
+        </scroll-view>
       </view>
 
       <!-- 资讯内容 -->
@@ -85,24 +108,42 @@
             src="../../static/my/empty-message.png"
           />
         </view>
-        <view v-else class="content-list">
-          <!-- 资讯列表内容 -->
-          <!-- 资讯列表内容 -->
+        <scroll-view
+          v-else
+          scroll-y="true"
+          class="content-list"
+          bounces="true"
+          @touchstart="onTouchStart"
+          @touchmove.stop.prevent="onTouchMove"
+          @touchend="onTouchEnd"
+          @scroll="onScroll"
+          :scroll-top="scrollTop"
+        >
+          <!-- pull-wrapper 会在顶部下拉时做 translateY 动画，产生回弹效果 -->
           <view
-            v-for="item in newsList"
-            :key="item.id"
-            class="news-item"
-            @click="viewNewsDetail(item)"
+            class="pull-wrapper"
+            :class="{ dragging: dragging }"
+            :style="{
+              transform: `translateY(${translateY}px)`,
+            }"
           >
-            <view class="content">
-              <view class="title">{{ item.title }}</view>
-              <view class="time">{{ item.created_at }}</view>
-            </view>
-            <view class="cover-img">
-              <image :src="item.pic" mode="aspectFill" />
+            <!-- 资讯列表内容 -->
+            <view
+              v-for="item in newsList"
+              :key="item.id"
+              class="news-item"
+              @click="viewNewsDetail(item)"
+            >
+              <view class="content">
+                <view class="title">{{ item.title }}</view>
+                <view class="time">{{ item.created_at }}</view>
+              </view>
+              <view class="cover-img">
+                <image :src="item.pic" mode="aspectFill" />
+              </view>
             </view>
           </view>
-        </view>
+        </scroll-view>
       </view>
     </view>
   </view>
@@ -122,6 +163,13 @@
   const programList = ref([]) // 节目收藏数据
   const newsList = ref([]) // 资讯收藏数据
 
+  // 下拉回弹相关状态
+  const startY = ref(0)
+  const translateY = ref(0)
+  const dragging = ref(false)
+  const maxPull = 200 // 最大可拉距离（像素）
+  const scrollTop = ref(0) // 记录滚动位置
+
   const tabs = [
     { key: 'program', label: '节目' },
     { key: 'news', label: '资讯' },
@@ -133,6 +181,61 @@
 
   const goBack = () => {
     uni.navigateBack()
+  }
+
+  // 触摸/滚动处理：实现下拉拉伸与回弹
+  const onTouchStart = (e) => {
+    const touches = e.touches || (e.changedTouches && e.changedTouches)
+    if (!touches || !touches[0]) return
+    startY.value = touches[0].clientY
+    dragging.value = false
+  }
+
+  const onTouchMove = (e) => {
+    const touches = e.touches || (e.changedTouches && e.changedTouches)
+    if (!touches || !touches[0]) return
+    const currentY = touches[0].clientY
+    const dy = currentY - startY.value
+
+    // 仅在滚动到顶部并且向下拖动时生效
+    if (dy > 0 && scrollTop.value <= 5) {
+      // 增强阻尼效果：使用三段式阻尼
+      let resisted
+      if (dy <= 60) {
+        // 初始阶段：线性阻尼
+        resisted = dy * 0.8
+      } else if (dy <= 120) {
+        // 中间阶段：二次阻尼
+        resisted = 48 + (dy - 60) * 0.5
+      } else {
+        // 最后阶段：强阻尼
+        resisted = 78 + Math.sqrt(dy - 120) * 6
+      }
+
+      translateY.value = Math.min(maxPull, resisted)
+      dragging.value = true
+
+      // 阻止默认滚动行为
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
+  const onTouchEnd = () => {
+    if (!dragging.value) return
+    // 直接回弹，不执行任何刷新操作
+    animateBack()
+  }
+
+  const animateBack = () => {
+    // 使用过渡 CSS 控制回弹动画，通过设置 translateY -> 0
+    translateY.value = 0
+    dragging.value = false
+  }
+
+  // 滚动事件处理
+  const onScroll = (e) => {
+    scrollTop.value = e.detail.scrollTop || 0
   }
 
   // 添加安全检查函数
@@ -287,4 +390,31 @@
 
 <style lang="scss" scoped>
   @import './index.scss';
+
+  .pull-wrapper {
+    transition: transform 400ms cubic-bezier(0.22, 0.8, 0.2, 1);
+    will-change: transform;
+  }
+
+  /* 当正在拖动时，去除 transition，让位移跟随手势更灵敏 */
+  .pull-wrapper.dragging {
+    transition: none;
+  }
+
+  /* 可选：在拖动时给列表顶部留白，避免图片被拉出圆角 */
+  .program-item:first-child,
+  .news-item:first-child {
+    border-top-left-radius: 16rpx;
+    border-top-right-radius: 16rpx;
+  }
+
+  /* 增强列表项的交互效果 */
+  .program-item,
+  .news-item {
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+    }
+  }
 </style>
