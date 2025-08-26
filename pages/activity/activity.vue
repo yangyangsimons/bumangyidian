@@ -12,53 +12,51 @@
     >
     </uni-nav-bar>
     <image src="/static/my/bg.png" mode="scaleToFill" class="bg" />
-    <view class="main">
-      <scroll-view
-        scroll-y="true"
-        class="activity-list"
-        bounces="true"
-        @touchstart="onTouchStart"
-        @touchmove.stop.prevent="onTouchMove"
-        @touchend="onTouchEnd"
-        @scroll="onScroll"
-        :scroll-top="scrollTop"
-      >
-        <!-- pull-wrapper 会在顶部下拉时做 translateY 动画，产生回弹效果 -->
-        <view
-          class="pull-wrapper"
-          :class="{ dragging: dragging }"
-          :style="{
-            transform: `translateY(${translateY}px)`,
-          }"
-        >
-          <view
-            class="activity-item"
-            :class="{ 'top-item': item.is_top }"
-            v-for="item in sortedActivityList"
-            :key="item.id"
-            @click="handleActivityClick(item)"
-          >
-            <image
-              :src="item.pic"
-              class="activity-image"
-              mode="aspectFill"
-              :lazy-load="true"
-            />
-          </view>
-        </view>
-      </scroll-view>
-      <!-- 空状态 -->
+    <scroll-view
+      scroll-y="true"
+      class="activity-list"
+      bounces="true"
+      @touchstart="onTouchStart"
+      @touchmove.stop.prevent="onTouchMove"
+      @touchend="onTouchEnd"
+      @scroll="onScroll"
+      :scroll-top="scrollTop"
+    >
+      <!-- pull-wrapper 会在顶部下拉时做 translateY 动画，产生回弹效果 -->
       <view
-        v-if="sortedActivityList.length === 0 && !loading"
-        class="empty-state"
+        class="pull-wrapper"
+        :class="{ dragging: dragging }"
+        :style="{
+          transform: `translateY(${translateY}px)`,
+        }"
       >
-        <text class="empty-text">暂无活动信息</text>
+        <view
+          class="activity-item"
+          :class="{ 'top-item': item.is_top }"
+          v-for="item in sortedActivityList"
+          :key="item.id"
+          @click="handleActivityClick(item)"
+        >
+          <image
+            :src="item.pic"
+            class="activity-image"
+            mode="aspectFill"
+            :lazy-load="true"
+          />
+        </view>
       </view>
+    </scroll-view>
+    <!-- 空状态 -->
+    <view
+      v-if="sortedActivityList.length === 0 && !loading"
+      class="empty-state"
+    >
+      <text class="empty-text">暂无活动信息</text>
+    </view>
 
-      <!-- 加载状态 -->
-      <view v-if="loading" class="loading-state">
-        <text class="loading-text">加载中...</text>
-      </view>
+    <!-- 加载状态 -->
+    <view v-if="loading" class="loading-state">
+      <text class="loading-text">加载中...</text>
     </view>
 
     <tabbar />

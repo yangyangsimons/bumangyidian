@@ -38,20 +38,20 @@
         padding-bottom: 120rpx;
 
         /* 顶部模糊过渡效果 */
-        mask: linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgba(0, 0, 0, 0.3) 10rpx,
-            rgba(0, 0, 0, 0.8) 40rpx,
-            black 100rpx
-        );
-        -webkit-mask: linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgba(0, 0, 0, 0.3) 10rpx,
-            rgba(0, 0, 0, 0.8) 40rpx,
-            black 100rpx
-        );
+        // mask: linear-gradient(
+        //     to bottom,
+        //     transparent 0%,
+        //     rgba(0, 0, 0, 0.3) 10rpx,
+        //     rgba(0, 0, 0, 0.8) 40rpx,
+        //     black 100rpx
+        // );
+        // -webkit-mask: linear-gradient(
+        //     to bottom,
+        //     transparent 0%,
+        //     rgba(0, 0, 0, 0.3) 10rpx,
+        //     rgba(0, 0, 0, 0.8) 40rpx,
+        //     black 100rpx
+        // );
     }
 
     .pull-wrapper {
