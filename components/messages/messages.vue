@@ -7,7 +7,7 @@
       class="my-message-container"
       bounces="true"
       @touchstart="onTouchStart"
-      @touchmove.stop.prevent="onTouchMove"
+      @touchmove="onTouchMove"
       @touchend="onTouchEnd"
       @scroll="onScroll"
       :scroll-top="scrollTop"
@@ -51,6 +51,12 @@
             <view class="content">{{ message.content }}</view>
           </view>
         </view>
+        <!-- 底部 overscroll 渐变 gap（长内容时启用） -->
+        <view
+          class="overscroll-gap"
+          v-show="bottomGap > 0"
+          :style="{ height: bottomGap + 'px' }"
+        />
       </view>
     </scroll-view>
 
@@ -83,7 +89,7 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, computed } from 'vue'
+  import { ref, onMounted, computed, nextTick, getCurrentInstance } from 'vue'
   import request from '@/utils/request.js'
   import { baseUrl } from '@/utils/config'
   import { useMusicStore } from '@/stores/music'
@@ -92,12 +98,32 @@
   const replyMessage = ref('')
   const isSubmitting = ref(false)
 
-  // 下拉回弹相关状态
+  // 回弹/overscroll 状态
   const startY = ref(0)
   const translateY = ref(0)
   const dragging = ref(false)
-  const maxPull = 200 // 最大可拉距离（像素）
-  const scrollTop = ref(0) // 记录滚动位置
+  const maxPull = 200
+  const scrollTop = ref(0)
+  const overscrollMode = ref('none') // none | top | bottom
+  const overscrollStartY = ref(0)
+  const bottomGap = ref(0) // 底部渐变 gap 高度（仅长内容）
+  const containerHeight = ref(0)
+  const contentHeight = ref(0)
+  const vm = getCurrentInstance()
+  const bottomUsesGap = ref(true)
+
+  // 判定参数
+  const BOTTOM_TOLERANCE_PX = 30
+  const TABBAR_HEIGHT_RPX = 120
+  const INPUT_BLOCK_TOTAL_RPX = 220 // messages 容器 padding-bottom 已按 220rpx 预留 (tabbar+输入+间隙)
+  const { windowWidth } = uni.getSystemInfoSync()
+  const rpx2px = (r) => (windowWidth / 750) * r
+  const RESERVED_BOTTOM_PX = rpx2px(INPUT_BLOCK_TOTAL_RPX) // 用于底部判定
+
+  const isContentShort = () =>
+    contentHeight.value &&
+    containerHeight.value &&
+    contentHeight.value <= containerHeight.value + 2
   // 根据点赞状态返回对应的图片地址
   const getLikeImageSrc = (message) => {
     return message.liked
@@ -111,6 +137,8 @@
     if (!touches || !touches[0]) return
     startY.value = touches[0].clientY
     dragging.value = false
+    overscrollMode.value = 'none'
+    overscrollStartY.value = 0
   }
 
   const onTouchMove = (e) => {
@@ -118,46 +146,115 @@
     if (!touches || !touches[0]) return
     const currentY = touches[0].clientY
     const dy = currentY - startY.value
+    const minTrigger = 8
 
-    // 仅在滚动到顶部并且向下拖动时生效
-    if (dy > 0 && scrollTop.value <= 5) {
-      // 增强阻尼效果：使用三段式阻尼
-      let resisted
-      if (dy <= 60) {
-        // 初始阶段：线性阻尼
-        resisted = dy * 0.8
-      } else if (dy <= 120) {
-        // 中间阶段：二次阻尼
-        resisted = 48 + (dy - 60) * 0.5
-      } else {
-        // 最后阶段：强阻尼
-        resisted = 78 + Math.sqrt(dy - 120) * 6
+    // 初始模式判定
+    if (overscrollMode.value === 'none') {
+      if (dy > minTrigger && (scrollTop.value <= 5 || isContentShort())) {
+        overscrollMode.value = 'top'
+      } else if (
+        dy < -minTrigger &&
+        (isNearBottom(scrollTop.value) || isContentShort())
+      ) {
+        overscrollMode.value = 'bottom'
+        overscrollStartY.value = currentY
+        bottomUsesGap.value = !isContentShort()
       }
+    }
 
+    // 顶部模式
+    if (overscrollMode.value === 'top') {
+      const pull = dy - minTrigger
+      if (pull <= 0) return
+      const resisted = applyDamping(pull)
       translateY.value = Math.min(maxPull, resisted)
       dragging.value = true
-
-      // 阻止默认滚动行为
       e.preventDefault()
       e.stopPropagation()
+      return
+    }
+
+    // 底部模式
+    if (overscrollMode.value === 'bottom') {
+      if (!overscrollStartY.value) overscrollStartY.value = currentY
+      const raw = overscrollStartY.value - currentY // 正值
+      if (raw <= 0) return
+      const resisted = applyDamping(raw)
+      if (bottomUsesGap.value) {
+        bottomGap.value = Math.min(maxPull, resisted)
+        translateY.value = 0
+      } else {
+        translateY.value = -Math.min(maxPull, resisted)
+      }
+      dragging.value = true
+      e.preventDefault()
+      e.stopPropagation()
+      return
     }
   }
 
   const onTouchEnd = () => {
     if (!dragging.value) return
-    // 直接回弹，不执行任何刷新操作
-    animateBack()
+    if (overscrollMode.value === 'top') {
+      animateBack()
+      return
+    }
+    if (overscrollMode.value === 'bottom') {
+      if (bottomUsesGap.value) {
+        bottomGap.value = 0
+        dragging.value = false
+        overscrollMode.value = 'none'
+      } else {
+        animateBack()
+      }
+      return
+    }
   }
 
   const animateBack = () => {
     // 使用过渡 CSS 控制回弹动画，通过设置 translateY -> 0
     translateY.value = 0
     dragging.value = false
+    bottomGap.value = 0
+    overscrollStartY.value = 0
+    overscrollMode.value = 'none'
   }
 
   // 滚动事件处理
   const onScroll = (e) => {
-    scrollTop.value = e.detail.scrollTop || 0
+    const detail = e.detail || {}
+    scrollTop.value = detail.scrollTop || 0
+    if (detail.scrollHeight && detail.scrollHeight !== contentHeight.value) {
+      contentHeight.value = detail.scrollHeight
+    }
+    measureHeights()
+  }
+
+  const applyDamping = (d) => {
+    if (d <= 60) return d * 0.8
+    if (d <= 120) return 48 + (d - 60) * 0.5
+    return 78 + Math.sqrt(d - 120) * 6
+  }
+
+  const isNearBottom = (scrollVal) => {
+    if (!containerHeight.value) return false
+    const remaining = contentHeight.value - (scrollVal + containerHeight.value)
+    return remaining <= BOTTOM_TOLERANCE_PX + RESERVED_BOTTOM_PX
+  }
+
+  const measureHeights = () => {
+    uni
+      .createSelectorQuery()
+      .in(vm)
+      .select('.my-message-container')
+      .boundingClientRect((rect) => {
+        if (rect && rect.height) containerHeight.value = rect.height
+      })
+      .select('.pull-wrapper')
+      .boundingClientRect((rect) => {
+        if (rect && rect.height) contentHeight.value = rect.height
+      })
+      .exec()
   }
   //点赞和取消点赞
   const toggleLike = async (message) => {
@@ -267,6 +364,8 @@
           messageData.value = []
         }
         console.log('留言数据加载完成，数据长度:', messageData.value.length)
+        await nextTick()
+        measureHeights()
       } else {
         console.log('获取留言数据失败:', messageInfo.msg || '未知错误')
         messageData.value = []
@@ -285,6 +384,8 @@
   onMounted(() => {
     console.log('Messages组件已挂载')
     loadData()
+    // 初次测量兜底
+    setTimeout(() => measureHeights(), 80)
   })
 
   // 暴露方法，以便父组件调用
