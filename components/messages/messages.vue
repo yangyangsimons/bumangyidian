@@ -10,14 +10,13 @@
       @touchmove="onTouchMove"
       @touchend="onTouchEnd"
       @scroll="onScroll"
-      :scroll-top="scrollTop"
     >
       <!-- pull-wrapper 会在顶部下拉时做 translateY 动画，产生回弹效果 -->
       <view
         class="pull-wrapper"
         :class="{ dragging: dragging }"
         :style="{
-          transform: `translateY(${translateY}px)`,
+          transform: `translate3d(0, ${translateY}px, 0)`,
         }"
       >
         <view
@@ -112,10 +111,22 @@
   const vm = getCurrentInstance()
   const bottomUsesGap = ref(true)
 
+  // rAF 兼容（某些端可能不存在 requestAnimationFrame）
+  const rAF = (cb) =>
+    typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame(cb)
+      : setTimeout(cb, 16)
+  // 节流状态
+  let ticking = false
+  let pendingTouchEvent = null
+  // 上次应用的值（减少微小抖动）
+  let lastAppliedY = 0
+  let lastAppliedGap = 0
+
   // 判定参数
   const BOTTOM_TOLERANCE_PX = 30
   const TABBAR_HEIGHT_RPX = 120
-  const INPUT_BLOCK_TOTAL_RPX = 220 // messages 容器 padding-bottom 已按 220rpx 预留 (tabbar+输入+间隙)
+  const INPUT_BLOCK_TOTAL_RPX = 320 // 静态底部 padding 预留 (tabbar + 输入框 + 缓冲)
   const { windowWidth } = uni.getSystemInfoSync()
   const rpx2px = (r) => (windowWidth / 750) * r
   const RESERVED_BOTTOM_PX = rpx2px(INPUT_BLOCK_TOTAL_RPX) // 用于底部判定
@@ -139,75 +150,119 @@
     dragging.value = false
     overscrollMode.value = 'none'
     overscrollStartY.value = 0
+    // 重置上次应用的值
+    lastAppliedY = 0
+    lastAppliedGap = 0
   }
 
   const onTouchMove = (e) => {
-    const touches = e.touches || (e.changedTouches && e.changedTouches)
-    if (!touches || !touches[0]) return
-    const currentY = touches[0].clientY
-    const dy = currentY - startY.value
-    const minTrigger = 8
-
-    // 初始模式判定
-    if (overscrollMode.value === 'none') {
-      if (dy > minTrigger && (scrollTop.value <= 5 || isContentShort())) {
-        overscrollMode.value = 'top'
-      } else if (
-        dy < -minTrigger &&
-        (isNearBottom(scrollTop.value) || isContentShort())
-      ) {
-        overscrollMode.value = 'bottom'
-        overscrollStartY.value = currentY
-        bottomUsesGap.value = !isContentShort()
+    pendingTouchEvent = e
+    if (ticking) return
+    ticking = true
+    rAF(() => {
+      const evt = pendingTouchEvent
+      pendingTouchEvent = null
+      const touches =
+        evt && (evt.touches || (evt.changedTouches && evt.changedTouches))
+      if (!touches || !touches[0]) {
+        ticking = false
+        return
       }
-    }
+      const currentY = touches[0].clientY
+      const dy = currentY - startY.value
+      const minTrigger = 8
 
-    // 顶部模式
-    if (overscrollMode.value === 'top') {
-      const pull = dy - minTrigger
-      if (pull <= 0) return
-      const resisted = applyDamping(pull)
-      translateY.value = Math.min(maxPull, resisted)
-      dragging.value = true
-      e.preventDefault()
-      e.stopPropagation()
-      return
-    }
-
-    // 底部模式
-    if (overscrollMode.value === 'bottom') {
-      if (!overscrollStartY.value) overscrollStartY.value = currentY
-      const raw = overscrollStartY.value - currentY // 正值
-      if (raw <= 0) return
-      const resisted = applyDamping(raw)
-      if (bottomUsesGap.value) {
-        bottomGap.value = Math.min(maxPull, resisted)
-        translateY.value = 0
-      } else {
-        translateY.value = -Math.min(maxPull, resisted)
+      // 初始判定（增加 2px 迟滞，减少误触）
+      if (overscrollMode.value === 'none') {
+        // 改进顶部判定：更宽松的条件，考虑小误差
+        if (dy > minTrigger + 2 && (scrollTop.value <= 5 || isContentShort())) {
+          overscrollMode.value = 'top'
+        } else if (
+          dy < -(minTrigger + 2) &&
+          (isNearBottom(scrollTop.value) || isContentShort())
+        ) {
+          overscrollMode.value = 'bottom'
+          overscrollStartY.value = currentY
+          bottomUsesGap.value = !isContentShort()
+        }
       }
-      dragging.value = true
-      e.preventDefault()
-      e.stopPropagation()
-      return
-    }
+
+      let updated = false
+      // 顶部模式
+      if (overscrollMode.value === 'top') {
+        const pull = dy - minTrigger
+        if (pull > 0) {
+          const resisted = Math.min(maxPull, applyDamping(pull))
+          if (Math.abs(resisted - lastAppliedY) > 0.5) {
+            // 降低阈值，让动画更流畅
+            translateY.value = resisted
+            lastAppliedY = resisted
+            updated = true
+          }
+          dragging.value = true
+          evt.preventDefault()
+          evt.stopPropagation()
+        } else {
+          // 如果拉动距离不够，重置状态
+          if (translateY.value > 0) {
+            translateY.value = 0
+            lastAppliedY = 0
+          }
+        }
+      }
+
+      // 底部模式
+      if (overscrollMode.value === 'bottom') {
+        if (!overscrollStartY.value) overscrollStartY.value = currentY
+        const raw = overscrollStartY.value - currentY // 正值
+        if (raw > 0) {
+          const resisted = Math.min(maxPull, applyDamping(raw))
+          if (bottomUsesGap.value) {
+            if (Math.abs(resisted - lastAppliedGap) > 0.5) {
+              bottomGap.value = resisted
+              lastAppliedGap = resisted
+              updated = true
+            }
+            if (translateY.value !== 0) translateY.value = 0
+          } else {
+            const neg = -resisted
+            if (Math.abs(neg - lastAppliedY) > 0.5) {
+              translateY.value = neg
+              lastAppliedY = neg
+              updated = true
+            }
+          }
+          dragging.value = true
+          evt.preventDefault()
+          evt.stopPropagation()
+        } else {
+          // 如果拉动距离不够，重置状态
+          if (bottomUsesGap.value && bottomGap.value > 0) {
+            bottomGap.value = 0
+            lastAppliedGap = 0
+          } else if (!bottomUsesGap.value && translateY.value < 0) {
+            translateY.value = 0
+            lastAppliedY = 0
+          }
+        }
+      }
+
+      if (!updated && dragging.value) {
+        // 没有显著变化，避免无意义刷新
+      }
+      ticking = false
+    })
   }
 
   const onTouchEnd = () => {
-    if (!dragging.value) return
-    if (overscrollMode.value === 'top') {
+    // 统一处理，存在偏移或 gap 都回弹
+    if (translateY.value !== 0 || bottomGap.value !== 0) {
       animateBack()
-      return
-    }
-    if (overscrollMode.value === 'bottom') {
-      if (bottomUsesGap.value) {
-        bottomGap.value = 0
-        dragging.value = false
-        overscrollMode.value = 'none'
-      } else {
-        animateBack()
-      }
-      return
+    } else {
+      // 即使没有明显偏移，也要重置状态
+      dragging.value = false
+      overscrollMode.value = 'none'
+      overscrollStartY.value = 0
     }
   }
 
@@ -218,16 +273,36 @@
     bottomGap.value = 0
     overscrollStartY.value = 0
     overscrollMode.value = 'none'
+    // 重置上次应用的值
+    lastAppliedY = 0
+    lastAppliedGap = 0
   }
 
   // 滚动事件处理
   const onScroll = (e) => {
     const detail = e.detail || {}
-    scrollTop.value = detail.scrollTop || 0
+    const newScrollTop = detail.scrollTop || 0
+
+    // 保存上一次的scrollTop用于比较
+    const oldScrollTop = scrollTop.value
+    scrollTop.value = newScrollTop
+
     if (detail.scrollHeight && detail.scrollHeight !== contentHeight.value) {
       contentHeight.value = detail.scrollHeight
     }
-    measureHeights()
+
+    // 改进回弹逻辑：只在非拖拽状态且有明显滚动变化时才回弹
+    if (!dragging.value && overscrollMode.value !== 'none') {
+      // 检查是否有有效的滚动动作（表示用户正在正常滚动）
+      const hasScrollMovement = Math.abs(newScrollTop - oldScrollTop) > 1
+
+      if (
+        hasScrollMovement &&
+        (translateY.value !== 0 || bottomGap.value !== 0)
+      ) {
+        animateBack()
+      }
+    }
   }
 
   const applyDamping = (d) => {
@@ -249,10 +324,6 @@
       .select('.my-message-container')
       .boundingClientRect((rect) => {
         if (rect && rect.height) containerHeight.value = rect.height
-      })
-      .select('.pull-wrapper')
-      .boundingClientRect((rect) => {
-        if (rect && rect.height) contentHeight.value = rect.height
       })
       .exec()
   }
@@ -339,6 +410,104 @@
     }
   }
 
+  // const mockData = [
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 1,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 2,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 3,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 4,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 5,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 6,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 7,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 8,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  // ]
   // 加载数据的方法
   const loadData = async () => {
     console.log('开始加载留言数据')
@@ -360,6 +529,7 @@
           Array.isArray(messageInfo.data.data)
         ) {
           messageData.value = messageInfo.data.data
+          // messageData.value = mockData
         } else {
           messageData.value = []
         }
@@ -386,6 +556,24 @@
     loadData()
     // 初次测量兜底
     setTimeout(() => measureHeights(), 80)
+
+    // 添加兜底回弹机制，防止某些情况下状态卡住
+    const checkAndResetStates = () => {
+      // 如果长时间保持拖拽状态但没有实际变化，强制重置
+      if (
+        !dragging.value &&
+        (translateY.value !== 0 || bottomGap.value !== 0)
+      ) {
+        setTimeout(() => {
+          if (translateY.value !== 0 || bottomGap.value !== 0) {
+            animateBack()
+          }
+        }, 500) // 0.5秒后检查
+      }
+    }
+
+    // 每隔一段时间检查状态
+    setInterval(checkAndResetStates, 2000)
   })
 
   // 暴露方法，以便父组件调用
@@ -399,13 +587,18 @@
   @import './index.scss';
 
   .pull-wrapper {
-    transition: transform 400ms cubic-bezier(0.22, 0.8, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.22, 0.8, 0.2, 1);
     will-change: transform;
   }
 
   /* 当正在拖动时，去除 transition，让位移跟随手势更灵敏 */
   .pull-wrapper.dragging {
     transition: none;
+  }
+
+  /* 底部渐变gap的过渡效果 */
+  .overscroll-gap {
+    transition: height 0.4s cubic-bezier(0.22, 0.8, 0.2, 1);
   }
 
   /* 可选：在拖动时给列表顶部留白，避免图片被拉出圆角 */
