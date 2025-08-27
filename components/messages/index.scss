@@ -42,18 +42,7 @@
         // 避免因为频繁 transform 触发合成层抖动
         will-change: transform;
     }
-    .overscroll-gap {
-        width: 100%;
-        background: linear-gradient(
-            to bottom,
-            rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.55) 55%,
-            rgba(255, 255, 255, 1) 100%
-        );
-        height: 0;
-        pointer-events: none;
-        transition: height 0.35s cubic-bezier(0.22, 0.8, 0.2, 1);
-    }
+    // 移除不再使用的 overscroll-gap 样式
     .my-message-item {
         box-sizing: border-box;
         border-radius: 20rpx;
