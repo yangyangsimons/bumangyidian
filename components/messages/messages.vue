@@ -6,20 +6,8 @@
       scroll-y="true"
       class="my-message-container"
       bounces="true"
-      @touchstart="onTouchStart"
-      @touchmove="onTouchMove"
-      @touchend="onTouchEnd"
-      @scroll="onScroll"
-      :scroll-top="scrollTop"
     >
-      <!-- pull-wrapper 会在顶部下拉时做 translateY 动画，产生回弹效果 -->
-      <view
-        class="pull-wrapper"
-        :class="{ dragging: dragging }"
-        :style="{
-          transform: `translateY(${translateY}px)`,
-        }"
-      >
+      <view class="pull-wrapper">
         <view
           v-for="(message, index) in approvedMessages"
           :key="index"
@@ -51,12 +39,7 @@
             <view class="content">{{ message.content }}</view>
           </view>
         </view>
-        <!-- 底部 overscroll 渐变 gap（长内容时启用） -->
-        <view
-          class="overscroll-gap"
-          v-show="bottomGap > 0"
-          :style="{ height: bottomGap + 'px' }"
-        />
+        <!-- 移除底部 overscroll gap，因为不再使用 -->
       </view>
     </scroll-view>
 
@@ -89,41 +72,16 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, computed, nextTick, getCurrentInstance } from 'vue'
+  import { ref, onMounted, computed, nextTick } from 'vue'
   import request from '@/utils/request.js'
   import { baseUrl } from '@/utils/config'
-  import { useMusicStore } from '@/stores/music'
+  import { checkTokenAndNavigate } from '@/utils/auth'
 
   const messageData = ref([])
   const replyMessage = ref('')
   const isSubmitting = ref(false)
 
-  // 回弹/overscroll 状态
-  const startY = ref(0)
-  const translateY = ref(0)
-  const dragging = ref(false)
-  const maxPull = 200
-  const scrollTop = ref(0)
-  const overscrollMode = ref('none') // none | top | bottom
-  const overscrollStartY = ref(0)
-  const bottomGap = ref(0) // 底部渐变 gap 高度（仅长内容）
-  const containerHeight = ref(0)
-  const contentHeight = ref(0)
-  const vm = getCurrentInstance()
-  const bottomUsesGap = ref(true)
-
-  // 判定参数
-  const BOTTOM_TOLERANCE_PX = 30
-  const TABBAR_HEIGHT_RPX = 120
-  const INPUT_BLOCK_TOTAL_RPX = 220 // messages 容器 padding-bottom 已按 220rpx 预留 (tabbar+输入+间隙)
-  const { windowWidth } = uni.getSystemInfoSync()
-  const rpx2px = (r) => (windowWidth / 750) * r
-  const RESERVED_BOTTOM_PX = rpx2px(INPUT_BLOCK_TOTAL_RPX) // 用于底部判定
-
-  const isContentShort = () =>
-    contentHeight.value &&
-    containerHeight.value &&
-    contentHeight.value <= containerHeight.value + 2
+  // 已移除上拉/下拉回弹相关所有状态与计算
   // 根据点赞状态返回对应的图片地址
   const getLikeImageSrc = (message) => {
     return message.liked
@@ -131,131 +89,7 @@
       : '../../static/my/like-false.png'
   }
 
-  // 触摸/滚动处理：实现下拉拉伸与回弹
-  const onTouchStart = (e) => {
-    const touches = e.touches || (e.changedTouches && e.changedTouches)
-    if (!touches || !touches[0]) return
-    startY.value = touches[0].clientY
-    dragging.value = false
-    overscrollMode.value = 'none'
-    overscrollStartY.value = 0
-  }
-
-  const onTouchMove = (e) => {
-    const touches = e.touches || (e.changedTouches && e.changedTouches)
-    if (!touches || !touches[0]) return
-    const currentY = touches[0].clientY
-    const dy = currentY - startY.value
-    const minTrigger = 8
-
-    // 初始模式判定
-    if (overscrollMode.value === 'none') {
-      if (dy > minTrigger && (scrollTop.value <= 5 || isContentShort())) {
-        overscrollMode.value = 'top'
-      } else if (
-        dy < -minTrigger &&
-        (isNearBottom(scrollTop.value) || isContentShort())
-      ) {
-        overscrollMode.value = 'bottom'
-        overscrollStartY.value = currentY
-        bottomUsesGap.value = !isContentShort()
-      }
-    }
-
-    // 顶部模式
-    if (overscrollMode.value === 'top') {
-      const pull = dy - minTrigger
-      if (pull <= 0) return
-      const resisted = applyDamping(pull)
-      translateY.value = Math.min(maxPull, resisted)
-      dragging.value = true
-      e.preventDefault()
-      e.stopPropagation()
-      return
-    }
-
-    // 底部模式
-    if (overscrollMode.value === 'bottom') {
-      if (!overscrollStartY.value) overscrollStartY.value = currentY
-      const raw = overscrollStartY.value - currentY // 正值
-      if (raw <= 0) return
-      const resisted = applyDamping(raw)
-      if (bottomUsesGap.value) {
-        bottomGap.value = Math.min(maxPull, resisted)
-        translateY.value = 0
-      } else {
-        translateY.value = -Math.min(maxPull, resisted)
-      }
-      dragging.value = true
-      e.preventDefault()
-      e.stopPropagation()
-      return
-    }
-  }
-
-  const onTouchEnd = () => {
-    if (!dragging.value) return
-    if (overscrollMode.value === 'top') {
-      animateBack()
-      return
-    }
-    if (overscrollMode.value === 'bottom') {
-      if (bottomUsesGap.value) {
-        bottomGap.value = 0
-        dragging.value = false
-        overscrollMode.value = 'none'
-      } else {
-        animateBack()
-      }
-      return
-    }
-  }
-
-  const animateBack = () => {
-    // 使用过渡 CSS 控制回弹动画，通过设置 translateY -> 0
-    translateY.value = 0
-    dragging.value = false
-    bottomGap.value = 0
-    overscrollStartY.value = 0
-    overscrollMode.value = 'none'
-  }
-
-  // 滚动事件处理
-  const onScroll = (e) => {
-    const detail = e.detail || {}
-    scrollTop.value = detail.scrollTop || 0
-    if (detail.scrollHeight && detail.scrollHeight !== contentHeight.value) {
-      contentHeight.value = detail.scrollHeight
-    }
-    measureHeights()
-  }
-
-  const applyDamping = (d) => {
-    if (d <= 60) return d * 0.8
-    if (d <= 120) return 48 + (d - 60) * 0.5
-    return 78 + Math.sqrt(d - 120) * 6
-  }
-
-  const isNearBottom = (scrollVal) => {
-    if (!containerHeight.value) return false
-    const remaining = contentHeight.value - (scrollVal + containerHeight.value)
-    return remaining <= BOTTOM_TOLERANCE_PX + RESERVED_BOTTOM_PX
-  }
-
-  const measureHeights = () => {
-    uni
-      .createSelectorQuery()
-      .in(vm)
-      .select('.my-message-container')
-      .boundingClientRect((rect) => {
-        if (rect && rect.height) containerHeight.value = rect.height
-      })
-      .select('.pull-wrapper')
-      .boundingClientRect((rect) => {
-        if (rect && rect.height) contentHeight.value = rect.height
-      })
-      .exec()
-  }
+  // 触摸/回弹逻辑已删除
   //点赞和取消点赞
   const toggleLike = async (message) => {
     //发送请求
@@ -284,6 +118,8 @@
 
   // 发送留言
   const sendMessage = async () => {
+    // 登录判断：未登录时 auth.js 内部会弹出 uni.showModal 并返回 false
+    if (!checkTokenAndNavigate()) return
     // 防止重复提交
     if (isSubmitting.value) {
       return
@@ -339,7 +175,107 @@
     }
   }
 
+  // const mockData = [
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 1,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 2,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 3,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 4,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 5,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 6,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 7,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  //   {
+  //     avator:
+  //       'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+  //     content: '我觉得这个 app使用起来很不错，点赞',
+  //     created_at: '2025-08-16 00:15:38',
+  //     id: 8,
+  //     liked: true,
+  //     liked_count: 1,
+  //     reply_content: '通过',
+  //     status: 1,
+  //     user_name: 'BMYD11',
+  //   },
+  // ]
+
   // 加载数据的方法
+
   const loadData = async () => {
     console.log('开始加载留言数据')
 
@@ -360,12 +296,12 @@
           Array.isArray(messageInfo.data.data)
         ) {
           messageData.value = messageInfo.data.data
+          // messageData.value = mockData
         } else {
           messageData.value = []
         }
         console.log('留言数据加载完成，数据长度:', messageData.value.length)
         await nextTick()
-        measureHeights()
       } else {
         console.log('获取留言数据失败:', messageInfo.msg || '未知错误')
         messageData.value = []
@@ -384,8 +320,6 @@
   onMounted(() => {
     console.log('Messages组件已挂载')
     loadData()
-    // 初次测量兜底
-    setTimeout(() => measureHeights(), 80)
   })
 
   // 暴露方法，以便父组件调用
@@ -399,7 +333,7 @@
   @import './index.scss';
 
   .pull-wrapper {
-    transition: transform 400ms cubic-bezier(0.22, 0.8, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.22, 0.8, 0.2, 1);
     will-change: transform;
   }
 
