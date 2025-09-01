@@ -64,6 +64,7 @@
 
 <script setup>
   import { ref } from 'vue'
+  import { onLoad } from '@dcloudio/uni-app'
   import { baseUrl } from '../../utils/config'
   import { useUserStore } from '@/stores/user'
   import { storeToRefs } from 'pinia'
@@ -181,9 +182,17 @@
       console.log('获取用户注册信息', registerResult)
       if (registerResult.data.code === 0 && registerResult.data.data.birth) {
         console.log('用户已注册生日是：', registerResult.data.data.birth)
-        uni.reLaunch({
-          url: '/pages/index/index',
-        })
+        // 优先跳回之前的页面
+        let redirect = uni.getStorageSync('postLoginRedirect')
+        if (redirect && redirect.startsWith('/')) {
+          // 清除避免后续重复跳转
+          uni.removeStorageSync('postLoginRedirect')
+          uni.reLaunch({ url: redirect })
+        } else {
+          uni.reLaunch({
+            url: '/pages/index/index',
+          })
+        }
       } else {
         // 用户未注册走注册流程
         if (phoneCode) {
@@ -202,7 +211,14 @@
           // await request(`${baseUrl}/user/update_phone`, 'POST', {
           //   code: e.detail.code,
           // })
-          uni.reLaunch({ url: '/pages/hello/hello' })
+          // 注册流程完成后，如果有 redirect 则回去，否则去 hello
+          let redirect = uni.getStorageSync('postLoginRedirect')
+          if (redirect && redirect.startsWith('/')) {
+            uni.removeStorageSync('postLoginRedirect')
+            uni.reLaunch({ url: redirect })
+          } else {
+            uni.reLaunch({ url: '/pages/hello/hello' })
+          }
         } else {
           console.log('获取手机号失败', e.detail.errMsg)
           return uni.showToast({
@@ -222,6 +238,16 @@
       uni.hideLoading()
     }
   }
+
+  // 若外部传入 redirect 参数，则覆盖存储的 redirect
+  onLoad((query) => {
+    if (query && query.redirect) {
+      const decoded = decodeURIComponent(query.redirect)
+      if (decoded.startsWith('/')) {
+        uni.setStorageSync('postLoginRedirect', decoded)
+      }
+    }
+  })
 </script>
 
 <style lang="scss" scoped>

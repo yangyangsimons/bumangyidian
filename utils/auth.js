@@ -28,7 +28,29 @@ export const checkTokenAndNavigate = (callback, options = {}) => {
           // await wsStore.close()
           // audioPlayerStore.stopAllAudio()
           // barrageStore.clearMessages()
-
+          // 记录当前页面用于登录后返回
+          try {
+            const pages = getCurrentPages()
+            if (pages && pages.length) {
+              const current = pages[pages.length - 1]
+              // 组合当前路由及其查询参数
+              let route = '/' + current.route
+              const opts =
+                current.options ||
+                (current.$page && current.$page.options) ||
+                {}
+              const queryStr = Object.keys(opts)
+                .map((k) => `${k}=${encodeURIComponent(opts[k])}`)
+                .join('&')
+              if (queryStr) route += `?${queryStr}`
+              // 避免把登录页自己存进去
+              if (!route.includes('/pages/login/login')) {
+                uni.setStorageSync('postLoginRedirect', route)
+              }
+            }
+          } catch (e) {
+            console.log('记录返回路径失败', e)
+          }
           setTimeout(() => {
             uni.reLaunch({
               url: '/pages/login/login',
