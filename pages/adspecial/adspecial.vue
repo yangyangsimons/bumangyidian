@@ -40,6 +40,47 @@
   const showPop = ref(false)
   const popoutSrc = ref('')
 
+  // 多次解码（处理被重复 encode 的场景：%252F -> %2F -> /）
+  const multiDecode = (val, max = 3) => {
+    if (!val || typeof val !== 'string') return val
+    let prev = val
+    for (let i = 0; i < max; i++) {
+      try {
+        const next = decodeURIComponent(prev)
+        if (next === prev) return next
+        prev = next
+      } catch (e) {
+        return prev
+      }
+    }
+    return prev
+  }
+
+  const applyIdAssets = (theId) => {
+    if (!theId) return
+    if (theId === '1001') {
+      mainsrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruitTea.jpg'
+      popoutSrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruit-tea-pop.png'
+    } else if (theId === '1002') {
+      mainsrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/shortTV.jpg'
+      popoutSrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/short-tv-pop.png'
+    } else if (theId === '1003') {
+      mainsrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/innerAd.jpg'
+      popoutSrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/inner-pop.png'
+    } else {
+      mainsrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/shortTV.jpg'
+      popoutSrc.value =
+        'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruit-tea-pop.png'
+    }
+  }
+
   const closePop = () => {
     showPop.value = false
     uni.switchTab({ url: '/pages/index/index' })
@@ -49,9 +90,45 @@
   }
 
   const reportSource = async () => {
-    // 登录校验；未登录会弹窗并跳转登录
-    const ok = checkTokenAndNavigate()
-    if (!ok) return
+    // 若未登录：构建当前页面 + 现有参数（含其它追踪参数），再合并 / 覆盖 id，避免重复
+    if (!hasValidToken()) {
+      try {
+        const pages = getCurrentPages && getCurrentPages()
+        let basePath = '/pages/adspecial/adspecial'
+        let params = {}
+        if (pages && pages.length) {
+          const current = pages[pages.length - 1] || {}
+          const rawOpts =
+            (current &&
+              (current.options || (current.$page && current.$page.options))) ||
+            {}
+          // 拷贝一份，后面可安全修改
+          Object.keys(rawOpts).forEach((k) => {
+            params[k] = rawOpts[k]
+          })
+        }
+        // 合并 / 覆盖 id
+        if (id.value) params.id = id.value
+        // 生成查询串（去重已由对象语义完成）
+        const queryStr = Object.keys(params)
+          .filter(
+            (k) =>
+              params[k] !== undefined && params[k] !== null && params[k] !== ''
+          )
+          .map((k) => `${k}=${encodeURIComponent(params[k])}`)
+          .join('&')
+        const redirect = queryStr ? `${basePath}?${queryStr}` : basePath
+        uni.setStorageSync('postLoginRedirect', redirect)
+      } catch (e) {
+        console.log('构建重定向路径失败', e)
+        // 兜底：至少带上 id
+        let fallback = '/pages/adspecial/adspecial'
+        if (id.value) fallback += `?id=${id.value}`
+        uni.setStorageSync('postLoginRedirect', fallback)
+      }
+      checkTokenAndNavigate() // 触发登录弹窗 & 跳转
+      return
+    }
 
     try {
       if (id.value) {
@@ -76,45 +153,20 @@
   onLoad(async (query) => {
     if (query && query.q) {
       console.log('从外部链接打开，query.q:', query.q)
-      const source = decodeURIComponent(query.q)
-      console.log('decode 之后的source:', source)
+      const source = multiDecode(query.q)
+      console.log('多次 decode 后的 source:', source)
 
-      // 使用字符串分割提取id
-      if (source.includes('id=')) {
-        const parts = source.split('id=')
-        if (parts[1]) {
-          id.value = parts[1].split('&')[0] // 处理可能有其他参数的情况
-        }
+      // 统一用正则匹配 ?id= / &id=
+      const match = source.match(/[?&]id=([^&]+)/)
+      if (match) {
+        id.value = match[1]
       }
-      console.log('提取的id:', id.value)
+      console.log('提取的 id:', id.value)
 
       // 上报id (来源总量) – 这里不强制登录，只统计来源
       if (id.value) {
-        //这里进行id来源判断和上报,
-        // 1001 -static/adSpecial/fruitTea.jpg
-        // 1002 -static/adSpecial/shortTV.jpg
-        // 1003 -static/adSpecial/innerAd.jpg
-        if (id.value === '1001') {
-          mainsrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruitTea.jpg'
-          popoutSrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruit-tea-pop.png'
-        } else if (id.value === '1002') {
-          mainsrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/shortTV.jpg'
-          popoutSrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/short-tv-pop.png'
-        } else if (id.value === '1003') {
-          mainsrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/innerAd.jpg'
-          popoutSrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/inner-pop.png'
-        } else {
-          mainsrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/shortTV.jpg'
-          popoutSrc.value =
-            'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruit-tea-pop.png' //默认图
-        }
+        // 根据 id 设置图片
+        applyIdAssets(id.value)
 
         try {
           const sourceReport = await request(
@@ -136,28 +188,8 @@
     //如果用户是点击跳转的，那么就获取携带的id,图片判断和外部链接一样,但是不上报
     if (query && query.id) {
       id.value = query.id
-      // 跳转逻辑和外部一样,但是不上报
-      if (id.value === '1001') {
-        mainsrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruitTea.jpg'
-        popoutSrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruit-tea-pop.png'
-      } else if (id.value === '1002') {
-        mainsrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/shortTV.jpg'
-        popoutSrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/short-tv-pop.png'
-      } else if (id.value === '1003') {
-        mainsrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/innerAd.jpg'
-        popoutSrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/inner-pop.png'
-      } else {
-        mainsrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/shortTV.jpg'
-        popoutSrc.value =
-          'https://imango-school-public.obs.cn-south-1.myhuaweicloud.com/activity/fruit-tea-pop.png' //默认图
-      }
+      // 设置图片（不上来源上报）
+      applyIdAssets(id.value)
     }
   })
 </script>
