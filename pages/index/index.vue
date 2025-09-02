@@ -160,21 +160,32 @@
     console.log('小程序启动，设置显示广告标识')
 
     if (query && query.q) {
-      // 如果有query参数，表示从外部链接打开
       console.log('从外部链接打开，query.q:', query.q)
       const source = decodeURIComponent(query.q)
-      console.log('decode 之后的souceid:', source)
-      // 上报来源
-      const sourceReport = await request(
-        `${baseUrl}/track/source_total`,
-        'POST',
-        {
-          source_id: source,
+      console.log('decode 之后的source:', source)
+
+      // 使用字符串分割提取id
+      let id = null
+      if (source.includes('id=')) {
+        const parts = source.split('id=')
+        if (parts[1]) {
+          id = parts[1].split('&')[0] // 处理可能有其他参数的情况
         }
-      )
-      console.log('上报来源结果:', sourceReport)
+      }
+      console.log('提取的id:', id)
+
+      // 上报id
+      if (id) {
+        const sourceReport = await request(
+          `${baseUrl}/track/source_total`,
+          'POST',
+          {
+            source_id: id,
+          }
+        )
+        console.log('上报来源结果:', sourceReport)
+      }
     } else {
-      // 如果没有query参数，表示正常加载
       console.log('正常加载主页面')
     }
   })

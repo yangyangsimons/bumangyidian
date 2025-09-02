@@ -9,6 +9,13 @@
 			}
 		},
 		{
+			"path": "pages/adspecial/adspecial",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/home/home",
 			"style": {
 				"navigationBarTitleText": "",
