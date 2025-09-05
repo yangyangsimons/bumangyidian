@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="card">
+  <view class="container">
+    <view class="card" @touchend="onCardTouchEnd">
       <view class="audio-player">
         <!-- 分类选择器 - 改为滑动式 -->
         <view class="category-selector">
@@ -16,6 +16,8 @@
               :scroll-with-animation="scrollWithAnimation"
               @scroll="onScroll"
               @scrollend="onScrollEnd"
+              @touchstart="onCategoryTouchStart"
+              @touchend="onCategoryTouchEnd"
             >
               <view
                 class="ruler-content"
@@ -95,23 +97,34 @@
           </view>
         </view>
       </view>
-    </div>
+    </view>
     <!-- 节目列表标题 -->
-    <div class="list-title">
-      <div>节目列表</div>
-    </div>
+    <view class="list-title" @dblclick="resetScrollView" @tap="onTitleTap">
+      <view>节目列表</view>
+    </view>
     <!-- 可滚动的节目列表容器 -->
-    <div class="list">
-      <div class="item" v-for="item in list" :key="item.id">
-        <div>
-          <div class="title">{{ item.title }}</div>
-          <div class="info">{{ item.desc }}</div>
-        </div>
-        <div class="row">
-          <div class="star" @click="toggleFavorite(item.id)">
+    <scroll-view
+      :key="scrollViewKey"
+      class="list"
+      scroll-y
+      :show-scrollbar="false"
+      :scroll-with-animation="false"
+      :enable-back-to-top="true"
+      :refresher-enabled="false"
+      @touchstart="onListTouchStart"
+      @touchmove="onListTouchMove"
+      @tap="onListTap"
+    >
+      <view class="item" v-for="item in list" :key="item.id">
+        <view>
+          <view class="title">{{ item.title }}</view>
+          <view class="info">{{ item.desc }}</view>
+        </view>
+        <view class="row">
+          <view class="star" @click="toggleFavorite(item.id)">
             <image :src="getLikeImageSrc(item)" mode="widthFix" />
-          </div>
-          <div class="play" @click="togglePlay(item)">
+          </view>
+          <view class="play" @click="togglePlay(item)">
             <image
               :src="
                 safeIsPlayingAudio(item.id)
@@ -120,11 +133,12 @@
               "
               mode="widthFix"
             />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          </view>
+        </view>
+      </view>
+      <view class="list-gradient-top"></view>
+    </scroll-view>
+  </view>
 </template>
 
 <script setup>
@@ -242,6 +256,9 @@
   const isInitialized = ref(false)
   const isUserScrolling = ref(false) // 区分用户滚动还是程序滚动
   const scrollEndTimer = ref(null) // 滚动结束计时器
+  const lastLoadedCategoryIndex = ref(activeCategory.value) // 记录已加载的分类，避免频繁请求
+  const scrollViewKey = ref(0) // 用于强制重新渲染scroll-view
+  const resetTimer = ref(null) // 防抖计时器
 
   // 根据收藏状态返回对应的图片地址
   const getLikeImageSrc = (item) => {
@@ -460,8 +477,7 @@
     ) {
       console.log('滚动中切换分类到:', currentItem.originalIndex)
       activeCategory.value = currentItem.originalIndex
-      // 切换分类时加载对应的节目列表
-      loadProgramList(currentItem.originalIndex)
+      // 不立即加载节目列表，等待滚动稳定后再加载，避免高频请求
       emit('categoryChange', currentItem.originalIndex)
     }
 
@@ -470,6 +486,11 @@
       if (isUserScrolling.value) {
         console.log('滚动停止，触发自动居中')
         centerActiveCategory()
+        // 居中后再判断是否需要加载节目列表
+        if (lastLoadedCategoryIndex.value !== activeCategory.value) {
+          loadProgramList(activeCategory.value)
+          lastLoadedCategoryIndex.value = activeCategory.value
+        }
       }
     }, 100) // 100ms 后如果没有新的滚动事件就认为滚动结束
   }
@@ -482,6 +503,10 @@
       if (isUserScrolling.value) {
         console.log('scrollend 事件触发自动居中')
         centerActiveCategory()
+        if (lastLoadedCategoryIndex.value !== activeCategory.value) {
+          loadProgramList(activeCategory.value)
+          lastLoadedCategoryIndex.value = activeCategory.value
+        }
       }
       isUserScrolling.value = false
     }, 50)
@@ -525,6 +550,7 @@
 
       // 加载对应的节目列表
       loadProgramList(category.originalIndex)
+      lastLoadedCategoryIndex.value = category.originalIndex
 
       // 触发分类变更事件
       emit('categoryChange', category.originalIndex)
@@ -587,6 +613,7 @@
 
       //获取分类下面的节目列表
       await loadProgramList()
+      lastLoadedCategoryIndex.value = activeCategory.value
       //如果没有歌曲的话，就把第一个歌曲设置进去（但不自动播放）
       if (
         musicStore.playlist.length <= 0 &&
@@ -660,6 +687,9 @@
     if (scrollEndTimer.value) {
       clearTimeout(scrollEndTimer.value)
     }
+    if (resetTimer.value) {
+      clearTimeout(resetTimer.value)
+    }
   })
   onShareAppMessage(() => {
     console.log('onShareAppMessage......')
@@ -676,6 +706,102 @@
       title: `不芒一点，陪你世界加一点`,
     }
   })
+
+  // 处理列表滚动事件冲突
+  const onListTouchStart = (e) => {
+    console.log('列表触摸开始')
+    // 阻止事件冒泡，确保列表的触摸事件不被干扰
+    e.stopPropagation()
+  }
+
+  const onListTouchMove = (e) => {
+    // 阻止事件冒泡，确保列表滚动正常
+    e.stopPropagation()
+  }
+
+  // 列表点击时检查是否需要重置
+  const onListTap = (e) => {
+    console.log('列表被点击，检查滚动状态')
+    // 如果列表不能滚动，尝试重置
+    setTimeout(() => {
+      scrollViewKey.value += 1
+      console.log('列表点击重置scroll-view，key:', scrollViewKey.value)
+    }, 50)
+  }
+
+  // 处理分类滚动事件，避免影响列表滚动
+  const onCategoryTouchStart = (e) => {
+    console.log('分类触摸开始')
+    // 标记分类滚动开始，不影响列表
+    e.stopPropagation()
+  }
+
+  const onCategoryTouchEnd = (e) => {
+    console.log('分类触摸结束')
+    // 清理分类滚动状态
+    e.stopPropagation()
+
+    // 立即重置一次
+    scrollViewKey.value += 1
+
+    setTimeout(() => {
+      console.log('第N次重置列表滚动状态')
+      scrollViewKey.value += 1
+    }, 20)
+
+    // 延时多次重置确保生效
+    setTimeout(() => {
+      console.log('第二次重置列表滚动状态')
+      scrollViewKey.value += 1
+    }, 50)
+
+    setTimeout(() => {
+      console.log('第三次重置列表滚动状态')
+      scrollViewKey.value += 1
+    }, 100)
+  }
+
+  // 重置scroll-view的函数（双击标题触发）
+  const resetScrollView = () => {
+    console.log('手动重置scroll-view')
+    scrollViewKey.value += 1
+    uni.showToast({
+      title: '滚动已重置',
+      icon: 'success',
+      duration: 1000,
+    })
+  }
+
+  // 整个card区域的触摸结束事件
+  const onCardTouchEnd = (e) => {
+    console.log('Card区域触摸结束，准备重置列表滚动')
+
+    // 清除之前的计时器
+    if (resetTimer.value) {
+      clearTimeout(resetTimer.value)
+    }
+
+    // 设置新的重置计时器
+    resetTimer.value = setTimeout(() => {
+      scrollViewKey.value += 1
+      console.log('Card触摸后重置scroll-view，key:', scrollViewKey.value)
+
+      // 二次确保
+      setTimeout(() => {
+        scrollViewKey.value += 1
+        console.log('Card触摸后二次重置scroll-view，key:', scrollViewKey.value)
+      }, 200)
+    }, 50)
+  }
+
+  // 标题单击提示
+  const onTitleTap = () => {
+    uni.showToast({
+      title: '双击可重置滚动',
+      icon: 'none',
+      duration: 1500,
+    })
+  }
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,6 @@
 .container {
     width: 100%;
     height: 100%;
-    overflow: hidden;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -178,32 +177,14 @@
 
     /* 可滚动的节目列表容器 */
     .list {
-        // 底部安全距离
-        box-sizing: border-box;
-        padding-bottom: 220rpx;
         height: 600rpx;
-        border-radius:
-            24rpx 24rpx,
-            0rpx,
-            0rpx;
+        box-sizing: border-box;
+        padding-bottom: 200rpx; // 底部留白
+        border-radius: 24rpx 24rpx 0 0;
         background: #fff;
-        overflow-y: auto;
-
-        /* 顶部模糊过渡效果 */
-        mask: linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgba(0, 0, 0, 0.3) 20rpx,
-            rgba(0, 0, 0, 0.8) 60rpx,
-            black 100rpx
-        );
-        -webkit-mask: linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgba(0, 0, 0, 0.3) 20rpx,
-            rgba(0, 0, 0, 0.8) 60rpx,
-            black 100rpx
-        );
+        position: relative;
+        overflow: hidden; // 确保滚动容器正确
+        z-index: 1; // 确保在正确的层级
         .item {
             padding: 24rpx 0;
             margin: 0 30rpx;
@@ -251,5 +232,19 @@
                 }
             }
         }
+    }
+    .list-gradient-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70rpx;
+        pointer-events: none;
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 1) 20%,
+            rgba(255, 255, 255, 0.6) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
     }
 }
