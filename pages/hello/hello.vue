@@ -58,6 +58,19 @@
           }}</text>
         </view>
       </view>
+      <!-- 学号部分 -->
+      <view class="school-number" v-if="showSchoolNumber">
+        <image class="number-icon" src="/static/school-number.png"></image>
+        <view class="input-container">
+          <input
+            @input="onKeyInput"
+            :value="schoolNumber"
+            type="text"
+            placeholder="请输入您的学号"
+            class="school-number-input"
+          />
+        </view>
+      </view>
     </view>
     <view class="footer">
       <button class="next" @click="handleNext">
@@ -165,8 +178,9 @@
   import { onShow, onHide } from '@dcloudio/uni-app'
   import { baseUrl } from '../../utils/config'
   import request from '../../utils/request'
-
+  const showSchoolNumber = ref(false)
   const selectedSex = ref('male')
+  const schoolNumber = ref('')
 
   // 学校相关数据
   const schoolList = ref([])
@@ -189,6 +203,10 @@
   // 调试开关
   const showDebugInfo = ref(true) // 设为 true 以显示调试信息
 
+  // 处理输入事件，更新 schoolNumber
+  const onKeyInput = (e) => {
+    schoolNumber.value = e.detail.value
+  }
   onShow(async () => {
     // 页面显示时不预加载学校列表，只在打开弹窗时加载
   })
@@ -429,6 +447,11 @@
   const selectSchoolItem = (index) => {
     tempSelectedIndex.value = index
     console.log('选择学校项:', index, schoolList.value[index])
+    // 这里可以添加其他逻辑，选中的学校id是1836的话，那么就需要填写学号
+    if (schoolList.value[index].id === 1836) {
+      // 需要填写学号的input显示
+      showSchoolNumber.value = true
+    }
   }
 
   // 确认学校选择
@@ -489,6 +512,42 @@
   }
 
   const handleNext = () => {
+    console.log('点击下一步')
+    //如果学校id是1836则必须填写学校并且存储学号
+    if (selectedSchool.value && selectedSchool.value.id === 1836) {
+      if (!schoolNumber.value.trim()) {
+        uni.showToast({
+          title: '请填写学号',
+          icon: 'none',
+        })
+        return
+      } else {
+        // 存储学号
+        uni.setStorage({
+          key: 'schoolNumber',
+          data: schoolNumber.value.trim(),
+          success: (result) => {
+            console.log('学号存储成功:', result)
+          },
+          fail: (error) => {
+            console.log('学号存储失败:', error)
+          },
+        })
+      }
+    } else {
+      // 如果不是1836学校，存一个空值
+      uni.setStorage({
+        key: 'schoolNumber',
+        data: '',
+        success: (result) => {
+          console.log('学号存储成功:', result)
+        },
+        fail: (error) => {
+          console.log('学号存储失败:', error)
+        },
+      })
+    }
+
     // 存储学校信息
     if (selectedSchool.value) {
       uni.setStorage({

@@ -28,6 +28,7 @@
 
 <script setup>
   import { ref, onMounted } from 'vue'
+  import { onLoad } from '@dcloudio/uni-app'
   import { baseUrl } from '../../utils/config'
 
   const adUrl = ref('')

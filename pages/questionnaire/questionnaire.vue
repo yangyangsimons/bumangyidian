@@ -50,6 +50,7 @@
   const question_text = ref('') // 记录问题文本
   const changeMbti = ref(false) // 记录MBTI类型
   const dataLoaded = ref(false) // 记录数据是否加载完成
+  const schoolNumber = ref('') // 学号
 
   onLoad((param) => {
     console.log('页面加载questionnaire', param)
@@ -95,20 +96,24 @@
   const getStorageData = async () => {
     try {
       // 使用Promise.all并行获取所有storage数据
-      const [schoolData, sexData, birthData] = await Promise.all([
-        getStorageItem('school'),
-        getStorageItem('sex'),
-        getStorageItem('birth'),
-      ])
+      const [schoolData, sexData, birthData, schoolNumberData] =
+        await Promise.all([
+          getStorageItem('school'),
+          getStorageItem('sex'),
+          getStorageItem('birth'),
+          getStorageItem('schoolNumber'),
+        ])
 
       school.value = schoolData.id
       sex.value = sexData === 'male' ? '男' : '女'
       birth.value = birthData
+      schoolNumber.value = schoolNumberData || ''
 
       console.log('预加载数据完成:', {
         school: school.value,
         sex: sex.value,
         birth: birth.value,
+        schoolNumber: schoolNumber.value,
       })
     } catch (error) {
       console.error('获取storage数据失败', error)
@@ -195,7 +200,7 @@
       const res = await request(`${baseUrl}/user/register`, 'POST', {
         sex: sex.value,
         birth: birth.value,
-        username: '李思明',
+        username: '不芒一点同学',
         avator: 'http://avatar1',
         answers: [
           {
@@ -204,6 +209,7 @@
           },
         ],
         school: school.value,
+        id_number: schoolNumber.value,
       })
       console.log('提交问卷结果', res)
       if (res.code === 0) {

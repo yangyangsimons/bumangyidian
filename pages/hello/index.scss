@@ -190,6 +190,40 @@
                 }
             }
         }
+        .school-number {
+            width: 686rpx;
+            height: 84rpx;
+            border-radius: 42rpx;
+            background: rgba(255, 255, 255, 1);
+            border: 2rpx solid rgba(151, 151, 151, 0.34);
+            color: rgba(152, 153, 153, 1);
+            letter-spacing: 6rpx;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 36rpx;
+            box-sizing: border-box;
+            margin-top: 32rpx;
+
+            .number-icon {
+                margin-right: 50rpx;
+                width: 40rpx;
+                height: 40rpx;
+                flex-shrink: 0;
+            }
+            .input-container {
+                flex: 1;
+                height: 84rpx;
+                line-height: 100%;
+                font-size: 32rpx;
+                font-weight: 500;
+                color: rgba(26, 28, 30, 1);
+                border: none;
+                outline: none;
+                display: flex;
+                align-items: center;
+            }
+        }
     }
 
     .footer {
