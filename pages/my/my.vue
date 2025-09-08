@@ -153,6 +153,37 @@
   const currentPage = ref(1) // 当前页码
   const totalPages = ref(0) // 总页数
   const isLoading = ref(false) // 是否正在加载
+  const id = ref(null) // 从扫码或链接中获取的商品ID
+
+  // const multiDecode = (val, max = 3) => {
+  //   if (!val || typeof val !== 'string') return val
+  //   let prev = val
+  //   for (let i = 0; i < max; i++) {
+  //     try {
+  //       const next = decodeURIComponent(prev)
+  //       if (next === prev) return next
+  //       prev = next
+  //     } catch (e) {
+  //       return prev
+  //     }
+  //   }
+  //   return prev
+  // }
+  onLoad(async (options) => {
+    // 处理扫描二维码进来的用户的逻辑
+    console.log('onLoad触发，处理扫码逻辑拿到id:', options)
+    if (options.id) {
+      id.value = options.id
+      console.log('ID:', id.value)
+
+      // 这里可以直接跳转到商品详情页
+      checkTokenAndNavigate((token) => {
+        uni.navigateTo({
+          url: `/pages/shop/shop?token=${token}&id=${id.value}`,
+        })
+      })
+    }
+  })
 
   const goToProductDetail = (productId) => {
     checkTokenAndNavigate((token) => {
