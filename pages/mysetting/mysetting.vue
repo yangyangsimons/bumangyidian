@@ -50,6 +50,17 @@
             ><image src="../../static//my/arrow.png" mode="scaleToFill"
           /></view>
         </view>
+        <view
+          class="school-number"
+          @click="showSchoolPicker"
+          v-if="showSchoolNumber"
+        >
+          <view class="text">学号</view>
+          <view class="value">{{ schoolNumber }}</view>
+          <view class="arrow"
+            ><image src="../../static//my/arrow.png" mode="scaleToFill"
+          /></view>
+        </view>
       </view>
       <!-- 修改MBTI部分，添加点击事件 -->
       <view class="mbti" @click="showMbtiPicker">
@@ -104,6 +115,14 @@
             @input="onSearchInput"
             confirm-type="search"
             @confirm="handleSearchConfirm"
+          />
+        </view>
+        <view class="school-number-input" v-if="showSearchSchoolNumber">
+          <input
+            type="text"
+            placeholder="请填写学号"
+            class="school-number"
+            @input="onSchoolNumberInput"
           />
         </view>
 
@@ -222,6 +241,7 @@
   import request from '@/utils/request.js'
   import { baseUrl } from '../../utils/config'
   import { dmReport } from '../../utils/report'
+  import { on } from 'events'
 
   // 现有的响应式数据
   const avator = ref('../../static/logo.png')
@@ -231,12 +251,17 @@
   const school = ref('保密')
   const mbti = ref('未设置')
   const mbtiOptions = ref({})
-
+  const schoolNumber = ref('未填写')
   // 新增MBTI选择相关的响应式数据
   const showMbtiModal = ref(false)
   const tempSelectedMbti = ref('')
   const selectedMbtiValue = ref('')
+  const showSchoolNumber = ref(true)
+  const showSearchSchoolNumber = ref(false)
 
+  const onSchoolNumberInput = (e) => {
+    schoolNumber.value = e.detail.value
+  }
   //logout相关
   const logout = () => {
     console.log('用户点击了退出登录')
@@ -381,6 +406,12 @@
         // 直接显示英文MBTI代码
         mbti.value = userInfo.data.mbti || '未设置'
         selectedMbtiValue.value = userInfo.data.mbti || ''
+        schoolNumber.value = userInfo.data.id_number || ''
+        console.log(schoolNumber.value, '学号')
+        //如果没有学号信息，就不显示学号
+        if (!schoolNumber.value) {
+          showSchoolNumber.value = false
+        }
       } else {
         console.error('获取用户信息失败:', userInfo.message)
       }
@@ -686,6 +717,16 @@
 
   const selectSchoolItem = (index) => {
     tempSelectedIndex.value = index
+    //如果选中的学校id是1836，就显示学号输入框
+    if (
+      schoolList.value[index] &&
+      (schoolList.value[index].id === 1836 ||
+        schoolList.value[index].school_id === 1836)
+    ) {
+      showSearchSchoolNumber.value = true
+    } else {
+      showSearchSchoolNumber.value = false
+    }
   }
 
   const confirmSchoolSelection = async () => {
@@ -699,6 +740,18 @@
       // 更新显示的学校名称
       school.value = getSchoolName(selectedSchool.value)
 
+      //如果学校的id是1836，并且学号没有填写，就提示填写学号
+      if (
+        (selectedSchool.value.id === 1836 ||
+          selectedSchool.value.school_id === 1836) &&
+        !schoolNumber.value.trim()
+      ) {
+        uni.showToast({
+          title: '请填写学号',
+          icon: 'none',
+        })
+        return
+      }
       // 调用接口更新用户学校信息
       try {
         const updateResult = await request(
@@ -708,6 +761,7 @@
             school_id:
               selectedSchool.value.id || selectedSchool.value.school_id,
             school_name: getSchoolName(selectedSchool.value),
+            id_number: schoolNumber.value || '',
           }
         )
 
