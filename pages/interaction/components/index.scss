@@ -83,13 +83,20 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            width: 30%;
         }
 
         .audio-title {
-            font-size: 42rpx;
+            font-size: 38rpx;
             font-weight: 700;
             color: rgba(16, 18, 19, 1);
             margin-bottom: 15rpx;
+            width: 100%;
+            // 超出就使用...
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-all;
         }
 
         .audio-desc {
@@ -99,6 +106,14 @@
             line-height: 32.92rpx;
             color: rgba(152, 153, 153, 1);
             margin-bottom: 44rpx;
+            width: 100%;
+            // 超出就使用...但是可以有两行文字
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-all;
         }
 
         .audio-time {

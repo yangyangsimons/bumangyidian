@@ -62,6 +62,13 @@
           <view class="audio-info">
             <text class="audio-title">{{ recommendInfo.title }}</text>
             <text class="audio-desc">{{ recommendInfo.desc }}</text>
+
+            <!-- <text class="audio-title"
+              >这是一段非常长的文字，我用来测试是不是会换行，或者样式混乱的情况出现呢</text
+            >
+            <text class="audio-desc"
+              >这是一段非常长的文字，我用来测试是不是会换行，或者样式混乱的情况出现呢</text
+            > -->
             <text class="audio-time">{{ recommendInfo.effective_time }}</text>
           </view>
         </view>
