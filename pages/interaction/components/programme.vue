@@ -164,8 +164,9 @@
   import { useMusicStore } from '@/stores/music'
   import { useAudioPlayerStore } from '@/stores/audioPlayer'
   import { checkTokenAndNavigate } from '@/utils/auth'
-
+  import { useVolumeStore } from '@/stores/volume' // 导入音量store
   const musicStore = useMusicStore()
+  const volumeStore = useVolumeStore() // 获取音量store
 
   console.log('programme.vue 中的 musicStore:', musicStore)
   console.log(

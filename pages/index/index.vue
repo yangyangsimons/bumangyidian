@@ -457,6 +457,7 @@
             system_model: currentModel.value,
             input_type: 3,
             text: '',
+            silence: 1,
           })
           console.log('模式切换消息发送成功')
         } else {
@@ -466,6 +467,7 @@
             system_model: currentModel.value,
             input_type: 3,
             text: '',
+            silence: 1,
           })
           console.log('模式切换消息发送成功')
         }
@@ -606,6 +608,7 @@
             system_model: currentModel.value,
             input_type: 3,
             text: '',
+            silence: 1,
           })
         }
       } else {
@@ -619,6 +622,7 @@
             system_model: currentModel.value,
             input_type: 3,
             text: '',
+            silence: 1,
           })
           console.log('发送input_type=3的初始消息成功')
         }

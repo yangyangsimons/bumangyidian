@@ -61,6 +61,16 @@ export const useBarrageStore = defineStore('barrage', {
         if (msgIndex !== -1) {
           this.messages[msgIndex].isStreaming = false
         }
+      } else {
+        // 如果没有正在进行的流式消息，但收到 finish，并且有完整文本
+        // 则直接新增一条普通 AI 消息，确保文本能显示出来
+        if (fullText && String(fullText).trim() !== '') {
+          this.addMessage({
+            type: 'ai',
+            content: fullText,
+            isStreaming: false,
+          })
+        }
       }
       this.currentStreamingMessageId = null
     },

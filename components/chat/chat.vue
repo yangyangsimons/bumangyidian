@@ -151,8 +151,8 @@
   import { usePlaceholderStore } from '../../stores/placeholderStore'
   import request from '@/utils/request'
   import { dmReport } from '../../utils/report'
-  import { on } from 'events'
-
+  import { useVolumeStore } from '../../stores/volume'
+  const volumeStore = useVolumeStore() // 获取音量store
   //电台模式下输入框监控
   const radioInput = ref(false)
   const radioInputMessage = ref('')
@@ -172,7 +172,8 @@
 
   const toggleMute = () => {
     mute.value = !mute.value
-    audioPlayerStore.setBgVolume(mute.value ? 0 : 1)
+    //更新音量状态
+    volumeStore.setVolume(mute.value ? 0 : 1)
     audioPlayerStore.setTtsVolume(mute.value ? 0 : 1)
   }
   // 设置能否发送消息
@@ -483,6 +484,7 @@
       uploadMessage.system_model = useModelStore().model
       uploadMessage.input_type = 2
       uploadMessage.text = userMessage
+      uploadMessage.silence = mute.value ? 1 : 0
       //延迟两秒钟之后查询用户信息
       setTimeout(async () => {
         const currentSubject = await request(`${baseUrl}/user/user_info`, 'GET')
@@ -494,6 +496,7 @@
       uploadMessage.system_model = useModelStore().model
       uploadMessage.input_type = 1
       uploadMessage.text = userMessage
+      uploadMessage.silence = mute.value ? 1 : 0
     }
 
     wsStore.sendMessage(uploadMessage)
