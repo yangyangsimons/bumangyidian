@@ -758,6 +758,38 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     console.log('TTS音频状态已重置')
   }
 
+  // 销毁TTS音频实例（释放底层解码与缓冲，占用内存）
+  const destroyTtsAudio = () => {
+    console.log('销毁TTS音频实例')
+    try {
+      // 停止当前播放与队列
+      stopTtsAudio()
+      // 调用小程序底层 destroy（若支持）
+      if (
+        ttsAudioContext.value &&
+        typeof ttsAudioContext.value.destroy === 'function'
+      ) {
+        try {
+          ttsAudioContext.value.destroy()
+          console.log('ttsAudioContext 已 destroy')
+        } catch (err) {
+          console.warn('调用 destroy 失败，忽略继续', err)
+        }
+      }
+    } finally {
+      // 彻底释放引用，等待下次需要时重新 init
+      ttsAudioContext.value = null
+      ttsSectionId.value = null
+      ttsAudioId.value = null
+      ttsIsPlaying.value = false
+      ttsPaused.value = false
+      currentTtsUrl.value = ''
+      ttsQueue.value = []
+      isProcessingQueue.value = false
+      bgWasPlayingBeforeTts.value = null
+    }
+  }
+
   // 清除背景音乐相关信息（重置背景音乐状态）
   const resetBgMusic = () => {
     console.log('重置背景音乐状态')
@@ -818,6 +850,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     ttsVolume,
     getQueueStatus,
     resetTtsAudio, // 新增：重置TTS音频
+    destroyTtsAudio, // 新增：销毁TTS实例
 
     // 通用方法
     stopAllAudio,

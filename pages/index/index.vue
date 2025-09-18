@@ -2,7 +2,7 @@
   <view class="cover">
     <image class="global-title" src="../../static/global-title.png"></image>
     <!-- 当金种子杯模式有效时显示切换按钮 -->
-    <button
+    <!-- <button
       v-if="isGoldModeAvailable"
       class="changeModel"
       @click="toggleSystemModel"
@@ -21,28 +21,13 @@
       <text class="talk">{{
         currentModel === '常规模式' ? '创新创业专家解读' : '陪你早安到晚安'
       }}</text>
-    </button>
+    </button> -->
 
     <image :src="bgSrc" class="cover-image" mode="aspectFill" />
     <view class="ai-mask">
       <view class="mask-text"> AI会话 </view>
     </view>
-    <!-- 根据shine_point的valid显示亮点 -->
-    <view
-      v-if="shinePointVisible"
-      class="shine-point"
-      :style="{
-        left: `${shinePointConfig.x_ratio * 100}%`,
-        top: `${shinePointConfig.y_ratio * 100}%`,
-      }"
-    >
-      <image
-        class="shining-image"
-        src="../../static/shining-point.png"
-        mode="scaleToFill"
-      />
-      <text class="shining-text">{{ shinePointConfig.text }} </text>
-    </view>
+
     <record-animation />
     <view
       class="subject-container"
@@ -146,6 +131,7 @@
   const duration = ref(300) // 滑动动画时长（毫秒）
   const circular = computed(() => adList.value.length > 1) // 只有多于1个广告时才循环播放
   const showDots = ref(false)
+  const shouldReConnect = ref(false)
   const toggleModelStore = useToggleModelStore()
   const sptime = ref(0)
   const current = ref(0)
@@ -155,7 +141,8 @@
   onLoad(async (query) => {
     console.log('onLoad主页面加载')
 
-    // 每次小程序启动（onLoad被调用）时都应该显示广告
+    // 每次小程序启动（onLoad被调用）时都应该显示广告也应该要建立连接和打招呼
+    shouldReConnect.value = true
     shouldShowAd.value = true
     console.log('小程序启动，设置显示广告标识')
 
@@ -189,6 +176,7 @@
       console.log('正常加载主页面')
     }
   })
+
   const adNav = (adUrl) => {
     console.log('广告链接......:', adUrl)
 
@@ -220,17 +208,17 @@
   }
 
   // 监听 store 中的状态变化
-  watch(
-    () => toggleModelStore.shouldToggleModel,
-    (newValue) => {
-      if (newValue) {
-        // 如果状态为 true，则执行 toggleModelchange 函数
-        toggleSystemModel()
-        // 执行完后重置状态
-        toggleModelStore.resetModelChangeFlag()
-      }
-    }
-  )
+  // watch(
+  //   () => toggleModelStore.shouldToggleModel,
+  //   (newValue) => {
+  //     if (newValue) {
+  //       // 如果状态为 true，则执行 toggleModelchange 函数
+  //       toggleSystemModel()
+  //       // 执行完后重置状态
+  //       toggleModelStore.resetModelChangeFlag()
+  //     }
+  //   }
+  // )
   const placeholderStore = usePlaceholderStore()
 
   //主题管理
@@ -344,165 +332,9 @@
       valid: false,
     },
   })
-  const shinePointConfig = reactive({
-    text: '',
-    valid: 0,
-    x_ratio: 0,
-    y_ratio: 0,
-  })
 
-  // 计算属性：是否显示亮点
-  const shinePointVisible = computed(() => {
-    if (typeof shinePointConfig.valid === 'boolean') {
-      return shinePointConfig.valid
-    } else {
-      return !!shinePointConfig.valid // 将数字转为布尔值
-    }
-  })
-
-  // 切换系统模式 - 只更新UI，不发送WebSocket消息
   // 添加防抖变量
   const isTogglingModel = ref(false)
-
-  // 切换系统模式 - 只更新UI，不发送WebSocket消息
-  const toggleSystemModel = async () => {
-    uni.showToast({
-      title: '切换中...',
-      icon: 'loading',
-      duration: 2500,
-    })
-    // 防止重复点击
-    if (isTogglingModel.value) {
-      console.log('切换模式操作进行中，请勿重复点击')
-      uni.showToast({
-        title: '操作进行中，请稍候',
-        icon: 'none',
-      })
-      return
-    }
-    try {
-      isTogglingModel.value = true
-
-      // 更新当前模式
-      currentModel.value =
-        currentModel.value === '常规模式' ? '金种子杯模式' : '常规模式'
-      // 更新背景图
-      bgSrc.value = systemModelConfig[currentModel.value].pic_url
-
-      console.log(`切换到${currentModel.value}`)
-      audioPlayerStore.reportCurrentProgress()
-      audioPlayerStore.stopAllAudio()
-      // audioPlayerStore.resetBgMusic()
-      // audioPlayerStore.resetTtsAudio()
-      console.log('停止并清空所有音频队列')
-      // barrageStore.clearMessages()
-      console.log('清空消息列表')
-      // 更新状态管理
-      if (currentModel.value === '金种子杯模式') {
-        dmReport(
-          'click',
-          {},
-          {
-            page: 'homePage',
-            contents: [
-              {
-                element_id: 'content',
-                element_content: '点击切换到金种子',
-              },
-            ],
-          }
-        )
-        //更新随机的placeholder
-
-        modelStore.setModel('金种子杯模式')
-        placeholderStore.setRandomSpecialPlaceholder()
-        isRadioStore.setIsRadio(false)
-      } else {
-        dmReport(
-          'click',
-          {},
-          {
-            page: 'homePage',
-            contents: [
-              {
-                element_id: 'content',
-                element_content: '点击切换到常规模式',
-              },
-            ],
-          }
-        )
-        modelStore.setModel('常规模式')
-        placeholderStore.setRandomNormalPlaceholder()
-      }
-      // 上报当前音频播放状态,停止所有音频并清空所有音频队列
-      // 关闭连接
-      await wsStore.close()
-      console.log('模式切换WebSocket连接已关闭')
-
-      // 等待一段时间，确保连接完全关闭
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      try {
-        // 重新连接
-        await wsStore.connect()
-        console.log('切换模式的socket重新连接成功')
-
-        // 等待连接稳定
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // 发送模式切换消息
-        if (currentModel.value === '金种子杯模式') {
-          changeModelSrc.value = '../../static/changeModel-2.png'
-          await wsStore.sendMessage({
-            system_model: currentModel.value,
-            input_type: 3,
-            text: '',
-            silence: 1,
-          })
-          console.log('模式切换消息发送成功')
-        } else {
-          changeModelSrc.value = '../../static/changeModel.png'
-          modelStore.setModel('常规模式')
-          await wsStore.sendMessage({
-            system_model: currentModel.value,
-            input_type: 3,
-            text: '',
-            silence: 1,
-          })
-          console.log('模式切换消息发送成功')
-        }
-
-        uni.showToast({
-          title: '模式切换成功',
-          icon: 'success',
-          duration: 1500,
-        })
-      } catch (error) {
-        console.error('WebSocket操作失败:', error)
-        uni.showToast({
-          title: '切换失败，请稍后再试',
-          icon: 'none',
-        })
-        // 如果失败，回滚UI状态
-        currentModel.value =
-          currentModel.value === '常规模式' ? '金种子杯模式' : '常规模式'
-        bgSrc.value = systemModelConfig[currentModel.value].pic_url
-        if (currentModel.value === '金种子杯模式') {
-          modelStore.setModel('金种子杯模式')
-        } else {
-          modelStore.setModel('常规模式')
-        }
-      }
-    } catch (error) {
-      console.error('切换模式过程中出错:', error)
-      uni.showToast({
-        title: '切换失败，请稍后再试',
-        icon: 'none',
-      })
-    } finally {
-      isTogglingModel.value = false
-    }
-  }
 
   const handleSubmit = (message) => {
     console.log(message, 'handleSubmit')
@@ -513,11 +345,6 @@
     try {
       const res = await request(`${baseUrl}/system/get_system_setting`, 'GET')
       console.log('获取系统配置', res)
-
-      // 更新shine_point配置
-      if (res.data && res.data.shine_point) {
-        Object.assign(shinePointConfig, res.data.shine_point)
-      }
 
       // 更新system_model配置
       if (res.data && res.data.system_model) {
@@ -612,19 +439,22 @@
           })
         }
       } else {
-        // 尝试连接WebSocket
+        // 如果是刚进入小程序那么，尝试连接WebSocket
         if (!wsStore.isConnected) {
           await wsStore.connect()
           console.log('socket连接成功')
 
           // 发送连接成功的消息 - 仅在页面首次加载时
-          await wsStore.sendMessage({
-            system_model: currentModel.value,
-            input_type: 3,
-            text: '',
-            silence: 1,
-          })
-          console.log('发送input_type=3的初始消息成功')
+          if (shouldReConnect.value) {
+            await wsStore.sendMessage({
+              system_model: currentModel.value,
+              input_type: 3,
+              text: '',
+              silence: 1,
+            })
+            console.log('发送input_type=3的初始消息成功')
+            shouldReConnect.value = false
+          }
         }
       }
     } catch (error) {
@@ -654,19 +484,38 @@
     if (isRadio.value) {
       // 如果是电台模式，就不停止背景音乐
       console.log('电台模式下不停止背景音乐onHide', isRadio.value)
-      audioPlayerStore.stopTtsAudio()
+      // 电台模式只销毁TTS实例，保留BGM
+      audioPlayerStore.destroyTtsAudio()
     } else {
       // audioPlayerStore.stopAllAudio()
-      audioPlayerStore.stopTtsAudio()
+      audioPlayerStore.destroyTtsAudio()
       // barrageStore.clearMessages()
       console.log('停止并清空所有音频队列', '非电台模式下停止背景音乐')
       // 清空消息列表
       console.log('清空消息列表')
     }
 
-    // 关闭WebSocket连接
+    // 不关闭WebSocket连接只在unload时关闭
+    // await wsStore.close()
+    console.log('hide, 主页面WebSocket连接保持')
+  })
+  onUnload(async () => {
+    // 页面卸载时关闭WebSocket连接
+    console.log('onUnload主页面卸载')
+    // 上报当前音频播放状态
+    audioPlayerStore.reportCurrentProgress()
+    console.log('音频播放状态已上报')
+
+    // 停止并清空所有音频队列
+    barrageStore.clearMessages()
+    console.log('停止并清空所有音频队列')
+
+    // 卸载时彻底销毁TTS实例（再次防御）
+    audioPlayerStore.destroyTtsAudio()
+
     await wsStore.close()
-    console.log('Hidesocket连接关闭')
+    console.log('unload, 主页面WebSocket连接已关闭')
+    shouldReConnect.value = true // 标记下次进入页面时需要重新连接
   })
   onShareAppMessage(() => {
     console.log('onShareAppMessage......')

@@ -22,7 +22,7 @@ export const useBarrageStore = defineStore('barrage', {
         id: messageId,
         timestamp: new Date().toISOString(),
       })
-      console.log('所有消息', this.messages)
+      // console.log('所有消息', this.messages)
       return messageId // 返回消息ID
     },
 
