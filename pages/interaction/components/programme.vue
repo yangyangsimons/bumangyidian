@@ -62,6 +62,13 @@
           <view class="audio-info">
             <text class="audio-title">{{ recommendInfo.title }}</text>
             <text class="audio-desc">{{ recommendInfo.desc }}</text>
+
+            <!-- <text class="audio-title"
+              >这是一段非常长的文字，我用来测试是不是会换行，或者样式混乱的情况出现呢</text
+            >
+            <text class="audio-desc"
+              >这是一段非常长的文字，我用来测试是不是会换行，或者样式混乱的情况出现呢</text
+            > -->
             <text class="audio-time">{{ recommendInfo.effective_time }}</text>
           </view>
         </view>
@@ -157,8 +164,9 @@
   import { useMusicStore } from '@/stores/music'
   import { useAudioPlayerStore } from '@/stores/audioPlayer'
   import { checkTokenAndNavigate } from '@/utils/auth'
-
+  import { useVolumeStore } from '@/stores/volume' // 导入音量store
   const musicStore = useMusicStore()
+  const volumeStore = useVolumeStore() // 获取音量store
 
   console.log('programme.vue 中的 musicStore:', musicStore)
   console.log(

@@ -51,7 +51,7 @@
   import { useMusicStore } from '@/stores/music'
   import { checkTokenAndNavigate } from '@/utils/auth'
   import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
-
+  import { dmReport } from '../../utils/report'
   const isCollected = ref(false)
   const newsid = ref('')
   const startTime = ref(0)
@@ -167,6 +167,7 @@
     const newsDetail = uni.getStorageSync('currentNewsDetail')
     console.log('加载资讯详情:', info)
     newsid.value = info.id
+
     //info.liked是0 就是没收藏，为1就是收藏了
     isCollected.value = info.liked == 1
 
@@ -174,6 +175,18 @@
       newsTitle.value = newsDetail.title || '资讯详情'
       newsTime.value = newsDetail.created_at || ''
       originalHtml.value = newsDetail.html || ''
+      //上报阅读id
+      dmReport(
+        'click',
+        {},
+        {
+          page: 'school_news',
+          contents: {
+            type: 'school_news',
+            id: newsid.value,
+          },
+        }
+      )
 
       // console.log('原始HTML:', newsDetail.html)
       uni.removeStorageSync('currentNewsDetail')

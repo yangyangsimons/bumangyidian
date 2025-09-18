@@ -120,97 +120,90 @@
   const allNews = ref([])
   const loading = ref(false)
   const refreshing = ref(false)
-  const pageSize = 20 // 每页加载数量，可以适当调大
+  // 后端似乎固定每页 10 条（用户反馈只拿到 10 条），不完全依赖 size 防止提前停止
+  const pageSize = 20 // 仍然保留参数（若后端以后支持）
+  const totalNews = ref(0) // 保存总条数
 
   //轮播图
   const swiperList = ref([])
   // 格式化日期
   const formatDate = (dateStr) => {
     if (!dateStr) return ''
-
-    // 提取日期部分（去掉时间）
     const datePart = dateStr.split(' ')[0]
     return datePart
   }
 
-  // 一次性加载所有新闻数据
+  // 一次性加载所有新闻数据（根据 total 连续翻页）
   const loadAllNews = async () => {
+    if (loading.value) return // 并发保护
     try {
       loading.value = true
       allNews.value = []
+      mainNews.value = null
+      newsList.value = []
+      totalNews.value = 0
 
       let page = 1
-      let hasMore = true
+      let fetched = 0
 
       console.log('开始加载所有新闻数据...')
 
-      while (hasMore) {
+      while (true) {
         console.log(`正在加载第 ${page} 页...`)
-
         const response = await request(
           `${baseUrl}/school_news/get_school_news_list?page=${page}&size=${pageSize}`,
           'GET'
         )
 
-        if (response.code === 0) {
-          const { data: newsData, total } = response.data
-
-          if (newsData && newsData.length > 0) {
-            allNews.value = [...allNews.value, ...newsData]
-
-            // 检查是否还有更多数据
-            if (allNews.value.length >= total || newsData.length < pageSize) {
-              hasMore = false
-              console.log(`数据加载完成，总共 ${allNews.value.length} 条`)
-            } else {
-              page++
-            }
-          } else {
-            hasMore = false
-            console.log('没有更多数据')
-          }
-        } else {
+        if (response.code !== 0) {
           console.error('获取新闻失败:', response.message)
-          uni.showToast({
-            title: response.message || '加载失败',
-            icon: 'none',
-          })
-          hasMore = false
+          uni.showToast({ title: response.message || '加载失败', icon: 'none' })
           break
         }
+
+        const { data: newsData, total } = response.data || {}
+        if (typeof total === 'number') totalNews.value = total
+
+        if (!newsData || newsData.length === 0) {
+          console.log('本页无数据，提前结束。')
+          break
+        }
+
+        allNews.value.push(...newsData)
+        fetched += newsData.length
+        console.log(`已累计获取 ${fetched}/${totalNews.value || '?'} 条`)
+
+        // 如果已经达到或超过 total，结束循环
+        if (totalNews.value && allNews.value.length >= totalNews.value) {
+          console.log(`达到总数 ${totalNews.value}，停止加载。`)
+          break
+        }
+
+        // 安全阈值：若连续请求但总数未返回，且本页数量与上一页相同且小于声明的 pageSize，有可能后端分页固定；继续翻页直到没有数据
+        if (!totalNews.value && newsData.length === 0) {
+          break
+        }
+
+        page++
       }
 
       // 设置主新闻和新闻列表
       if (allNews.value.length > 0) {
         mainNews.value = allNews.value[0]
-        // 新闻列表不包含主新闻，从第二条开始显示
         newsList.value = allNews.value.slice(1)
+        console.log('主新闻设置完成, 总共:', allNews.value.length)
 
-        console.log('主新闻设置完成')
-        console.log('allNews总数:', allNews.value.length)
-        console.log('newsList数量:', newsList.value.length)
-        console.log('显示总数:', 1 + newsList.value.length)
-
-        // 检查是否需要自动跳转到特定资讯
+        // 自动跳转逻辑
         const autoOpenNewsId = uni.getStorageSync('autoOpenNewsId')
         if (autoOpenNewsId) {
-          console.log('自动跳转到资讯:', autoOpenNewsId)
-
-          // 在所有资讯中查找对应的资讯
-          const targetNews = allNews.value.find(
-            (news) => news.id == autoOpenNewsId
-          )
+          const targetNews = allNews.value.find((n) => n.id == autoOpenNewsId)
+          uni.removeStorageSync('autoOpenNewsId')
           if (targetNews) {
-            // 清除标识
-            uni.removeStorageSync('autoOpenNewsId')
-
-            // 延迟一点时间确保页面渲染完成
             setTimeout(() => {
               viewNewsDetail(targetNews)
             }, 500)
           } else {
-            console.log('未找到对应的资讯')
-            uni.removeStorageSync('autoOpenNewsId')
+            console.log('未找到对应的资讯: ', autoOpenNewsId)
           }
         }
       } else {
@@ -218,10 +211,7 @@
       }
     } catch (error) {
       console.error('加载新闻数据失败:', error)
-      uni.showToast({
-        title: '网络错误，请重试',
-        icon: 'none',
-      })
+      uni.showToast({ title: '网络错误，请重试', icon: 'none' })
     } finally {
       loading.value = false
     }
@@ -229,26 +219,17 @@
 
   onShow(async () => {
     console.log('页面显示，开始加载数据')
-
-    // 如果播放列表为空，从后端获取节目列表并随机选择一首
     if (musicStore.playlist.length <= 0) {
       await loadRandomSongToPlaylist()
     }
-
     await loadAllNews()
-    // 获取轮播图
     await getSwiperList()
   })
 
-  // 处理分享链接进入
   onLoad((options) => {
     console.log('页面加载参数:', options)
-
-    // 检查是否是从分享链接进入
     if (options.shareNewsId) {
       console.log('从分享链接进入，资讯ID:', options.shareNewsId)
-
-      // 设置一个标识，在数据加载完成后自动跳转到对应资讯
       uni.setStorageSync('autoOpenNewsId', options.shareNewsId)
     }
   })

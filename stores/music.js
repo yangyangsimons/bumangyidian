@@ -10,6 +10,9 @@ export const useMusicStore = defineStore('music', () => {
   const playlist = ref([])
   const currentSong = ref(null)
   const currentCategory = ref(null)
+  // 上报去重相关状态
+  const lastReportedMusicId = ref(null)
+  const lastReportedAt = ref(0) // ms 时间戳
 
   console.log('musicStore 正在创建...') // 调试信息
 
@@ -154,6 +157,9 @@ export const useMusicStore = defineStore('music', () => {
 
       // 设置为不循环播放（音乐播放完成后可以切换到下一首）
       audioPlayerStore.setBgLoop(false)
+
+      // 上报开始播放
+      recordMusicPlay(currentSong.value.id)
     }
   }
 
@@ -250,6 +256,10 @@ export const useMusicStore = defineStore('music', () => {
         // 恢复播放
         console.log('恢复播放')
         audioPlayerStore.resumeBgMusic()
+        // 恢复播放也做一次开始播放上报（有去重保护）
+        if (currentSong.value?.id) {
+          recordMusicPlay(currentSong.value.id)
+        }
       }
     }
   }
@@ -288,6 +298,9 @@ export const useMusicStore = defineStore('music', () => {
       // 设置为不循环播放（音乐播放完成后可以切换到下一首）
       audioPlayerStore.setBgLoop(false)
 
+      // 上报开始播放
+      recordMusicPlay(currentSong.value.id)
+
       // 状态同步由computed处理，不需要手动设置
       console.log(
         '播放后状态:',
@@ -303,6 +316,37 @@ export const useMusicStore = defineStore('music', () => {
           传入的audioId: currentSong.value.id,
         })
       }, 100)
+    }
+  }
+
+  // 上报音乐开始播放（去重）
+  const recordMusicPlay = async (musicId) => {
+    try {
+      if (!musicId) return
+      const now = Date.now()
+      // 1 秒内相同歌曲的重复上报忽略，避免由于多处触发造成重复
+      if (
+        lastReportedMusicId.value === musicId &&
+        now - lastReportedAt.value < 1000
+      ) {
+        console.log('跳过重复开始播放上报:', musicId)
+        return
+      }
+
+      // 预先更新去重标记，避免并发触发
+      lastReportedMusicId.value = musicId
+      lastReportedAt.value = now
+
+      const payload = { music_id: musicId }
+      console.log('上报音乐开始播放:', payload)
+      await request(
+        'https://mang.5gradio.com.cn/school_music/record_school_music_play',
+        'POST',
+        payload
+      )
+      console.log('音乐开始播放上报成功')
+    } catch (error) {
+      console.error('音乐开始播放上报失败:', error)
     }
   }
 
@@ -447,6 +491,7 @@ export const useMusicStore = defineStore('music', () => {
     startPlay,
     pausePlay,
     stopPlay,
+    recordMusicPlay,
     reportMusicProgress,
     destroyAudio,
   }

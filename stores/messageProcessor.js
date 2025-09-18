@@ -251,15 +251,20 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
     console.log('收到结束消息', data)
     // 设置可以发送消息
     sendStore.setSend(true)
-    const { full_text } = data
+    // 统一兜底：优先使用 full_text，其次 text/msg，再次使用累计文本
+    const finalText =
+      (data && (data.full_text || data.text || data.msg)) ||
+      accumulatedText.value
 
-    // 如果有full_text，用它替换累积的文本
-    if (full_text) {
-      accumulatedText.value = full_text
+    // 完成流式消息：
+    // - 若存在当前流式消息：将其标记完成，并在有文本时覆盖为完整文本
+    // - 若不存在流式消息：在有文本时直接新增一条 AI 消息（由 barrageStore 兜底实现）
+    if (finalText && String(finalText).trim() !== '') {
+      barrageStore.finishStreamingMessage(finalText)
+    } else {
+      // 即便没有文本，也需要结束流式状态（不覆盖已有内容）
+      barrageStore.finishStreamingMessage('')
     }
-
-    // 结束流式消息，使用累积的文本或full_text
-    barrageStore.finishStreamingMessage(full_text || accumulatedText.value)
 
     // 重置流式状态
     isStreaming.value = false

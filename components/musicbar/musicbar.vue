@@ -4,9 +4,16 @@
       <image :src="getCurrentDiscImage" mode="aspectFill" />
     </view>
 
-    <view class="text" @click="showPlaylist = true">
+    <view class="text" @click="showPlaylist = false">
       <text>{{ musicStore.currentSong.title }}</text>
       <text>{{ musicStore.currentSong.desc }}</text>
+      <!-- <text
+        >这是一段非常长的文字，我用来测试是不是会换行，或者样式混乱的情况出现呢</text
+      >
+
+      <text
+        >这是一段非常长的文字，我用来测试是不是会换行，或者样式混乱的情况出现呢</text
+      > -->
     </view>
 
     <view class="icons">

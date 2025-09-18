@@ -6,6 +6,7 @@ import { useSubjectStore } from './subject' // 导入主题store
 import { useIsRadioStore } from './isRadio'
 import { useMessageProcessorStore } from './messageProcessor' // 导入messageProcessor
 import { useModelStore } from './model' // 导入模型store
+import { useVolumeStore } from './volume' // 导入音量store
 export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   // 获取主题store
   const subjectStore = useSubjectStore()
@@ -18,7 +19,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   const bgAudioId = ref(null)
   const bgPlayTime = ref(0)
   const bgIsPlaying = ref(false)
-  const bgVolume = ref(0) // 背景音乐音量，范围0-1
+  const bgVolume = ref(1) // 背景音乐音量，范围0-1
   const bgLoop = ref(false) // 是否循环播放背景音乐
   const currentBgUrl = ref('') // 当前背景音乐URL，用于循环播放时重新播放
 
@@ -40,6 +41,9 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   // TTS音频队列
   const ttsQueue = ref([])
   const isProcessingQueue = ref(false)
+  // 记录TTS开始前背景音乐是否在播放（用于iOS上TTS导致BGM被系统暂停时恢复）
+  // null 表示未设置；true 表示开始TTS前BGM在播放；false 表示未播放
+  const bgWasPlayingBeforeTts = ref(null)
 
   // 上报API地址
   const UPLOAD_PROGRESS_URL = `${baseUrl}/content/upload_progress`
@@ -165,7 +169,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
 
       // 暂停事件
       bgAudioManager.value.onPause(() => {
-        console.log('背景音乐已暂停')
+        console.log('背景音乐已暂停-------')
         //上报进度
         reportCurrentProgress()
         bgIsPlaying.value = false
@@ -196,7 +200,10 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
   // 初始化TTS音频播放器
   const initTtsAudioContext = () => {
     if (!ttsAudioContext.value) {
-      ttsAudioContext.value = uni.createInnerAudioContext()
+      ttsAudioContext.value = uni.createInnerAudioContext({
+        useWebAudioImplement: true,
+      })
+      console.log('TTS音频上下文已创建', ttsAudioContext.value)
 
       // 设置初始音量
       ttsAudioContext.value.volume = ttsVolume.value
@@ -268,7 +275,8 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     // 如果音频上下文已初始化，直接设置音量
     if (ttsAudioContext.value) {
       ttsAudioContext.value.volume = volume
-      console.log('TTS音量已设置为:', volume)
+      console.log('TTS音量切换为:', volume)
+      console.log('TTS音量实际为:', ttsAudioContext.value.volume)
     }
 
     return volume // 返回实际设置的音量值
@@ -276,17 +284,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
 
   // 设置背景音乐音量
   const setBgVolume = (volume) => {
-    // 确保音量在0-1之间
-    volume = Math.min(1.0, Math.max(0.0, volume))
-    bgVolume.value = volume
-
-    // 如果背景音乐管理器已初始化，直接设置音量
-    if (bgAudioManager.value) {
-      bgAudioManager.value.volume = volume
-      console.log('背景音乐音量已设置为:', volume)
-    }
-
-    return volume // 返回实际设置的音量值
+    console.log('bgmusic不能设置音量，请使用系统音量键调整')
   }
 
   // 设置背景音乐循环播放状态
@@ -443,11 +441,37 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     if (ttsQueue.value.length === 0) {
       isProcessingQueue.value = false
       console.log('TTS队列为空，等待新音频')
+
+      // 如果在TTS开始前BGM处于播放状态，但现在未播放且有可恢复的URL，则尝试恢复
+      if (
+        bgWasPlayingBeforeTts.value === true &&
+        !bgIsPlaying.value &&
+        currentBgUrl.value
+      ) {
+        // 给系统一点释放音频会话的时间（iOS上尤为重要）
+        setTimeout(() => {
+          console.log('TTS结束且队列为空，尝试恢复背景音乐')
+          resumeBgMusic()
+        }, 150)
+      }
+
+      // 重置标记
+      bgWasPlayingBeforeTts.value = null
       return
     }
 
     // 标记队列处理中
     isProcessingQueue.value = true
+
+    // 首次进入处理队列时记录TTS开始前BGM是否在播放
+    if (bgWasPlayingBeforeTts.value === null) {
+      bgWasPlayingBeforeTts.value = !!bgIsPlaying.value
+      if (bgWasPlayingBeforeTts.value) {
+        console.log('记录：TTS开始前背景音乐正在播放')
+      } else {
+        console.log('记录：TTS开始前背景音乐未播放')
+      }
+    }
 
     // 取出队列中的第一个音频
     const nextAudio = ttsQueue.value.shift()
@@ -584,6 +608,21 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
     // 清空队列
     ttsQueue.value = []
     isProcessingQueue.value = false
+
+    // 如果在TTS开始前BGM处于播放状态，但现在未播放且有可恢复的URL，则尝试恢复
+    if (
+      bgWasPlayingBeforeTts.value === true &&
+      !bgIsPlaying.value &&
+      currentBgUrl.value
+    ) {
+      setTimeout(() => {
+        console.log('停止TTS后尝试恢复背景音乐')
+        resumeBgMusic()
+      }, 150)
+    }
+
+    // 重置标记
+    bgWasPlayingBeforeTts.value = null
   }
 
   // 停止所有音频
