@@ -5,6 +5,7 @@ import { useAudioPlayerStore } from './audioPlayer'
 import { ref } from 'vue'
 import { useSendStore } from './send'
 import { useIsRadioStore } from './isRadio'
+import { useMusicStore } from './music'
 
 export const useMessageProcessorStore = defineStore('messageProcessor', () => {
   const barrageStore = useBarrageStore()
@@ -67,12 +68,28 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
   const handleBgMusic = (data) => {
     console.log('收到背景音乐消息', data)
     const { audio_url, play_time, section_id, audio_id } = data
+    const musicStore = useMusicStore()
 
     // 清除音乐播放完成回调，避免WebSocket音乐播放完成后自动切换
     audioPlayerStore.setOnMusicEndedCallback(null)
 
-    // 播放背景音乐
-    audioPlayerStore.playBgMusic(audio_url, play_time, section_id, audio_id)
+    // 如果后端包含 school_music_info，用 musicStore 统一同步（集中播放/状态逻辑）
+    if (data.school_music_info && data.school_music_info.id) {
+      const info = data.school_music_info
+      musicStore.applyServerBgMusic(
+        {
+          id: info.id,
+          // 如果 server 给的 audio_url 为空，兜底用最外层 audio_url
+          audio_url: info.audio_url || audio_url,
+          title: info.title || info.name || '校园节目',
+        },
+        true, // shouldPlay: 后端既然推送 bg_music 就播放
+        play_time || 0
+      )
+    } else {
+      // 旧逻辑：直接播放器播放
+      audioPlayerStore.playBgMusic(audio_url, play_time, section_id, audio_id)
+    }
 
     // 设置背景音乐循环播放
     audioPlayerStore.setBgLoop(true)

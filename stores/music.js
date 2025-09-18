@@ -464,6 +464,81 @@ export const useMusicStore = defineStore('music', () => {
     console.log('音乐播放器已停止')
   }
 
+  /**
+   * 后端推送的 bg_music（包含 school_music_info）时调用，
+   * 只做前端状态同步或必要的播放动作，避免破坏现有播放/切歌逻辑。
+   * data 结构期望：{ id, audio_url, title/desc/artist/cover/duration }
+   * @param {Object} serverMusic 节目信息 (等同于 school_music_info)
+   * @param {Boolean} shouldPlay 如果后端这条消息意味着需要立即播放
+   * @param {Number} playTime 可选：从指定秒数（或毫秒换算）开始
+   */
+  const applyServerBgMusic = (serverMusic, shouldPlay = true, playTime = 0) => {
+    if (!serverMusic || !serverMusic.id) {
+      console.warn('applyServerBgMusic: 无有效 serverMusic.id', serverMusic)
+      return
+    }
+
+    const audioPlayerStore = useAudioPlayerStore()
+
+    // 情况1：当前已是同一首歌 -> 仅保证 UI 同步，不重复播放
+    if (currentSong.value && currentSong.value.id === serverMusic.id) {
+      // 可补充：若需要更新封面/标题等信息
+      Object.assign(currentSong.value, serverMusic)
+      console.log('applyServerBgMusic: 已在播放同一节目，仅同步字段', {
+        id: serverMusic.id,
+      })
+      return
+    }
+
+    // 情况2：不在 playlist 中 -> 用不打断策略：设置 playlist 并按需播放
+    const existIndex = playlist.value.findIndex(
+      (m) => m && m.id === serverMusic.id
+    )
+
+    if (existIndex === -1) {
+      // 保留原有列表还是重置？这里选择插入到当前索引后面（或者若无列表则直接设为单曲）
+      if (playlist.value.length === 0) {
+        playlist.value = [serverMusic]
+        currentIndex.value = 0
+      } else {
+        playlist.value.splice(currentIndex.value + 1, 0, serverMusic)
+        currentIndex.value = currentIndex.value + 1
+      }
+    } else {
+      currentIndex.value = existIndex
+      // 更新元数据（例如后端刷新了封面）
+      Object.assign(playlist.value[existIndex], serverMusic)
+    }
+
+    currentSong.value = playlist.value[currentIndex.value]
+
+    console.log('applyServerBgMusic: 同步节目到 musicStore', {
+      id: currentSong.value.id,
+      title: currentSong.value.title,
+      shouldPlay,
+      playTime,
+    })
+
+    if (shouldPlay) {
+      audioPlayerStore.playBgMusic(
+        currentSong.value.audio_url,
+        playTime || 0,
+        null,
+        currentSong.value.id,
+        {
+          title: currentSong.value.title || '不芒一点',
+          epname: currentSong.value.desc || '校园节目',
+          singer: currentSong.value.artist || '',
+          coverImgUrl:
+            currentSong.value.cover ||
+            'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
+        }
+      )
+      audioPlayerStore.setBgLoop(false)
+      recordMusicPlay(currentSong.value.id)
+    }
+  }
+
   // 返回所有需要暴露的状态和方法
   const storeInstance = {
     // 状态
@@ -494,6 +569,7 @@ export const useMusicStore = defineStore('music', () => {
     recordMusicPlay,
     reportMusicProgress,
     destroyAudio,
+    applyServerBgMusic,
   }
 
   console.log(
