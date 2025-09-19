@@ -25,7 +25,7 @@
 
     <image :src="bgSrc" class="cover-image" mode="aspectFill" />
     <view class="ai-mask">
-      <view class="mask-text"> AI会话 </view>
+      <view class="mask-text"> 以下内容由AI生成，仅供参考 </view>
     </view>
 
     <record-animation />

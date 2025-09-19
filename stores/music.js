@@ -107,14 +107,14 @@ export const useMusicStore = defineStore('music', () => {
     // 移除备用逻辑，避免当用户从index页面进入programme页面时的误判
     const result = currentAudioId === audioId
 
-    console.log('isPlayingAudio检查:', {
-      audioId,
-      bgIsPlaying,
-      currentAudioId,
-      bgAudioIdRef: audioPlayerStore.bgAudioId,
-      bgAudioIdType: typeof audioPlayerStore.bgAudioId,
-      result,
-    })
+    // console.log('isPlayingAudio检查:', {
+    //   audioId,
+    //   bgIsPlaying,
+    //   currentAudioId,
+    //   bgAudioIdRef: audioPlayerStore.bgAudioId,
+    //   bgAudioIdType: typeof audioPlayerStore.bgAudioId,
+    //   result,
+    // })
 
     return result
   }

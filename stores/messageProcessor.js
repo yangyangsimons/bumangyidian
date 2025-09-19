@@ -81,7 +81,9 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
           id: info.id,
           // 如果 server 给的 audio_url 为空，兜底用最外层 audio_url
           audio_url: info.audio_url || audio_url,
-          title: info.title || info.name || '校园节目',
+          title: info.title || '校园节目',
+          desc: info.desc || '',
+          cover: info.cover_url || '',
         },
         true, // shouldPlay: 后端既然推送 bg_music 就播放
         play_time || 0
@@ -259,7 +261,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
       // 向弹幕添加文本
       barrageStore.appendToStreamingMessage(text)
 
-      console.log('当前累积文本:', accumulatedText.value)
+      // console.log('当前累积文本:', accumulatedText.value)
     }
   }
 

@@ -1,10 +1,10 @@
 <template>
   <view class="intro-container" v-if="guideShow">
-    <view class="change-model-container"> </view>
-    <view class="change-model-container-right">
+    <!-- <view class="change-model-container"> </view> -->
+    <!-- <view class="change-model-container-right">
       <image src="../../static/guide/right-top-icon.png" mode="scaleToFill" />
       <text class="text">模式一键切换</text>
-    </view>
+    </view> -->
     <view class="music-container">
       <image src="../../static/guide/music-icon.png" mode="scaleToFill" />
       <text class="text">打开声音或者戴上耳机</text>
