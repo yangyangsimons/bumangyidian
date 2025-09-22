@@ -46,10 +46,18 @@
 
   // 获取当前disc图片，优先使用分类封面
   const getCurrentDiscImage = computed(() => {
+    // 1) 优先使用当前歌曲封面（兼容 cover_url / cover 字段）
+    if (musicStore.currentSong) {
+      const song = musicStore.currentSong
+      if (song.cover_url) return song.cover_url
+      if (song.cover) return song.cover
+    }
+    // 2) 兼容原有：使用当前分类封面
     if (musicStore.currentCategory && musicStore.currentCategory.cover_url) {
       return musicStore.currentCategory.cover_url
     }
-    return '/static/recommend.png' // 默认图片
+    // 3) 默认图片
+    return '/static/recommend.png'
   })
 
   // 播放指定歌曲

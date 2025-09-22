@@ -136,7 +136,7 @@ export const useMusicStore = defineStore('music', () => {
     currentIndex.value = index
     currentSong.value = getCurrentSong.value
     currentCategory.value = category // 设置当前分类
-
+    console.log('播放列表已设置，准备播放-----', category)
     const audioPlayerStore = useAudioPlayerStore() // 在方法内部获取
     if (currentSong.value) {
       // 使用audioPlayer store播放背景音乐
@@ -150,7 +150,6 @@ export const useMusicStore = defineStore('music', () => {
           epname: currentSong.value.desc || '校园节目',
           singer: currentSong.value.artist || '',
           coverImgUrl:
-            currentSong.value.cover ||
             'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
         }
       )
@@ -245,21 +244,23 @@ export const useMusicStore = defineStore('music', () => {
       // 暂停时上报播放进度
       reportMusicProgress()
     } else {
-      // 如果当前歌曲与audioPlayer正在播放的不同，播放新歌曲
-      if (
-        !audioPlayerStore.bgIsPlaying ||
-        (audioPlayerStore.bgAudioId?.value || null) !== currentSong.value.id
-      ) {
-        console.log('播放新歌曲')
-        playSong(currentIndex.value)
-      } else {
-        // 恢复播放
-        console.log('恢复播放')
+      // 恢复或切歌的判定：如果当前bg的audioId与当前歌曲一致，则优先恢复；否则播放新歌曲
+      const bgIdRef = audioPlayerStore.bgAudioId
+      const bgId =
+        bgIdRef && typeof bgIdRef === 'object' && 'value' in bgIdRef
+          ? bgIdRef.value
+          : bgIdRef
+
+      if (bgId === currentSong.value.id) {
+        console.log('恢复播放（同一首歌曲，处于暂停状态）')
         audioPlayerStore.resumeBgMusic()
         // 恢复播放也做一次开始播放上报（有去重保护）
         if (currentSong.value?.id) {
           recordMusicPlay(currentSong.value.id)
         }
+      } else {
+        console.log('播放新歌曲（不同歌曲或未初始化）')
+        playSong(currentIndex.value)
       }
     }
   }
@@ -290,7 +291,6 @@ export const useMusicStore = defineStore('music', () => {
           epname: currentSong.value.desc || '校园节目',
           singer: currentSong.value.artist || '',
           coverImgUrl:
-            currentSong.value.cover ||
             'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
         }
       )
@@ -530,7 +530,6 @@ export const useMusicStore = defineStore('music', () => {
           epname: currentSong.value.desc || '校园节目',
           singer: currentSong.value.artist || '',
           coverImgUrl:
-            currentSong.value.cover ||
             'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg',
         }
       )

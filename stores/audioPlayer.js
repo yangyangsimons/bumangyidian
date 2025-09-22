@@ -331,7 +331,6 @@ export const useAudioPlayerStore = defineStore('audioPlayer', () => {
       bgAudioManager.value.epname = metadata.epname || '校园节目'
       bgAudioManager.value.singer = metadata.singer || ''
       bgAudioManager.value.coverImgUrl =
-        metadata.coverImgUrl ||
         'https://oss-5gradio-school-public.oss-cn-shenzhen.aliyuncs.com/logo/logo.jpg'
     } else {
       // 使用当前主题更新背景音乐属性

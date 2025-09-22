@@ -83,7 +83,7 @@ export const useMessageProcessorStore = defineStore('messageProcessor', () => {
           audio_url: info.audio_url || audio_url,
           title: info.title || '校园节目',
           desc: info.desc || '',
-          cover: info.cover_url || '',
+          cover_url: info.cover_url || '',
         },
         true, // shouldPlay: 后端既然推送 bg_music 就播放
         play_time || 0
